@@ -303,7 +303,7 @@ void main() {
     vec3 P = vv.xyz; vec2 px = 1./res; vec3 Pr = vpos(uv + vec2(px.x, 0.)), Pl = vpos(uv - vec2(px.x, 0.)), Pu = vpos(uv + vec2(0., px.y)), Pd = vpos(uv - vec2(0., px.y));
     vec3 ex = abs(Pr.z - P.z) < abs(P.z - Pl.z) ? Pr - P : P - Pl, ey = abs(Pu.z - P.z) < abs(P.z - Pd.z) ? Pu - P : P - Pd;
     vec3 n = normalize(cross(ex, ey)); if (n.z < 0.) n = -n;
-    float rad = .75, occ = 0., ang = h31(vec3(gl_FragCoord.xy, 3.))*6.2832, ps = rad*projY*.5/max(-P.z, .3);
+    float zc = max(-P.z, .3), rad = clamp(.75 + zc*.07, .75, 2.4), occ = 0., ang = h31(vec3(gl_FragCoord.xy, 3.))*6.2832, ps = max(rad*projY*.5/zc, 7./res.y);
     for (int i = 0; i < 12; i++) {
       float a = ang + float(i)*2.39996, r = (float(i) + .5)/12.; vec2 o = vec2(cos(a)*res.y/res.x, sin(a))*r*ps;
       vec3 v = vpos(uv + o) - P; float dist = length(v) + 1e-4;
