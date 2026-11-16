@@ -739,28 +739,41 @@ function buildSide() {
   xs.sideL = [];
   const lamp = (col, I, d, x, y, z, aim) => { const l = exPt(col, I, d, x, y, z); l.userData.aim = aim || [0, -1, 0]; l.userData.b = I; xs.sideL.push(l); return l; };
   // Fenster mit Läden, Blumenkästen, Vorhängen
-  const glassD = new THREE.MeshStandardMaterial({color:0x0c1018, roughness:.05, metalness:.85}), glassL = new THREE.MeshBasicMaterial({color:0x8a6a3a}), shut = [0x3a5a48, 0x5a3a30, 0x2e4058];
+  const mkWin = (lit, k) => { const c = document.createElement("canvas"); c.width = 64; c.height = 88; const x = c.getContext("2d"), g = x.createLinearGradient(0, 0, 0, 88);
+    if (lit) { g.addColorStop(0, ["#e8c27a", "#f0d090", "#d8a860"][k%3]); g.addColorStop(1, "#a8743c"); } else { g.addColorStop(0, "#4a607a"); g.addColorStop(.55, "#1e2836"); g.addColorStop(1, "#0c1018"); }
+    x.fillStyle = g; x.fillRect(0, 0, 64, 88);
+    if (lit) { x.fillStyle = "rgba(130,64,44,.6)"; x.fillRect(0, 0, 13, 88); x.fillRect(51, 0, 13, 88); if (k%2) { x.fillStyle = "rgba(50,30,20,.65)"; x.beginPath(); x.arc(34, 52, 8, 0, 7); x.fill(); x.fillRect(26, 58, 16, 30); } else { x.fillStyle = "rgba(255,240,200,.35)"; x.beginPath(); x.arc(32, 18, 14, 0, 7); x.fill(); } }
+    else { x.fillStyle = "rgba(255,255,255,.08)"; x.beginPath(); x.moveTo(0, 0); x.lineTo(34, 0); x.lineTo(0, 56); x.fill(); }
+    x.fillStyle = "#2a2622"; x.fillRect(30, 0, 4, 88); x.fillRect(0, 40, 64, 4); x.fillRect(0, 0, 64, 3); x.fillRect(0, 85, 64, 3); x.fillRect(0, 0, 3, 88); x.fillRect(61, 0, 3, 88);
+    const tx = new THREE.CanvasTexture(c); return new THREE.MeshBasicMaterial({map:tx}); }, winM = [mkWin(0, 0), mkWin(0, 1), mkWin(1, 0), mkWin(1, 1), mkWin(1, 2)];
+  const shopM = (kind) => { const c = document.createElement("canvas"); c.width = 256; c.height = 128; const x = c.getContext("2d"), g = x.createLinearGradient(0, 0, 0, 128); g.addColorStop(0, "#f0cf8c"); g.addColorStop(1, "#7a4c26"); x.fillStyle = g; x.fillRect(0, 0, 256, 128);
+    x.fillStyle = "rgba(60,36,20,.75)"; for (const y of [44, 82]) x.fillRect(8, y, 240, 5);
+    for (let i = 0; i < 12; i++) for (const y of [44, 82]) { const px = 14 + i*20 + (y > 50 ? 6 : 0); if (kind === 0) { x.fillStyle = ["#e8e2d4", "#b8573a", "#3a5a48"][i%3]; x.fillRect(px, y - 14, 10, 14); } else if (kind === 1) { x.fillStyle = ["#c4813a", "#a8642a", "#dba35a"][i%3]; x.beginPath(); x.ellipse(px + 6, y - 6, 9, 6, 0, 0, 7); x.fill(); } else { x.fillStyle = ["#d84a3a", "#e8e8e0", "#3a6ab0"][i%3]; x.fillRect(px, y - 18, 12, 18); } }
+    x.fillStyle = "rgba(255,240,190,.55)"; for (const px of [50, 128, 206]) { x.beginPath(); x.arc(px, 8, 14, 0, 7); x.fill(); }
+    x.fillStyle = "#2a2018"; x.fillRect(0, 0, 256, 5); x.fillRect(0, 123, 256, 5); x.fillRect(0, 0, 5, 128); x.fillRect(251, 0, 5, 128); x.fillRect(126, 0, 4, 128);
+    return new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c)}); };
+  const shut = [0x3a5a48, 0x5a3a30, 0x2e4058];
   for (const s of [-1, 1]) for (const x of [-9.6, -7.2, -4.8, -2.4, 0, 2.4, 4.8, 7.2, 9.6]) for (const y of [4.8, 7.4, 10.0]) {
     if (s < 0 && Math.abs(x - DOORX) < 1.3 && y < 5.6) continue; if (s > 0 && y < 5.6 && x > -9.8 && x < 7.4) continue; const z0 = s*hd, inn = -s, ry = s < 0 ? 0 : Math.PI;
-    exBox(1.15, 1.55, .1, conc, x, y, z0 + inn*.05).userData.noSh = 1; const g = new THREE.Mesh(new THREE.PlaneGeometry(.92, 1.3), Math.random() < .3 ? glassL : glassD); g.position.set(x, y, z0 + inn*.105); g.rotation.y = ry; exG.add(g);
+    exBox(1.15, 1.55, .1, conc, x, y, z0 + inn*.05).userData.noSh = 1; const g = new THREE.Mesh(new THREE.PlaneGeometry(.92, 1.3), winM[Math.random() < .3 ? 2 + Math.floor(Math.random()*3) : Math.floor(Math.random()*2)]); g.position.set(x, y, z0 + inn*.105); g.rotation.y = ry; exG.add(g);
     const sc = shut[(Math.abs(Math.round(x*3 + y))) % 3]; for (const k of [-1, 1]) exBox(.3, 1.45, .04, mStd(sc, .05, .85), x + k*.68, y, z0 + inn*.12).userData.noSh = 1;
     exBox(1.35, .09, .34, conc, x, y - .82, z0 + inn*.17).userData.noSh = 1;
     if (Math.random() < .5) { exBox(1.0, .22, .26, wood, x, y - .62, z0 + inn*.3).userData.noSh = 1; exBox(.95, .14, .24, green, x, y - .46, z0 + inn*.3).userData.noSh = 1; } }
   // Haustüren (Nord): Nr. 29, Nr. 31 (Vargas Haus), Nr. 33
   const door = (x, s, col, num, wd) => { const z0 = s*hd, inn = -s, ry = s < 0 ? 0 : Math.PI;
     exBox(1.5, .16, .26, conc, x, 2.4, z0 + inn*.13); exBox(.16, 2.34, .26, conc, x - .7, 1.17, z0 + inn*.13); exBox(.16, 2.34, .26, conc, x + .7, 1.17, z0 + inn*.13); exBox(1.2, 2.25, .07, mStd(col, .1, wd ? .8 : .5), x, 1.12, z0 + inn*.06);
-    const gl = new THREE.Mesh(new THREE.PlaneGeometry(.5, .9), new THREE.MeshBasicMaterial({color:0x7a6a48})); gl.position.set(x, 1.55, z0 + inn*.1); gl.rotation.y = ry; exG.add(gl);
+    const gl = new THREE.Mesh(new THREE.PlaneGeometry(.5, .9), winM[3]); gl.position.set(x, 1.55, z0 + inn*.1); gl.rotation.y = ry; exG.add(gl);
     exBox(.1, .05, .08, mStd(0xd8b060, .8, .3), x + .42, 1.05, z0 + inn*.13); exBox(1.7, .16, .7, conc, x, .08, z0 + inn*.4); exPl(.44, .24, sign(num, "#e0a860", .44, .24, "#1c1a18"), x, 2.75, z0 + inn*.02, ry);
     const b = new THREE.Mesh(new THREE.SphereGeometry(.07, 8, 6), new THREE.MeshBasicMaterial({color:0xffe0b0})); b.position.set(x, 2.95, z0 + inn*.3); exG.add(b); lamp(0xffc890, 1.0, 7, x, 2.85, z0 + inn*.4, [0, -1, inn*1.5]); };
   door(DOORX, -1, 0x2c4a3a, "Nr. 31", true); door(2.6, -1, 0x4a3224, "Nr. 29", true); door(-2.4, -1, 0x23304a, "Nr. 33", false);
   // Rückweg (Nordwand, West)
   sideGate(-8.4, -hd + .02, 0, "← HAUPTSTRASSE");
   // Südseite: Café Lenz mit Markise, Tische, Bäckerei, Kiosk
-  const awn = (x0, x1, col, txt, tc) => { const w = x1 - x0, cx = (x0 + x1)/2; const a = new THREE.Mesh(new THREE.BoxGeometry(w, .08, 1.5), mStd(col, .05, .9)); a.position.set(cx, 2.95, hd - .8); a.rotation.x = .22; exG.add(a); for (let i = 0; i < Math.floor(w/.6); i++) { const st = new THREE.Mesh(new THREE.BoxGeometry(.3, .09, 1.5), mStd(0xe8e4dc, .05, .9)); st.position.set(x0 + .6*i + .45, 2.95, hd - .8); st.rotation.x = .22; exG.add(st); }
+  const awn = (x0, x1, col, txt, tc, kind) => { const w = x1 - x0, cx = (x0 + x1)/2; const a = new THREE.Mesh(new THREE.BoxGeometry(w, .08, 1.5), mStd(col, .05, .9)); a.position.set(cx, 2.95, hd - .8); a.rotation.x = .22; exG.add(a); for (let i = 0; i < Math.floor(w/.6); i++) { const st = new THREE.Mesh(new THREE.BoxGeometry(.3, .11, 1.5), mStd(0xe8e4dc, .05, .9)); st.position.set(x0 + .6*i + .45, 2.95, hd - .8); st.rotation.x = .22; exG.add(st); }
     for (const sx of [x0 + .1, x1 - .1]) exBox(.05, 2.9, .05, metal, sx, 1.45, hd - 1.5);
-    exPl(w - .4, .45, sign(txt, tc, w - .4, .45, "#1c1612"), cx, 3.55, hd - .06, Math.PI); const wl = new THREE.Mesh(new THREE.PlaneGeometry(w - 1.0, 1.5), new THREE.MeshBasicMaterial({color:0x8a6a38})); wl.position.set(cx, 1.5, hd - .05); wl.rotation.y = Math.PI; exG.add(wl);
+    exPl(w - .4, .45, sign(txt, tc, w - .4, .45, "#1c1612"), cx, 3.55, hd - .06, Math.PI); const wl = new THREE.Mesh(new THREE.PlaneGeometry(w - 1.0, 1.5), shopM(kind)); wl.position.set(cx, 1.5, hd - .05); wl.rotation.y = Math.PI; exG.add(wl);
     exBox(w - .9, .08, .06, dk, cx, 2.3, hd - .07); exBox(w - .9, .08, .06, dk, cx, .75, hd - .07); lamp(0xffc080, 1.1, 6, cx, 2.0, hd - 1.2, [0, -1, 0]); };
-  awn(-9.6, -4.4, 0x2a5a44, "CAFÉ LENZ", "#f0d8a0"); awn(-3.6, .6, 0x8a3a2e, "BÄCKEREI KOCH", "#f4e4c0"); awn(1.6, 4.0, 0x2a4a7a, "KIOSK", "#f0f0f0");
+  awn(-9.6, -4.4, 0x2a5a44, "CAFÉ LENZ", "#f0d8a0", 0); awn(-3.6, .6, 0x8a3a2e, "BÄCKEREI KOCH", "#f4e4c0", 1); awn(1.6, 4.0, 0x2a4a7a, "KIOSK", "#f0f0f0", 2);
   const tbl = (x, z) => { const t = new THREE.Mesh(new THREE.CylinderGeometry(.34, .34, .05, 14), mStd(0xe8e0d0, .1, .6)); t.position.set(x, .74, z); exG.add(t); const p = new THREE.Mesh(new THREE.CylinderGeometry(.03, .03, .74, 8), metal); p.position.set(x, .37, z); exG.add(p); solidOf(p, blocks);
     for (const [cx, cz] of [[-.55, 0], [.55, 0]]) { exBox(.38, .04, .38, wood, x + cx, .46, z + cz); exBox(.38, .42, .04, wood, x + cx, .68, z + cz + (cz ? 0 : 0) + .17*Math.sign(cx)*0); exBox(.04, .46, .04, metal, x + cx - .15, .23, z + cz - .15); exBox(.04, .46, .04, metal, x + cx + .15, .23, z + cz + .15); } };
   for (const x of [-8.6, -6.9, -5.4]) tbl(x, hd - 1.9);
@@ -775,6 +788,11 @@ function buildSide() {
   for (const [x, z, s] of [[-.5, hd - .45, .8], [10.1, -hd + .5, .8], [6.4, -hd + .45, .6]]) exBox(s, s, s, mStd(0x9a8466, .02, .95), x, s/2, z, true);
   { const pts = [V3(-10, 6.2, -hd + .3), V3(0, 5.3, 0), V3(10, 6.2, hd - .3)], cv = new THREE.CatmullRomCurve3(pts), cp = cv.getPoints(40); exG.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(cp), new THREE.LineBasicMaterial({color:0x2a2a2e})));
     const fl = cp.filter((_, i) => i%2 === 0), col = new Float32Array(fl.length*3), cc = [[.95, .55, .2], [.9, .9, .85], [.3, .6, .9], [.9, .3, .3]]; fl.forEach((_, i) => { const c = cc[i%4]; col.set(c, i*3); }); const ge = new THREE.BufferGeometry().setFromPoints(fl); ge.setAttribute("color", new THREE.BufferAttribute(col, 3)); exG.add(new THREE.Points(ge, new THREE.PointsMaterial({size:6, sizeAttenuation:false, vertexColors:true, fog:false}))); }
+  { const mh = new THREE.Mesh(new THREE.CylinderGeometry(.42, .42, .02, 20), mStd(0x2a2a2e, .5, .6)); mh.position.set(1.0, .011, .3); exG.add(mh); for (let i = -2; i <= 2; i++) exBox(.62, .006, .025, dk, 1.0, .024, .3 + i*.12);
+    for (const [px, pz, sx, sz] of [[-1.9, .7, 1.1, .6], [5.2, -.4, .9, .5], [-8.6, -.9, .8, .45]]) { const pd = new THREE.Mesh(new THREE.CircleGeometry(1, 20), new THREE.MeshBasicMaterial({color:0x6a7a92, transparent:true, opacity:.45, depthWrite:false})); pd.rotation.x = -Math.PI/2; pd.scale.set(sx, sz, 1); pd.position.set(px, .008, pz); exG.add(pd); }
+    for (const dz of [-1, 1]) { const w = new THREE.Mesh(new THREE.TorusGeometry(.34, .022, 6, 20), metal); w.position.set(-.4 + dz*.5, .36, -hd + .6); exG.add(w); }
+    exBox(1.0, .03, .03, metal, -.4, .58, -hd + .6); exBox(.03, .34, .03, metal, -.55, .52, -hd + .6); exBox(.03, .44, .03, metal, .08, .52, -hd + .6); exBox(.03, .03, .4, metal, .1, .78, -hd + .6); exBox(.2, .04, .06, dk, -.58, .76, -hd + .6);
+    for (const [px, pz] of [[-hw + .35, -hd + .08], [hw - .35, hd - .08]]) { const pp = new THREE.Mesh(new THREE.CylinderGeometry(.05, .05, SH - .4, 8), mStd(0x3a3c40, .5, .5)); pp.position.set(px, (SH - .4)/2, pz); exG.add(pp); for (const y of [2, 5, 8, 11]) { const br = new THREE.Mesh(new THREE.CylinderGeometry(.075, .075, .08, 8), mStd(0x2a2c30, .6, .4)); br.position.set(px, y, pz); exG.add(br); } } }
   // Enden der Straße: hohe Mauer West, Garagentor Ost
   exBox(.3, 3.0, 3.2, mStd(0x4a4e58, .5, .6), hw - .2, 1.5, hd - 1.8); exPl(2.4, .5, sign("PRIVAT · NICHT PARKEN", "#d8a24a", 2.4, .5, "#1c1816"), hw - .06, 3.4, hd - 1.8, -Math.PI/2);
   scene.fog = new THREE.FogExp2(0xc8a690, .03); scene.background = new THREE.Color(0xc8a690);
