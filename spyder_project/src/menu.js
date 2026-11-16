@@ -175,10 +175,16 @@ function applyReal() {
 }
 const DEVO = {joyF:"touch", joyS:"touch", joyO:"touch", joyDz:"touch", tbS:"touch", vib:"touch", lockP:"keyboard", padS:"pad", padDz:"pad", padVib:"pad"};
 const TABS = OPTD.map(d => d[7]).filter((t, i, a) => a.indexOf(t) === i).concat("DEV"); let curTab = TABS[0];
+function gfxInfo() {
+  if (window.__gpu) return T("Aktiver Renderer: WebGPU. Hier gibt es keine Nachbearbeitung (Tiefenschärfe, Ambient Occlusion, Nebel, Bewegungsunschärfe, Farbsäume) – dafür unten „WebGPU“ ausschalten und neu laden.");
+  const g2 = !!(renderer.capabilities && renderer.capabilities.isWebGL2), dt = g2 || !!(renderer.extensions && renderer.extensions.get("WEBGL_depth_texture"));
+  return T("Aktiver Renderer: WebGL") + (g2 ? " 2" : " 1") + " · " + (post.err ? T("Nachbearbeitung ausgefallen: ") + post.err : dt ? T("Nachbearbeitung verfügbar") : T("Nachbearbeitung nicht verfügbar (Gerät ohne Tiefentextur)"));
+}
 function buildOpts() {
   const tb = $("sTabs"), box = $("optRows"); tb.innerHTML = ""; box.innerHTML = "";
   TABS.forEach(t => { const b = document.createElement("button"); b.textContent = T(t); if (t === curTab) b.className = "on"; b.onclick = () => { curTab = t; buildOpts(); }; tb.appendChild(b); });
   if (curTab === "DEV") { buildDev(box); return; }
+  if (curTab === "GRAFIK") { const r = document.createElement("div"); r.className = "srow"; r.innerHTML = "<small>" + gfxInfo() + "</small>"; box.appendChild(r); }
   if (curTab === "ANZEIGE") { const r = document.createElement("div"); r.className = "srow sw"; r.innerHTML = '<div><label>' + T("Sprache") + '</label><small>' + T("Deutsch oder English") + '</small></div><div class="seg"><button data-l="de">DE</button><button data-l="en">EN</button></div>';
     r.querySelectorAll("button").forEach(b => { b.classList.toggle("on", b.dataset.l === LANG); b.onclick = () => setLang(b.dataset.l); }); box.appendChild(r); }
   OPTD.filter(d => d[7] === curTab && (!DEVO[d[0]] || DEVO[d[0]] === (window.inputMode || "keyboard"))).forEach(d => { const [k, lbl, mn, mx, dv, df, fmt, , hint] = d, r = document.createElement("div"), l = '<div><label for="opt_' + k + '">' + T(lbl) + '</label>' + (hint ? '<small>' + T(hint) + '</small>' : '') + '</div>';
@@ -361,7 +367,8 @@ function renderFinal(dt) {
   post.cine += ((opt.cine && document.body.classList.contains("cine") && !paused ? 1 : 0) - post.cine)*Math.min(1, dt*3);
   if (fg && !(scene.fog && VOLF[scene.fog.density])) fg = 0;
   if (window.__gpu || (!mb && !aoK && !fg && !ca && post.cine < .01 && post.dof < .01 && post.nr < .02 && !(story.gl > .01))) { post.has = false; renderer.render(scene, camera); return; }
-  if (!post.rt) postInit();
+  if (post.err) { post.has = false; renderer.render(scene, camera); return; }
+  try { if (!post.rt) postInit();
   const sz = renderer.getDrawingBufferSize(new THREE.Vector2()); if (sz.x !== post.w || sz.y !== post.h) { post.w = sz.x; post.h = sz.y; post.rt.setSize(sz.x, sz.y); post.has = false; }
   camera.updateMatrixWorld(); const u = post.mat.uniforms;
   renderer.setRenderTarget(post.rt); renderer.render(scene, camera); renderer.setRenderTarget(null);
@@ -373,6 +380,7 @@ function renderFinal(dt) {
   const fc = scene.fog ? scene.fog.color : (scene.background && scene.background.isColor ? scene.background : null); if (fc) u.fogC.value.copy(fc).multiplyScalar(1.6).addScalar(.02);
   lamp.getWorldPosition(u.lampP.value); u.lampC.value.copy(lamp.color).multiplyScalar(Math.min(1.5, lamp.intensity));
   renderer.render(post.scn, post.cam); post.prev.copy(vp); post.has = true;
+  } catch (e) { post.err = String((e && e.message) || e).slice(0, 80); post.has = false; try { renderer.setRenderTarget(null); renderer.render(scene, camera); } catch (e2) {} }
 }
 const _ppm = new THREE.Matrix4(), _ppv = new THREE.Vector3();
 
