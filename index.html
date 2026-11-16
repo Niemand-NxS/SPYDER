@@ -843,7 +843,7 @@ if (window.__gpu) {
 (() => {
 "use strict";
 /* ======================= Sprache / Language (DE · EN) ======================= */
-let LANG = "de"; try { LANG = localStorage.getItem("spyderLang") || ((navigator.language || "de").slice(0, 2) === "de" ? "de" : "en"); } catch (e) {}
+let LANG = "en"; try { LANG = localStorage.getItem("spyderLang") || "en"; } catch (e) {}
 const EN = {
   "Verlässt das Haus":"Leaves the house","Heimliche Übergabe":"Secret handover","Verdächtiges Telefonat":"Suspicious phone call","Kommt nicht allein heim":"Comes home not alone","MORGEN":"MORNING","MITTAG":"NOON","NACHMITTAG":"AFTERNOON","ABEND":"EVENING","BESCHATTUNG":"SURVEILLANCE","FOTOS":"PHOTOS","DER TAG IST VORBEI":"THE DAY IS OVER",
   "Ich-Perspektive (V), dann Foto: Enter bzw. RT":"First person (V), then photo: Enter / RT","Beschattung beginnt …":"Surveillance begins …","Neuer Auftrag: Beschattung":"New job: Surveillance","Noch nichts Verdächtiges – warte auf „JETZT FOTOGRAFIEREN“ oben.":"Nothing suspicious yet – wait for “SHOOT NOW” at the top.","Dieses Foto ist schon im Kasten.":"You already have this photo.","Varga ist nicht richtig im Bild.":"Varga is not properly in the frame.","Die Begleitung fehlt im Bild.":"The companion is missing from the frame.","Der Kontakt muss mit ins Bild.":"The contact has to be in the frame too.","Varga hat dich bemerkt – der Tag beginnt von vorn":"Varga noticed you – the day starts over","Kein brauchbares Foto – der Moment wird wiederholt":"No usable photo – the moment will be repeated","Beschattung abgeschlossen":"Surveillance completed",
@@ -1193,7 +1193,66 @@ const EN = {
   "Früher war hier mehr los. Jetzt kommen nur noch die beiden da draußen.":"It used to be busier here. Now it's only those two outside.","Der da schläft seit Dienstag. Ich zahle ihm den Strom.":"That one's been sleeping since Tuesday. I pay his power.",
   "Mhm… noch… einen…":"Mhm… another… one…","Hörst du das? Die Rohre. KRONOS atmet.":"Do you hear that? The pipes. KRONOS is breathing.","Nicht… zerlegen…":"Don't… take apart…",
   "Er träumt oft davon. Ich frage nicht nach.":"He dreams of it often. I don't ask.","Du bist ein seltsamer Gast. Aber ich habe schon seltsamere bedient.":"You're a strange guest. But I've served stranger ones.",
-  "Mit den Beinen kannst du ja schlecht bestellen.":"You can hardly order with those legs.","Wenn du Ärger hast, bleib hier. Hier sucht keiner.":"If you're in trouble, stay here. Nobody looks here.","Rost… überall…":"Rust… everywhere…"
+  "Mit den Beinen kannst du ja schlecht bestellen.":"You can hardly order with those legs.","Wenn du Ärger hast, bleib hier. Hier sucht keiner.":"If you're in trouble, stay here. Nobody looks here.","Rost… überall…":"Rust… everywhere…",
+  "Ambient Occlusion":"Ambient occlusion","Dunkelt Ecken, Spalten und Kontaktstellen ab, für mehr Tiefe (nur WebGL, deaktiviert Kantenglättung, kostet Leistung)":"Darkens corners, crevices and contact points for more depth (WebGL only, disables anti-aliasing, costs performance)",
+  "Tür verriegelt":"Door locked",
+  "Tür schließen":"Close door",
+  "Tür öffnen":"Open door",
+  "KEIN ANLASS ZUR SORGE":"NOTHING TO WORRY ABOUT",
+  "ÖL+TEILE 24H":"OIL + PARTS 24H",
+  "Schwer, glänzend und kaum nachzuverfolgen. Rackson tauscht sie gegen SuperEuro (SE).":"Heavy, shiny and nearly untraceable. Rackson trades them for SuperEuro (SE).",
+  "„Custom & Mods – wir bauen alles, was eine Steckdose hat.“":"“Custom & Mods – we build anything with a power socket.”",
+  "Bring Rackson die Goldbarren – er wartet in der Gasse.":"Bring Rackson the gold bars – he's waiting in the alley.",
+  "Erster Auftrag erledigt. Geh zu Mase in die Werkstatt, um Upgrades zu kaufen.":"First job done. Go see Mase at the workshop to buy upgrades.",
+  "Mase baut die Upgrades ein. Bezahlt wird in SuperEuro (SE).":"Mase installs the upgrades. Payment is in SuperEuro (SE).",
+  "Upgrades gibt es nur bei Mase in der Werkstatt. Hier siehst du deinen Stand.":"Upgrades are only available from Mase at the workshop. Here you can see your status.",
+  "Hmm hmm. Was darf's sein, Kleine?":"Hmm hmm. What'll it be, kid?",
+  "Gold an Rackson übergeben":"Hand gold to Rackson",
+  "› Tür fährt auf …":"› Door slides open …",
+  "Lüftungsgitter aufschneiden":"Cut open vent grille",
+  "Der Job läuft, Kleine. Feuerleiter in der Gasse, Dach, Lüftungsschacht. Ich bin nicht zu Hause!":"The job's on, kid. Fire escape in the alley, roof, vent shaft. I'm not home!",
+  "Kreditkontor, Tresor, Gold. Mehr Gerede hilft dir nicht, los jetzt!":"Credit office, vault, gold. Talking won't help you, get going!",
+  "Gute Arbeit gestern, Kleine! Ich such gerade was Neues. Komm später wieder.":"Good work yesterday, kid! I'm looking for something new. Come back later.",
+  "Kein neuer Job im Moment. Bau dir Upgrades ein, ich meld mich.":"No new job right now. Get yourself some upgrades, I'll be in touch.",
+  "Arach! Der Kreditkontor-Job war erste Sahne. Das Gold gehört dir, kauf dir Upgrades bei Mase.":"Arach! The credit office job was first-rate. The gold is yours, buy upgrades from Mase.",
+  "Ich halte den Kanal offen. Sobald der nächste Auftrag reinkommt, funk ich dich an.":"I'll keep the channel open. As soon as the next job comes in, I'll radio you.",
+  "Rackson hier. Zum Kreditkontor: Feuerleiter in der Gasse, aufs Dach, Lüftungsschacht in die Schalterhalle.":"Rackson here. To the credit office: fire escape in the alley, up to the roof, vent shaft into the banking hall.",
+  "Such die Tresor-Konsole, hack sie und pack das Gold ins Backpack. Und pass auf die Wachroboter auf.":"Find the vault console, hack it and pack the gold into your backpack. And watch out for the guard robots.",
+  "Hier Rackson. Schön, dass du dich meldest, Arach.":"Rackson here. Good that you called, Arach.",
+  "Gerade liegt kein neuer Auftrag auf dem Kanal. Ich funk dich an, sobald was reinkommt.":"No new job on the channel right now. I'll radio you as soon as something comes in.",
+  "Mase hier. Hmm hmm. Ach, du bist's, Kleine!":"Mase here. Hmm hmm. Oh, it's you, kid!",
+  "Öffne dein Backpack, dann schalte ich dir die Upgrades per Fernzugriff frei. Und Racksons Pistole? Fast fertig.":"Open your backpack and I'll unlock the upgrades for you remotely. And Rackson's pistol? Almost done.",
+  "Wenn du was an dir verbessern willst, komm vorbei oder öffne dein Backpack. Ich bin in der Werkstatt.":"If you want to improve something on yourself, drop by or open your backpack. I'm at the workshop.",
+  "Bar Klirr. Na, Kleine? Schön, dass du anrufst.":"Bar Klirr. Well, kid? Nice of you to call.",
+  "Wenn dir einer blöd kommt, sag Bescheid. Die Tür steht dir immer offen. Und der Öl-Vorrat auch.":"If anyone gives you trouble, let me know. The door's always open for you. And so is the oil supply.",
+  "Auftrag abgeschlossen: Kreditkontor Brandt & Co. Das Gold gehört dir. Upgrades gibt es bei Mase.":"Job complete: Brandt & Co. credit office. The gold is yours. Upgrades are available from Mase.",
+  "Neuer Auftrag: Kreditkontor Brandt & Co. Einstieg über Feuerleiter, Dach und Lüftungsschacht.":"New job: Brandt & Co. credit office. Entry via fire escape, roof and vent shaft.",
+  "Kanal 7 ist offen. Rackson hält dich auf dem Laufenden.":"Channel 7 is open. Rackson will keep you posted.",
+  "Keine Übertragung":"No transmission",
+  "Noch kein Auftrag. Rackson meldet sich, sobald etwas reinkommt.":"No job yet. Rackson will get in touch as soon as something comes in.",
+  "Tresor in der Schalterhalle leerräumen. Gold gehört dir. Zwei Wachroboter, Kameras im Gebäude.":"Clear out the vault in the banking hall. The gold is yours. Two guard robots, cameras in the building.",
+  "ÜBERTRAGUNGEN":"TRANSMISSIONS",
+  "● Warte auf neue Übertragung …":"● Waiting for new transmission …",
+  "KEIN KONTAKT":"NO CONTACT",
+  "Arach, hier Rackson. Falls du's vergessen hast: Feuerleiter in der Gasse, dann aufs Dach.":"Arach, Rackson here. In case you forgot: fire escape in the alley, then up to the roof.",
+  "Der Lüftungsschacht führt direkt in die Schalterhalle. Ruf mich an, wenn du was brauchst.":"The vent shaft leads straight into the banking hall. Call me if you need anything.",
+  "Arach! Rackson. Das Kreditkontor war ein Traum, die Szene redet schon über dich.":"Arach! Rackson. The credit office was a dream, the scene is already talking about you.",
+  "Bau dir Upgrades ein. Ich funk dich an, sobald der nächste Auftrag reinkommt.":"Get yourself some upgrades. I'll radio you as soon as the next job comes in.",
+  "Zwanzig Barren, sauber gezählt. Fünfundvierzigtausend SuperEuro, Arach – kommt sofort auf dein Konto.":"Twenty bars, neatly counted. Forty-five thousand SuperEuro, Arach – going to your account right away.",
+  "Hab nachgezählt. Fair bezahlt, Arach – kommt gleich auf dein Konto.":"Counted them again. Paid fair and square, Arach – going to your account shortly.",
+  "Überweisung: ":"Transfer: ",
+  "Schneide das Lüftungsgitter am Dachaufbau auf und dring ins Kreditkontor ein.":"Cut open the vent grille on the roof structure and get into the credit office.",
+  "BÄCKEREI KOCH":"KOCH BAKERY",
+  "PRIVAT · NICHT PARKEN":"PRIVATE · NO PARKING",
+  "Pixel, die tatsächlich gerendert werden. Niedriger = flüssiger, über 100 % = schärfer":"Pixels actually rendered. Lower = smoother, above 100% = sharper",
+  "DRÜCKE EINE TASTE":"PRESS ANY KEY",
+  "CAFÉ LENZ":"CAFÉ LENZ",
+  "DURCHGANG · PARALLELSTRASSE":"PASSAGE · PARALLEL STREET",
+  "← HAUPTSTRASSE":"← MAIN STREET",
+  "Nr. 29":"No. 29",
+  "Nr. 31":"No. 31",
+  "Nr. 33":"No. 33",
+  "KIOSK":"KIOSK"
 };
 for (const k of Object.keys(EN)) { const u = k.toUpperCase(); if (!(u in EN)) EN[u] = EN[k].toUpperCase(); }
 /* Bruchstücke für zusammengesetzte Texte (längste zuerst) */
@@ -2594,6 +2653,7 @@ const OPTD = [   // [Schlüssel, Bezeichnung, min, max, Teiler, Standard, Format
   ["nearBlur","Unschärfe bei Nähe zur Kamera",0,0,0,true,null,"GRAFIK","Dinge direkt vor der Kamera werden unscharf (nur WebGL; Kantenglättung aus, solange etwas sehr nah ist)"],
   ["cine","Film-Look in Cutscenes",0,0,0,true,null,"GRAFIK","Tiefenschärfe und Filmkorn (nur WebGL; Kantenglättung aus während der Cutscene)"],
   ["mblur","Bewegungsunschärfe",0,100,100,0,v => v ? Math.round(v*100) + "%" : "Aus","GRAFIK","Verwischt schnelle Kamerabewegungen (nur WebGL, deaktiviert Kantenglättung)"],
+  ["ao","Ambient Occlusion",0,100,100,0,v => v ? Math.round(v*100) + "%" : "Aus","GRAFIK","Dunkelt Ecken, Spalten und Kontaktstellen ab, für mehr Tiefe (nur WebGL, deaktiviert Kantenglättung, kostet Leistung)"],
   ["vfog","Volumetrischer Nebel",0,100,100,.4,v => v ? Math.round(v*100) + "%" : "Aus","GRAFIK","Dichter, wabernder Nebel mit Streulicht der Lampen; im Schatten dunkel. Nur in Gasse, Straße, Treppenhaus und auf dem Dach (nur WebGL, deaktiviert Kantenglättung)"],
   ["gpu","WebGPU (experimentell)",0,0,0,false,null,"GRAFIK","Gilt nach Neuladen. Bei Problemen wechselt das Spiel automatisch zurück auf WebGL"]];
 const opt = {}; OPTD.forEach(d => opt[d[0]] = d[5]);
@@ -2733,7 +2793,8 @@ const post = {fc:0, cine:0, dof:0, nr:0, focus:6, rt:null, mat:null, quad:null, 
 const POST_FS = `
 uniform sampler2D tC, tD; uniform mat4 invP, invV, prevVP, curVP; uniform vec2 res; uniform float near, far, time, mb, fogD, mbK, ca, cine, focus, dofK, nearK, gl;
 vec3 samp(vec2 uv) { vec2 o = (uv - .5)*ca*.03; return vec3(texture2D(tC, uv + o).r, texture2D(tC, uv).g, texture2D(tC, uv - o).b); }
-uniform vec3 camP, fogC, lampP, lampC; varying vec2 vUv;
+uniform vec3 camP, fogC, lampP, lampC; uniform float ao, projY; varying vec2 vUv;
+vec3 vpos(vec2 u){ float dd = texture2D(tD, u).x; vec4 v = invP*vec4(u*2. - 1., dd*2. - 1., 1.); return v.xyz/v.w; }
 float h31(vec3 p){ p = fract(p*.1031); p += dot(p, p.zyx + 31.32); return fract((p.x + p.y)*p.z); }
 float vn(vec3 p){ vec3 i = floor(p), f = fract(p); f = f*f*(3. - 2.*f);
   return mix(mix(mix(h31(i), h31(i + vec3(1,0,0)), f.x), mix(h31(i + vec3(0,1,0)), h31(i + vec3(1,1,0)), f.x), f.y),
@@ -2750,6 +2811,18 @@ void main() {
     for (int i = 0; i < 9; i++) col += samp(uv + v*((float(i) + j)/8. - .5));
     col /= 9.;
   } else col = samp(uv);
+  if (ao > 0. && d < .9999) {
+    vec3 P = vv.xyz; vec2 px = 1./res; vec3 Pr = vpos(uv + vec2(px.x, 0.)), Pl = vpos(uv - vec2(px.x, 0.)), Pu = vpos(uv + vec2(0., px.y)), Pd = vpos(uv - vec2(0., px.y));
+    vec3 ex = abs(Pr.z - P.z) < abs(P.z - Pl.z) ? Pr - P : P - Pl, ey = abs(Pu.z - P.z) < abs(P.z - Pd.z) ? Pu - P : P - Pd;
+    vec3 n = normalize(cross(ex, ey)); if (n.z < 0.) n = -n;
+    float rad = .75, occ = 0., ang = h31(vec3(gl_FragCoord.xy, 3.))*6.2832, ps = rad*projY*.5/max(-P.z, .3);
+    for (int i = 0; i < 12; i++) {
+      float a = ang + float(i)*2.39996, r = (float(i) + .5)/12.; vec2 o = vec2(cos(a)*res.y/res.x, sin(a))*r*ps;
+      vec3 v = vpos(uv + o) - P; float dist = length(v) + 1e-4;
+      occ += max(dot(n, v)/dist - .15, 0.)*(1. - smoothstep(rad*.5, rad*1.5, dist));
+    }
+    col *= 1. - clamp(occ/12.*2.6, 0., 1.)*ao*.8;
+  }
   if (dofK > 0. || nearK > 0.) {
     float lin = 2.*near*far/(far + near - (d*2. - 1.)*(far - near)), coc = max(clamp(abs(lin - focus)/max(focus, 1.) - .12, 0., 1.)*dofK*.011, clamp((1. - lin)/.8, 0., 1.)*nearK*.016);
     if (coc > .0004) { vec3 acc = col; float wsum = 1.; for (int i = 0; i < 12; i++) { float a = float(i)*2.39996, r = sqrt((float(i) + .5)/12.); vec2 o = vec2(cos(a)*res.y/res.x, sin(a))*r*coc; acc += samp(uv + o); wsum += 1.; } col = acc/wsum; }
@@ -2782,13 +2855,13 @@ void main() {
 }`;
 function postInit() {
   post.rt = new THREE.WebGLRenderTarget(4, 4, {minFilter:THREE.LinearFilter, magFilter:THREE.LinearFilter, depthTexture:new THREE.DepthTexture(4, 4, THREE.UnsignedIntType)});
-  post.mat = new THREE.ShaderMaterial({uniforms:{tC:{value:null}, tD:{value:null}, invP:{value:new THREE.Matrix4()}, invV:{value:new THREE.Matrix4()}, prevVP:{value:new THREE.Matrix4()}, curVP:{value:new THREE.Matrix4()}, res:{value:new THREE.Vector2()}, near:{value:.1}, ca:{value:0}, cine:{value:0}, dofK:{value:0}, nearK:{value:0}, gl:{value:0}, focus:{value:6}, far:{value:100}, time:{value:0}, mb:{value:0}, mbK:{value:1}, fogD:{value:0}, camP:{value:new THREE.Vector3()}, fogC:{value:new THREE.Color()}, lampP:{value:new THREE.Vector3()}, lampC:{value:new THREE.Color()}},
+  post.mat = new THREE.ShaderMaterial({uniforms:{tC:{value:null}, tD:{value:null}, invP:{value:new THREE.Matrix4()}, invV:{value:new THREE.Matrix4()}, prevVP:{value:new THREE.Matrix4()}, curVP:{value:new THREE.Matrix4()}, res:{value:new THREE.Vector2()}, near:{value:.1}, ca:{value:0}, cine:{value:0}, dofK:{value:0}, nearK:{value:0}, gl:{value:0}, ao:{value:0}, projY:{value:1}, focus:{value:6}, far:{value:100}, time:{value:0}, mb:{value:0}, mbK:{value:1}, fogD:{value:0}, camP:{value:new THREE.Vector3()}, fogC:{value:new THREE.Color()}, lampP:{value:new THREE.Vector3()}, lampC:{value:new THREE.Color()}},
     vertexShader:"varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0., 1.); }", fragmentShader:POST_FS, depthTest:false, depthWrite:false});
   post.scn = new THREE.Scene(); post.cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1); post.quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), post.mat); post.quad.frustumCulled = false; post.scn.add(post.quad);
 }
 function renderFinal(dt) {
   post.fc += (((opt.menuDof && mode === "menu" && document.body.classList.contains("menu") && !$("splash")) ? 1.6 : (opt.fpCa && fp && mode !== "menu" ? .45 : 0)) - post.fc)*Math.min(1, dt*6);
-  const mb = opt.mblur || 0, ca = Math.max(opt.ca || 0, post.fc < .01 ? 0 : post.fc); let fg = opt.vfog || 0;
+  const mb = opt.mblur || 0, aoK = opt.ao || 0, ca = Math.max(opt.ca || 0, post.fc < .01 ? 0 : post.fc); let fg = opt.vfog || 0;
   { // Smarte Tiefenschärfe: nur wenn eine Figur im Bildmittelpunkt steht, nah genug und nicht Weitwinkel
     let want = 0, fd = post.focus;
     if (opt.cine && document.body.classList.contains("cine") && mode === "cut" && !paused) {
@@ -2805,7 +2878,7 @@ function renderFinal(dt) {
   { let want = 0; if (opt.nearBlur && !paused && mode !== "menu" && !voidOn) { try { const s = sdf(camera.position, _ppv); want = (s < 1.1 || (!fp && camera.position.distanceTo(pos) < 1.3)) ? 1 : 0; } catch (e) {} } post.nr += (want - post.nr)*Math.min(1, dt*8); }
   post.cine += ((opt.cine && document.body.classList.contains("cine") && !paused ? 1 : 0) - post.cine)*Math.min(1, dt*3);
   if (fg && !(scene.fog && VOLF[scene.fog.density])) fg = 0;
-  if (window.__gpu || (!mb && !fg && !ca && post.cine < .01 && post.dof < .01 && post.nr < .02 && !(story.gl > .01))) { post.has = false; renderer.render(scene, camera); return; }
+  if (window.__gpu || (!mb && !aoK && !fg && !ca && post.cine < .01 && post.dof < .01 && post.nr < .02 && !(story.gl > .01))) { post.has = false; renderer.render(scene, camera); return; }
   if (!post.rt) postInit();
   const sz = renderer.getDrawingBufferSize(new THREE.Vector2()); if (sz.x !== post.w || sz.y !== post.h) { post.w = sz.x; post.h = sz.y; post.rt.setSize(sz.x, sz.y); post.has = false; }
   camera.updateMatrixWorld(); const u = post.mat.uniforms;
@@ -2814,7 +2887,7 @@ function renderFinal(dt) {
   post.t += dt; const jump = camera.getWorldPosition(_ppv).distanceTo(post.pp) > 2.5; post.pp.copy(_ppv);
   u.tC.value = post.rt.texture; u.tD.value = post.rt.depthTexture; u.invP.value.copy(camera.projectionMatrix).invert(); u.invV.value.copy(camera.matrixWorld);
   if (!post.has || jump) post.prev.copy(vp); u.prevVP.value.copy(post.prev); u.curVP.value.copy(vp); u.near.value = camera.near; u.far.value = camera.far; u.res.value.set(sz.x, sz.y); u.time.value = post.t % 1000;
-  u.mb.value = mb; u.ca.value = ca; u.cine.value = post.cine < .01 ? 0 : post.cine; u.dofK.value = post.dof < .01 ? 0 : post.dof; u.nearK.value = post.nr < .02 ? 0 : post.nr; u.gl.value = story.gl || 0; u.focus.value = post.focus; u.mbK.value = Math.min(1, (1/60)/Math.max(dt, .004))*1.0; u.fogD.value = fg*.12; u.camP.value.copy(_ppv);
+  u.mb.value = mb; u.ca.value = ca; u.cine.value = post.cine < .01 ? 0 : post.cine; u.dofK.value = post.dof < .01 ? 0 : post.dof; u.nearK.value = post.nr < .02 ? 0 : post.nr; u.gl.value = story.gl || 0; u.ao.value = aoK; u.projY.value = camera.projectionMatrix.elements[5]; u.focus.value = post.focus; u.mbK.value = Math.min(1, (1/60)/Math.max(dt, .004))*1.0; u.fogD.value = fg*.12; u.camP.value.copy(_ppv);
   const fc = scene.fog ? scene.fog.color : (scene.background && scene.background.isColor ? scene.background : null); if (fc) u.fogC.value.copy(fc).multiplyScalar(1.6).addScalar(.02);
   lamp.getWorldPosition(u.lampP.value); u.lampC.value.copy(lamp.color).multiplyScalar(Math.min(1.5, lamp.intensity));
   renderer.render(post.scn, post.cam); post.prev.copy(vp); post.has = true;

@@ -135,6 +135,7 @@ const OPTD = [   // [Schlüssel, Bezeichnung, min, max, Teiler, Standard, Format
   ["nearBlur","Unschärfe bei Nähe zur Kamera",0,0,0,true,null,"GRAFIK","Dinge direkt vor der Kamera werden unscharf (nur WebGL; Kantenglättung aus, solange etwas sehr nah ist)"],
   ["cine","Film-Look in Cutscenes",0,0,0,true,null,"GRAFIK","Tiefenschärfe und Filmkorn (nur WebGL; Kantenglättung aus während der Cutscene)"],
   ["mblur","Bewegungsunschärfe",0,100,100,0,v => v ? Math.round(v*100) + "%" : "Aus","GRAFIK","Verwischt schnelle Kamerabewegungen (nur WebGL, deaktiviert Kantenglättung)"],
+  ["ao","Ambient Occlusion",0,100,100,0,v => v ? Math.round(v*100) + "%" : "Aus","GRAFIK","Dunkelt Ecken, Spalten und Kontaktstellen ab, für mehr Tiefe (nur WebGL, deaktiviert Kantenglättung, kostet Leistung)"],
   ["vfog","Volumetrischer Nebel",0,100,100,.4,v => v ? Math.round(v*100) + "%" : "Aus","GRAFIK","Dichter, wabernder Nebel mit Streulicht der Lampen; im Schatten dunkel. Nur in Gasse, Straße, Treppenhaus und auf dem Dach (nur WebGL, deaktiviert Kantenglättung)"],
   ["gpu","WebGPU (experimentell)",0,0,0,false,null,"GRAFIK","Gilt nach Neuladen. Bei Problemen wechselt das Spiel automatisch zurück auf WebGL"]];
 const opt = {}; OPTD.forEach(d => opt[d[0]] = d[5]);
@@ -274,7 +275,8 @@ const post = {fc:0, cine:0, dof:0, nr:0, focus:6, rt:null, mat:null, quad:null, 
 const POST_FS = `
 uniform sampler2D tC, tD; uniform mat4 invP, invV, prevVP, curVP; uniform vec2 res; uniform float near, far, time, mb, fogD, mbK, ca, cine, focus, dofK, nearK, gl;
 vec3 samp(vec2 uv) { vec2 o = (uv - .5)*ca*.03; return vec3(texture2D(tC, uv + o).r, texture2D(tC, uv).g, texture2D(tC, uv - o).b); }
-uniform vec3 camP, fogC, lampP, lampC; varying vec2 vUv;
+uniform vec3 camP, fogC, lampP, lampC; uniform float ao, projY; varying vec2 vUv;
+vec3 vpos(vec2 u){ float dd = texture2D(tD, u).x; vec4 v = invP*vec4(u*2. - 1., dd*2. - 1., 1.); return v.xyz/v.w; }
 float h31(vec3 p){ p = fract(p*.1031); p += dot(p, p.zyx + 31.32); return fract((p.x + p.y)*p.z); }
 float vn(vec3 p){ vec3 i = floor(p), f = fract(p); f = f*f*(3. - 2.*f);
   return mix(mix(mix(h31(i), h31(i + vec3(1,0,0)), f.x), mix(h31(i + vec3(0,1,0)), h31(i + vec3(1,1,0)), f.x), f.y),
@@ -291,6 +293,18 @@ void main() {
     for (int i = 0; i < 9; i++) col += samp(uv + v*((float(i) + j)/8. - .5));
     col /= 9.;
   } else col = samp(uv);
+  if (ao > 0. && d < .9999) {
+    vec3 P = vv.xyz; vec2 px = 1./res; vec3 Pr = vpos(uv + vec2(px.x, 0.)), Pl = vpos(uv - vec2(px.x, 0.)), Pu = vpos(uv + vec2(0., px.y)), Pd = vpos(uv - vec2(0., px.y));
+    vec3 ex = abs(Pr.z - P.z) < abs(P.z - Pl.z) ? Pr - P : P - Pl, ey = abs(Pu.z - P.z) < abs(P.z - Pd.z) ? Pu - P : P - Pd;
+    vec3 n = normalize(cross(ex, ey)); if (n.z < 0.) n = -n;
+    float rad = .75, occ = 0., ang = h31(vec3(gl_FragCoord.xy, 3.))*6.2832, ps = rad*projY*.5/max(-P.z, .3);
+    for (int i = 0; i < 12; i++) {
+      float a = ang + float(i)*2.39996, r = (float(i) + .5)/12.; vec2 o = vec2(cos(a)*res.y/res.x, sin(a))*r*ps;
+      vec3 v = vpos(uv + o) - P; float dist = length(v) + 1e-4;
+      occ += max(dot(n, v)/dist - .15, 0.)*(1. - smoothstep(rad*.5, rad*1.5, dist));
+    }
+    col *= 1. - clamp(occ/12.*2.6, 0., 1.)*ao*.8;
+  }
   if (dofK > 0. || nearK > 0.) {
     float lin = 2.*near*far/(far + near - (d*2. - 1.)*(far - near)), coc = max(clamp(abs(lin - focus)/max(focus, 1.) - .12, 0., 1.)*dofK*.011, clamp((1. - lin)/.8, 0., 1.)*nearK*.016);
     if (coc > .0004) { vec3 acc = col; float wsum = 1.; for (int i = 0; i < 12; i++) { float a = float(i)*2.39996, r = sqrt((float(i) + .5)/12.); vec2 o = vec2(cos(a)*res.y/res.x, sin(a))*r*coc; acc += samp(uv + o); wsum += 1.; } col = acc/wsum; }
@@ -323,13 +337,13 @@ void main() {
 }`;
 function postInit() {
   post.rt = new THREE.WebGLRenderTarget(4, 4, {minFilter:THREE.LinearFilter, magFilter:THREE.LinearFilter, depthTexture:new THREE.DepthTexture(4, 4, THREE.UnsignedIntType)});
-  post.mat = new THREE.ShaderMaterial({uniforms:{tC:{value:null}, tD:{value:null}, invP:{value:new THREE.Matrix4()}, invV:{value:new THREE.Matrix4()}, prevVP:{value:new THREE.Matrix4()}, curVP:{value:new THREE.Matrix4()}, res:{value:new THREE.Vector2()}, near:{value:.1}, ca:{value:0}, cine:{value:0}, dofK:{value:0}, nearK:{value:0}, gl:{value:0}, focus:{value:6}, far:{value:100}, time:{value:0}, mb:{value:0}, mbK:{value:1}, fogD:{value:0}, camP:{value:new THREE.Vector3()}, fogC:{value:new THREE.Color()}, lampP:{value:new THREE.Vector3()}, lampC:{value:new THREE.Color()}},
+  post.mat = new THREE.ShaderMaterial({uniforms:{tC:{value:null}, tD:{value:null}, invP:{value:new THREE.Matrix4()}, invV:{value:new THREE.Matrix4()}, prevVP:{value:new THREE.Matrix4()}, curVP:{value:new THREE.Matrix4()}, res:{value:new THREE.Vector2()}, near:{value:.1}, ca:{value:0}, cine:{value:0}, dofK:{value:0}, nearK:{value:0}, gl:{value:0}, ao:{value:0}, projY:{value:1}, focus:{value:6}, far:{value:100}, time:{value:0}, mb:{value:0}, mbK:{value:1}, fogD:{value:0}, camP:{value:new THREE.Vector3()}, fogC:{value:new THREE.Color()}, lampP:{value:new THREE.Vector3()}, lampC:{value:new THREE.Color()}},
     vertexShader:"varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0., 1.); }", fragmentShader:POST_FS, depthTest:false, depthWrite:false});
   post.scn = new THREE.Scene(); post.cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1); post.quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), post.mat); post.quad.frustumCulled = false; post.scn.add(post.quad);
 }
 function renderFinal(dt) {
   post.fc += (((opt.menuDof && mode === "menu" && document.body.classList.contains("menu") && !$("splash")) ? 1.6 : (opt.fpCa && fp && mode !== "menu" ? .45 : 0)) - post.fc)*Math.min(1, dt*6);
-  const mb = opt.mblur || 0, ca = Math.max(opt.ca || 0, post.fc < .01 ? 0 : post.fc); let fg = opt.vfog || 0;
+  const mb = opt.mblur || 0, aoK = opt.ao || 0, ca = Math.max(opt.ca || 0, post.fc < .01 ? 0 : post.fc); let fg = opt.vfog || 0;
   { // Smarte Tiefenschärfe: nur wenn eine Figur im Bildmittelpunkt steht, nah genug und nicht Weitwinkel
     let want = 0, fd = post.focus;
     if (opt.cine && document.body.classList.contains("cine") && mode === "cut" && !paused) {
@@ -346,7 +360,7 @@ function renderFinal(dt) {
   { let want = 0; if (opt.nearBlur && !paused && mode !== "menu" && !voidOn) { try { const s = sdf(camera.position, _ppv); want = (s < 1.1 || (!fp && camera.position.distanceTo(pos) < 1.3)) ? 1 : 0; } catch (e) {} } post.nr += (want - post.nr)*Math.min(1, dt*8); }
   post.cine += ((opt.cine && document.body.classList.contains("cine") && !paused ? 1 : 0) - post.cine)*Math.min(1, dt*3);
   if (fg && !(scene.fog && VOLF[scene.fog.density])) fg = 0;
-  if (window.__gpu || (!mb && !fg && !ca && post.cine < .01 && post.dof < .01 && post.nr < .02 && !(story.gl > .01))) { post.has = false; renderer.render(scene, camera); return; }
+  if (window.__gpu || (!mb && !aoK && !fg && !ca && post.cine < .01 && post.dof < .01 && post.nr < .02 && !(story.gl > .01))) { post.has = false; renderer.render(scene, camera); return; }
   if (!post.rt) postInit();
   const sz = renderer.getDrawingBufferSize(new THREE.Vector2()); if (sz.x !== post.w || sz.y !== post.h) { post.w = sz.x; post.h = sz.y; post.rt.setSize(sz.x, sz.y); post.has = false; }
   camera.updateMatrixWorld(); const u = post.mat.uniforms;
@@ -355,7 +369,7 @@ function renderFinal(dt) {
   post.t += dt; const jump = camera.getWorldPosition(_ppv).distanceTo(post.pp) > 2.5; post.pp.copy(_ppv);
   u.tC.value = post.rt.texture; u.tD.value = post.rt.depthTexture; u.invP.value.copy(camera.projectionMatrix).invert(); u.invV.value.copy(camera.matrixWorld);
   if (!post.has || jump) post.prev.copy(vp); u.prevVP.value.copy(post.prev); u.curVP.value.copy(vp); u.near.value = camera.near; u.far.value = camera.far; u.res.value.set(sz.x, sz.y); u.time.value = post.t % 1000;
-  u.mb.value = mb; u.ca.value = ca; u.cine.value = post.cine < .01 ? 0 : post.cine; u.dofK.value = post.dof < .01 ? 0 : post.dof; u.nearK.value = post.nr < .02 ? 0 : post.nr; u.gl.value = story.gl || 0; u.focus.value = post.focus; u.mbK.value = Math.min(1, (1/60)/Math.max(dt, .004))*1.0; u.fogD.value = fg*.12; u.camP.value.copy(_ppv);
+  u.mb.value = mb; u.ca.value = ca; u.cine.value = post.cine < .01 ? 0 : post.cine; u.dofK.value = post.dof < .01 ? 0 : post.dof; u.nearK.value = post.nr < .02 ? 0 : post.nr; u.gl.value = story.gl || 0; u.ao.value = aoK; u.projY.value = camera.projectionMatrix.elements[5]; u.focus.value = post.focus; u.mbK.value = Math.min(1, (1/60)/Math.max(dt, .004))*1.0; u.fogD.value = fg*.12; u.camP.value.copy(_ppv);
   const fc = scene.fog ? scene.fog.color : (scene.background && scene.background.isColor ? scene.background : null); if (fc) u.fogC.value.copy(fc).multiplyScalar(1.6).addScalar(.02);
   lamp.getWorldPosition(u.lampP.value); u.lampC.value.copy(lamp.color).multiplyScalar(Math.min(1.5, lamp.intensity));
   renderer.render(post.scn, post.cam); post.prev.copy(vp); post.has = true;
