@@ -2831,8 +2831,8 @@ void main() {
     col *= 1. - clamp(occ/12.*2.6, 0., 1.)*ao*.8;
   }
   if (dofK > 0. || nearK > 0.) {
-    float lin = 2.*near*far/(far + near - (d*2. - 1.)*(far - near)), coc = max(clamp(abs(lin - focus)/max(focus, 1.) - .12, 0., 1.)*dofK*.011, clamp((1. - lin)/.8, 0., 1.)*nearK*.016);
-    if (coc > .0004) { vec3 acc = col; float wsum = 1.; for (int i = 0; i < 12; i++) { float a = float(i)*2.39996, r = sqrt((float(i) + .5)/12.); vec2 o = vec2(cos(a)*res.y/res.x, sin(a))*r*coc; acc += samp(uv + o); wsum += 1.; } col = acc/wsum; }
+    float lin = 2.*near*far/(far + near - (d*2. - 1.)*(far - near)), cf = clamp(abs(lin - focus)/max(focus, 1.) - .22, 0., 1.), coc = max(cf*cf*(3. - 2.*cf)*dofK*.0052, clamp((1. - lin)/.8, 0., 1.)*nearK*.016);
+    if (coc > .0004) { vec3 acc = col; float wsum = 1.; for (int i = 0; i < 12; i++) { float a = float(i)*2.39996 + h31(vec3(gl_FragCoord.xy, 7.))*6.2832, r = sqrt((float(i) + .5)/12.); vec2 o = vec2(cos(a)*res.y/res.x, sin(a))*r*coc; acc += samp(uv + o); wsum += 1.; } col = acc/wsum; }
   }
   if (fogD > 0.) {
     vec3 ro = camP, rd = wp - ro; float len = length(rd); rd /= max(len, 1e-4); if (d >= .9999) len = 30.; len = min(len, 40.);
@@ -2876,7 +2876,7 @@ function renderFinal(dt) {
       if (spider.visible) chk(pos, 0);
       if (voidTwin && voidTwin.visible) chk(voidTwin.position, .3);
       for (const R of [...robots, ...(typeof barBots !== "undefined" ? barBots : []), ...(typeof exAct !== "undefined" ? exAct : [])]) if (R.g && R.g.visible) chk(R.g.position, .5);
-      if (sp) { const dist = camera.position.distanceTo(sp), sm = (a, b, v) => { const u = clamp((v - a)/(b - a), 0, 1); return u*u*(3 - 2*u); }; want = sm(16, 6, dist)*sm(66, 42, camera.fov)*(voidOn ? .4 : 1); fd = clamp(dist, 1.2, 20); }
+      if (sp) { const dist = camera.position.distanceTo(sp), sm = (a, b, v) => { const u = clamp((v - a)/(b - a), 0, 1); return u*u*(3 - 2*u); }; want = .7*sm(16, 6, dist)*sm(66, 42, camera.fov)*(voidOn ? .4 : 1); fd = clamp(dist, 1.2, 20); }
     }
     if (opt.menuDof && mode === "menu" && document.body.classList.contains("menu") && !$("splash")) { const dist = camera.position.distanceTo(pos); want = .85; fd = clamp(dist, 1.2, 20); }
     if (Math.abs(fd - post.focus) > 4 && want > 0) post.focus = fd;
