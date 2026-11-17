@@ -37,10 +37,10 @@ function buildCityMouth() {
   const mods = [0x5a3022, 0x2e3a40, 0x1e2a44, 0x6a4a22, 0x3a3030, 0x24303a];
   const facade = (fx, dirX, z, w, h, seed) => {
     const t = ctyWin(seed, 128, 256); t.repeat.set(Math.max(1, Math.round(w/3)), Math.max(1, Math.round(h/6)));
-    const f = new THREE.Mesh(new THREE.PlaneGeometry(w, h), bas(0xb0b4c0, {map:t})); f.material.color.setScalar(Math.max(.35, .95 - Math.abs(z)*.01)); f.position.set(fx, h/2, z); f.rotation.y = dirX*Math.PI/2; add(f);
+    const f = new THREE.Mesh(new THREE.PlaneGeometry(w, h), bas(0xb0b4c0, {map:t})); f.material.color.setScalar(Math.max(.35, .95 - Math.abs(z)*.01)); f.material.polygonOffset = true; f.material.polygonOffsetFactor = 2; f.material.polygonOffsetUnits = 4; f.position.set(fx, h/2, z); f.rotation.y = dirX*Math.PI/2; add(f);
     const n = 5 + Math.floor(h/5); for (let i = 0; i < n; i++) { const mw = 2 + Math.random()*2.4, mh = 2.2 + Math.random()*.4, md = 1.2 + Math.random()*1.6, my = 2 + Math.floor(Math.random()*(h/2.6 - 1))*2.6 + mh/2, mz = z + (Math.random() - .5)*(w - mw);
       const c = mods[(Math.random()*mods.length)|0], m = new THREE.Mesh(new THREE.BoxGeometry(md, mh, mw), bas(c)); m.material.color.multiplyScalar(.8 + Math.random()*.3); m.position.set(fx - dirX*(md/2), my, mz); add(m);
-      if (Math.random() < .7) { const wc = [0xe0701e, 0xf0b060, 0x6ab0e8, 0xcfd6e0][(Math.random()*4)|0], wp = new THREE.Mesh(new THREE.PlaneGeometry(mw*.55, mh*.4), bas(wc)); wp.material.color.multiplyScalar(.75); wp.position.set(fx - dirX*(md + .02), my, mz); wp.rotation.y = dirX*Math.PI/2; add(wp); } }
+      if (Math.random() < .7) { const wc = [0xe0701e, 0xf0b060, 0x6ab0e8, 0xcfd6e0][(Math.random()*4)|0], wp = new THREE.Mesh(new THREE.PlaneGeometry(mw*.55, mh*.4), bas(wc)); wp.material.color.multiplyScalar(.75); wp.material.polygonOffset = true; wp.material.polygonOffsetFactor = -2; wp.material.polygonOffsetUnits = -4; wp.position.set(fx - dirX*(md + .06), my, mz); wp.rotation.y = dirX*Math.PI/2; add(wp); } }
     for (let i = 0; i < 2; i++) { const p = new THREE.Mesh(new THREE.CylinderGeometry(.1, .1, h, 6), bas(0x1a1c22)); p.position.set(fx - dirX*.2, h/2, z + (Math.random() - .5)*w*.8); add(p); }
     return f;
   };
