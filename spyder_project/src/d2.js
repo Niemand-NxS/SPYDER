@@ -239,7 +239,7 @@ function updateCamera() {
        nach innen sofort, nach außen weich; zusätzlich nie unter die Lauffläche und nie in einem Block. */
     _t3.crossVectors(_t2, nS); if (_t3.lengthSq() < 1e-6) _t3.set(1, 0, 0); _t3.normalize().multiplyScalar(.14); _t4.crossVectors(_t3, _t2).normalize().multiplyScalar(.12);
     // Treffer auf der Lauffläche (Normale zeigt wie nS) verkürzen den Abstand NICHT – dafür wird die Kamera unten angehoben (siehe unten)
-    const hitT = (o) => { const r = rayBox(o, _t2); return r.n && r.n.dot(nS) > .8 ? 1e9 : r.t; };
+    const hitT = (o) => { const r = rayBox(o, _t2); return (r.n && r.n.dot(nS) > .8) || (window.__seeOn && r.i === 6) ? 1e9 : r.t; };   // Objekte (Blöcke) werden bei aktiver Durchsicht ausgeblendet statt die Kamera heranzuziehen
     let tmin = hitT(_t1); for (const [a, b] of [[1,0],[-1,0],[0,1],[0,-1]]) { _t5.copy(_t1).addScaledVector(_t3, a).addScaledVector(_t4, b); const tt = hitT(_t5); if (tt < tmin) tmin = tt; }
     const want = Math.min(camDist*(.35 + .65*SC), Math.max(tmin - .22, .12));
     camHitD = camHitD === undefined || want < camHitD ? want : camHitD + (want - camHitD)*(1 - Math.exp(-dtc*7)); const dist = camHitD;
