@@ -519,7 +519,7 @@ function labRestore() {      // sauberer RÃ¼cksprung aus Gasse / Schacht / StraÃ
   scene.fog = null; scene.background = new THREE.Color(0x0b0e14); lamp.distance = 0; lamp.decay = 1; lamp.color.setHex(0xf2f6ff); lamp.position.set(0, H - .5, 0);
   for (const o of ceilLights) o.visible = true; spider.visible = true; dust.visible = true; sirenOn(false);
 }
-function enterLab() {
+function enterLab() { window.loadShow && (loadShow(), loadHideSoon(2200));
   labRestore(); sirenOn(true); $("fade").classList.add("on"); dressLevel(2); placeSpider(1.8, 1.3, 0, -1); body.o.set(0,0,0); body.v.set(0,0,0); body.tp = body.tr = body.vp = body.vr = 0; vel.set(0,0,0); speed = 0; hipNow = HIP_H; _plOk = false; const lk = [[0,1.8,HIP_H*S,1.3,0,0,-1,0,1,0],[8,1.8,HIP_H*S,.2,0,0,-1,0,1,0],[11.2,1.8,HIP_H*S,.2,0,0,-1,0,1,0]]; story.ph = "lab"; story.tr = 20; story.lampT = .6; story.lampBase = .6; story.emerT = 1; story.glass = false; setObj("");
   startCut({dur:11.2, bin:0, bout:1.3,
     shots:[{t0:0,t1:4.4,a:[-3.7,2.9,2.9,.4,1.3,-1.2,62],b:[-1.8,2.5,2.5,.4,1.3,-1.2,60]},{t0:4.4,t1:7.8,a:[1.8,.5,.3,0,1.7,-1.6,58],b:[1.5,.55,.5,-.2,1.7,-1.6,56]},{t0:7.8,t1:11.2,a:() => [pos.x + 1.3,pos.y + .75,pos.z + 1.2,"S",0,0,52],b:() => [pos.x + 1.0,pos.y + .6,pos.z + 1.0,"S",0,0,50]}],

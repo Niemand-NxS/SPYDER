@@ -3129,8 +3129,6 @@ function padTick(dt) {
   const el = document.createElement("div"); el.id = "loadI"; el.innerHTML = '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="14" rx="3.2" ry="4"/><circle cx="12" cy="8" r="2"/><path d="M9 11 4 8 2 4M9 14 3 14 1 18M9.5 17 5 21M15 11 20 8 22 4M15 14 21 14 23 18M14.5 17 19 21"/></svg><span></span>'; document.body.appendChild(el);
   let lt = 0; window.loadShow = () => { el.querySelector("span").textContent = T("Lädt …"); el.classList.add("on"); clearTimeout(lt); lt = setTimeout(() => el.classList.remove("on"), 4000); };
   window.loadHideSoon = ms => { clearTimeout(lt); lt = setTimeout(() => el.classList.remove("on"), ms || 1500); };
-  const wrap = f => { const o = f; return function () { loadShow(); try { return o.apply(this, arguments); } finally { loadHideSoon(1600); } }; };
-  try { enterShaft = wrap(enterShaft); enterAlley = wrap(enterAlley); enterStreet = wrap(enterStreet); enterStairs = wrap(enterStairs); enterSide = wrap(enterSide); enterLab = wrap(enterLab); enterHeist = wrap(enterHeist); loadCheckpoint = wrap(loadCheckpoint); } catch (e) { console.warn("loadI", e); }
 }
 
 /* ======================= Skript-Aktionen: Lüftungsgitter aufbrechen, Tür öffnen ======================= */
@@ -3748,7 +3746,7 @@ function labRestore() {      // sauberer Rücksprung aus Gasse / Schacht / Stra�
   scene.fog = null; scene.background = new THREE.Color(0x0b0e14); lamp.distance = 0; lamp.decay = 1; lamp.color.setHex(0xf2f6ff); lamp.position.set(0, H - .5, 0);
   for (const o of ceilLights) o.visible = true; spider.visible = true; dust.visible = true; sirenOn(false);
 }
-function enterLab() {
+function enterLab() { window.loadShow && (loadShow(), loadHideSoon(2200));
   labRestore(); sirenOn(true); $("fade").classList.add("on"); dressLevel(2); placeSpider(1.8, 1.3, 0, -1); body.o.set(0,0,0); body.v.set(0,0,0); body.tp = body.tr = body.vp = body.vr = 0; vel.set(0,0,0); speed = 0; hipNow = HIP_H; _plOk = false; const lk = [[0,1.8,HIP_H*S,1.3,0,0,-1,0,1,0],[8,1.8,HIP_H*S,.2,0,0,-1,0,1,0],[11.2,1.8,HIP_H*S,.2,0,0,-1,0,1,0]]; story.ph = "lab"; story.tr = 20; story.lampT = .6; story.lampBase = .6; story.emerT = 1; story.glass = false; setObj("");
   startCut({dur:11.2, bin:0, bout:1.3,
     shots:[{t0:0,t1:4.4,a:[-3.7,2.9,2.9,.4,1.3,-1.2,62],b:[-1.8,2.5,2.5,.4,1.3,-1.2,60]},{t0:4.4,t1:7.8,a:[1.8,.5,.3,0,1.7,-1.6,58],b:[1.5,.55,.5,-.2,1.7,-1.6,56]},{t0:7.8,t1:11.2,a:() => [pos.x + 1.3,pos.y + .75,pos.z + 1.2,"S",0,0,52],b:() => [pos.x + 1.0,pos.y + .6,pos.z + 1.0,"S",0,0,50]}],
@@ -3924,7 +3922,7 @@ function shaftDie() {
   say("SYSTEM", "Kritischer Sturzschaden – ARACHNE-8 fällt aus. Neustart am letzten Knotenpunkt.", 4); story.sk += 1; $("hit").style.opacity = 1;
   setTimeout(() => showDeath("Kritischer Sturzschaden – ARACHNE-8 fällt aus.", () => { for (const k in PARTS) PARTS[k] = 1; const cp = shaft.cp; loadNode(cp.id, cp.from); $("hit").style.opacity = 0; $("fade").classList.remove("on"); shaft.busy = false; shaft.dead = false; }, 2800), 800);
 }
-function enterShaft() {
+function enterShaft() { window.loadShow && (loadShow(), loadHideSoon(2200));
   cpSet("shaft"); shaft.on = true; story.lvl = 3; story.ph = "shaft"; sirenOn(false); sirenOn(true); document.body.classList.add("shaft"); spider.visible = true;
   testG.visible = winG.visible = labG.visible = false; for (const o of doorParts) o.visible = false; ventG.visible = ventF.visible = hole.visible = false;
   terms.forEach(T => { T.active = false; T.g.visible = false; }); blocks.length = 0; mann.visible = false; mann.position.set(40,0,0); dust.visible = false; story.dustA = 0; story.emerT = 0; story.lampT = .9; story.flick = 0;
@@ -4214,7 +4212,7 @@ function buildAlley() {
   bx(.5, .12, .5, pipeM, -9.0, .06, AD - .5); bx(.1, .5, .1, pipeM, -9.0, .35, AD - .5);
   scene.fog = new THREE.FogExp2(0x0a0b0f, .036); scene.background = new THREE.Color(0x000000);
 }
-function enterAlley() {
+function enterAlley() { window.loadShow && (loadShow(), loadHideSoon(2200));
   cpSet("alley"); shaft.on = false; shaft.cur = null; while (shaftG.children.length) { const o = shaftG.children.pop(); o.traverse(c => { if (c.geometry) c.geometry.dispose(); }); } fanG = null; sealL = null;
   document.body.classList.remove("shaft"); story.ph = "alley"; story.lvl = 4; sirenOn(false); story.night = 1; story.lampT = 2.2; story.emerT = 0; story.flick = 0; story.dustA = 0; alarmL.intensity = 0; fill.intensity = 0; sirenOn(false);
   testG.visible = winG.visible = labG.visible = false; for (const o of doorParts) o.visible = false; ventG.visible = ventF.visible = hole.visible = false; terms.forEach(T => { T.active = false; T.g.visible = false; }); mann.visible = false; dust.visible = false; for (const s of shards) s.m.visible = false;
@@ -4737,7 +4735,7 @@ function buildFlat() {
 
 /* ---------- Szenen betreten ---------- */
 const mkKlirr = () => makeRobot({body:0x6a7078, acc:0x8a3a2a, glow:0xf2b86a, apron:0x5a4a38, tape:true});
-function enterStreet(kind) {
+function enterStreet(kind) { window.loadShow && (loadShow(), loadHideSoon(2200));
   cpSet(kind === "garage" ? "garage" : kind === "shop" ? "shop" : "street"); exLeaveOld(); buildStreet(); ch2.dark = false; const hw = hwS(), hd = SD/2;
   if (kind === "arrive") { ch2.stage = 3; placeAt(-10.2, hw, .6, 0, 1, 0, 1, 0, 0); startCut(streetCut()); }
   else if (kind === "door") { ch2.stage = 3; placeAt(5.6, hw, -.6, 0, 1, 0, 1, 0, 0); setObj("Geh zum Treppenhaus (Nr. 14) und klettere ganz nach oben – Wohnung links."); toast("Kapitel 2 · Morgen"); }
@@ -4747,11 +4745,11 @@ function enterStreet(kind) {
   else { ch2.stage = 5; placeAt(DOORX - .6, hw, -hd + 1.0, 0, 1, 0, 1, 0, 0); setObj("Geh zu Mases Garage – schräg gegenüber."); }
   setTimeout(() => { $("fade").classList.remove("on"); }, 350);
 }
-function enterStairs() {
+function enterStairs() { window.loadShow && (loadShow(), loadHideSoon(2200));
   cpSet("stairs"); exLeaveOld(); buildStairs(); ch2.stage = gear.knife ? 8 + Math.min(gear.job, 2) : 4; ch2.dark = true; xs.flick = 3.2; placeAt(-.7, hwS(), -STD/2 + 1.0, 0, 1, 0, 0, 0, 1);
   setObj(ch2.stage >= 8 ? jobObj() : "Klettere ganz nach oben – Wohnung links. Dort klingeln."); setTimeout(() => { $("fade").classList.remove("on"); }, 350);
 }
-function loadCheckpoint(k) {
+function loadCheckpoint(k) { window.loadShow && (loadShow(), loadHideSoon(2200));
   ch2.stage = 0; ch2.wait = 0; ch2.dark = false; ch2.noMusic = false; ch2.barOff = false; ch2.locked = false; ch2.focus = false; ch2.knock = 0; xs.on = false; exG.visible = false; mode = mode === "cut" ? "surf" : mode;
   if (k === "shaft") { labRestore(); for (const o of ceilLights) o.visible = false; enterShaft(); }
   else if (k === "alley") enterAlley();
@@ -5553,7 +5551,7 @@ function jobCutShop() {
 /* ======================= Heist: Dach, Schalterhalle, Tresor ======================= */
 const hz = {bots:[], fx:[], piles:[], door:null, doorU:0, doorT:0, doorBl:[], term:null, alert:0, t:0, bl:null, ventP:null, redL:null, fail:0, done:false, shot:null, lootN:0};
 function jobReset() { hz.bots.length = 0; hz.fx.length = 0; hz.piles.length = 0; hz.doorBl.length = 0; hz.door = null; hz.term = null; hz.alert = 0; hz.bl = null; hz.redL = null; hz.shot = null; hz.done = false; try { sirenOn(false); } catch (e) {} }
-function enterHeist(kind) {
+function enterHeist(kind) { window.loadShow && (loadShow(), loadHideSoon(2200));
   cpSet("heist"); exLeaveOld(); xs.cast = true; const hw = hwS();
   if (kind === "roof") { buildRoof(); ch2.stage = 9; placeAt(-7.2, hw, 4.3, 0, 1, 0, 1, 0, 0); setObj("Öffne das Lüftungsgitter am Dachaufbau und dring ins Kreditkontor ein."); }
   else { buildBank(); ch2.stage = 9; placeAt(-6.8, 6 - hw, 4.8, 0, -1, 0, 1, 0, 0); setObj(gear.hacked ? "Räum den Tresor aus (E) und flieh durch den Lüftungsschacht an der Decke." : "Hack die Tresor-Konsole an der Ostwand. Weiche den Wachrobotern aus – oder grill sie mit dem Laser."); }
@@ -6021,7 +6019,7 @@ function obsGateInt() {
   if (xs.scene === "side" && pos.z < -SD/2 + 2.0 && Math.abs(pos.x + 8.4) < 1.3 && pos.y < 3) return {label:"Zurück zur Hauptstraße", act:() => { obsClear(); $("fade").classList.add("on"); setTimeout(() => enterStreet("side"), 650); }};
   return null;
 }
-function enterSide() {
+function enterSide() { window.loadShow && (loadShow(), loadHideSoon(2200));
   cpSet("side"); exLeaveOld(); buildSide(); ch2.dark = false; ch2.stage = 8 + Math.min(gear.job, 2); const hw = hwS(), hd = SD/2;
   placeAt(-8.4, hw, -hd + 1.0, 0, 1, 0, 0, 0, 1); const O = gear.obs; obsTod(O && O.st === 2 ? O.slot : 0); setObj(jobObj());
   toast(T("Parallelstraße")); setTimeout(() => { $("fade").classList.remove("on"); }, 350);

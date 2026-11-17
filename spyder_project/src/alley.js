@@ -181,7 +181,7 @@ function buildAlley() {
   bx(.5, .12, .5, pipeM, -9.0, .06, AD - .5); bx(.1, .5, .1, pipeM, -9.0, .35, AD - .5);
   scene.fog = new THREE.FogExp2(0x0a0b0f, .036); scene.background = new THREE.Color(0x000000);
 }
-function enterAlley() {
+function enterAlley() { window.loadShow && (loadShow(), loadHideSoon(2200));
   cpSet("alley"); shaft.on = false; shaft.cur = null; while (shaftG.children.length) { const o = shaftG.children.pop(); o.traverse(c => { if (c.geometry) c.geometry.dispose(); }); } fanG = null; sealL = null;
   document.body.classList.remove("shaft"); story.ph = "alley"; story.lvl = 4; sirenOn(false); story.night = 1; story.lampT = 2.2; story.emerT = 0; story.flick = 0; story.dustA = 0; alarmL.intensity = 0; fill.intensity = 0; sirenOn(false);
   testG.visible = winG.visible = labG.visible = false; for (const o of doorParts) o.visible = false; ventG.visible = ventF.visible = hole.visible = false; terms.forEach(T => { T.active = false; T.g.visible = false; }); mann.visible = false; dust.visible = false; for (const s of shards) s.m.visible = false;

@@ -124,7 +124,7 @@ function shaftDie() {
   say("SYSTEM", "Kritischer Sturzschaden – ARACHNE-8 fällt aus. Neustart am letzten Knotenpunkt.", 4); story.sk += 1; $("hit").style.opacity = 1;
   setTimeout(() => showDeath("Kritischer Sturzschaden – ARACHNE-8 fällt aus.", () => { for (const k in PARTS) PARTS[k] = 1; const cp = shaft.cp; loadNode(cp.id, cp.from); $("hit").style.opacity = 0; $("fade").classList.remove("on"); shaft.busy = false; shaft.dead = false; }, 2800), 800);
 }
-function enterShaft() {
+function enterShaft() { window.loadShow && (loadShow(), loadHideSoon(2200));
   cpSet("shaft"); shaft.on = true; story.lvl = 3; story.ph = "shaft"; sirenOn(false); sirenOn(true); document.body.classList.add("shaft"); spider.visible = true;
   testG.visible = winG.visible = labG.visible = false; for (const o of doorParts) o.visible = false; ventG.visible = ventF.visible = hole.visible = false;
   terms.forEach(T => { T.active = false; T.g.visible = false; }); blocks.length = 0; mann.visible = false; mann.position.set(40,0,0); dust.visible = false; story.dustA = 0; story.emerT = 0; story.lampT = .9; story.flick = 0;

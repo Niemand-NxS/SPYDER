@@ -256,7 +256,7 @@ function jobCutShop() {
 /* ======================= Heist: Dach, Schalterhalle, Tresor ======================= */
 const hz = {bots:[], fx:[], piles:[], door:null, doorU:0, doorT:0, doorBl:[], term:null, alert:0, t:0, bl:null, ventP:null, redL:null, fail:0, done:false, shot:null, lootN:0};
 function jobReset() { hz.bots.length = 0; hz.fx.length = 0; hz.piles.length = 0; hz.doorBl.length = 0; hz.door = null; hz.term = null; hz.alert = 0; hz.bl = null; hz.redL = null; hz.shot = null; hz.done = false; try { sirenOn(false); } catch (e) {} }
-function enterHeist(kind) {
+function enterHeist(kind) { window.loadShow && (loadShow(), loadHideSoon(2200));
   cpSet("heist"); exLeaveOld(); xs.cast = true; const hw = hwS();
   if (kind === "roof") { buildRoof(); ch2.stage = 9; placeAt(-7.2, hw, 4.3, 0, 1, 0, 1, 0, 0); setObj("Öffne das Lüftungsgitter am Dachaufbau und dring ins Kreditkontor ein."); }
   else { buildBank(); ch2.stage = 9; placeAt(-6.8, 6 - hw, 4.8, 0, -1, 0, 1, 0, 0); setObj(gear.hacked ? "Räum den Tresor aus (E) und flieh durch den Lüftungsschacht an der Decke." : "Hack die Tresor-Konsole an der Ostwand. Weiche den Wachrobotern aus – oder grill sie mit dem Laser."); }
@@ -724,7 +724,7 @@ function obsGateInt() {
   if (xs.scene === "side" && pos.z < -SD/2 + 2.0 && Math.abs(pos.x + 8.4) < 1.3 && pos.y < 3) return {label:"Zurück zur Hauptstraße", act:() => { obsClear(); $("fade").classList.add("on"); setTimeout(() => enterStreet("side"), 650); }};
   return null;
 }
-function enterSide() {
+function enterSide() { window.loadShow && (loadShow(), loadHideSoon(2200));
   cpSet("side"); exLeaveOld(); buildSide(); ch2.dark = false; ch2.stage = 8 + Math.min(gear.job, 2); const hw = hwS(), hd = SD/2;
   placeAt(-8.4, hw, -hd + 1.0, 0, 1, 0, 0, 0, 1); const O = gear.obs; obsTod(O && O.st === 2 ? O.slot : 0); setObj(jobObj());
   toast(T("Parallelstraße")); setTimeout(() => { $("fade").classList.remove("on"); }, 350);

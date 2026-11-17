@@ -513,6 +513,4 @@ function padTick(dt) {
   const el = document.createElement("div"); el.id = "loadI"; el.innerHTML = '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="14" rx="3.2" ry="4"/><circle cx="12" cy="8" r="2"/><path d="M9 11 4 8 2 4M9 14 3 14 1 18M9.5 17 5 21M15 11 20 8 22 4M15 14 21 14 23 18M14.5 17 19 21"/></svg><span></span>'; document.body.appendChild(el);
   let lt = 0; window.loadShow = () => { el.querySelector("span").textContent = T("Lädt …"); el.classList.add("on"); clearTimeout(lt); lt = setTimeout(() => el.classList.remove("on"), 4000); };
   window.loadHideSoon = ms => { clearTimeout(lt); lt = setTimeout(() => el.classList.remove("on"), ms || 1500); };
-  const wrap = f => { const o = f; return function () { loadShow(); try { return o.apply(this, arguments); } finally { loadHideSoon(1600); } }; };
-  try { enterShaft = wrap(enterShaft); enterAlley = wrap(enterAlley); enterStreet = wrap(enterStreet); enterStairs = wrap(enterStairs); enterSide = wrap(enterSide); enterLab = wrap(enterLab); enterHeist = wrap(enterHeist); loadCheckpoint = wrap(loadCheckpoint); } catch (e) { console.warn("loadI", e); }
 }

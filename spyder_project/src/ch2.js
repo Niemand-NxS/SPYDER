@@ -316,7 +316,7 @@ function buildFlat() {
 
 /* ---------- Szenen betreten ---------- */
 const mkKlirr = () => makeRobot({body:0x6a7078, acc:0x8a3a2a, glow:0xf2b86a, apron:0x5a4a38, tape:true});
-function enterStreet(kind) {
+function enterStreet(kind) { window.loadShow && (loadShow(), loadHideSoon(2200));
   cpSet(kind === "garage" ? "garage" : kind === "shop" ? "shop" : "street"); exLeaveOld(); buildStreet(); ch2.dark = false; const hw = hwS(), hd = SD/2;
   if (kind === "arrive") { ch2.stage = 3; placeAt(-10.2, hw, .6, 0, 1, 0, 1, 0, 0); startCut(streetCut()); }
   else if (kind === "door") { ch2.stage = 3; placeAt(5.6, hw, -.6, 0, 1, 0, 1, 0, 0); setObj("Geh zum Treppenhaus (Nr. 14) und klettere ganz nach oben – Wohnung links."); toast("Kapitel 2 · Morgen"); }
@@ -326,11 +326,11 @@ function enterStreet(kind) {
   else { ch2.stage = 5; placeAt(DOORX - .6, hw, -hd + 1.0, 0, 1, 0, 1, 0, 0); setObj("Geh zu Mases Garage – schräg gegenüber."); }
   setTimeout(() => { $("fade").classList.remove("on"); }, 350);
 }
-function enterStairs() {
+function enterStairs() { window.loadShow && (loadShow(), loadHideSoon(2200));
   cpSet("stairs"); exLeaveOld(); buildStairs(); ch2.stage = gear.knife ? 8 + Math.min(gear.job, 2) : 4; ch2.dark = true; xs.flick = 3.2; placeAt(-.7, hwS(), -STD/2 + 1.0, 0, 1, 0, 0, 0, 1);
   setObj(ch2.stage >= 8 ? jobObj() : "Klettere ganz nach oben – Wohnung links. Dort klingeln."); setTimeout(() => { $("fade").classList.remove("on"); }, 350);
 }
-function loadCheckpoint(k) {
+function loadCheckpoint(k) { window.loadShow && (loadShow(), loadHideSoon(2200));
   ch2.stage = 0; ch2.wait = 0; ch2.dark = false; ch2.noMusic = false; ch2.barOff = false; ch2.locked = false; ch2.focus = false; ch2.knock = 0; xs.on = false; exG.visible = false; mode = mode === "cut" ? "surf" : mode;
   if (k === "shaft") { labRestore(); for (const o of ceilLights) o.visible = false; enterShaft(); }
   else if (k === "alley") enterAlley();
