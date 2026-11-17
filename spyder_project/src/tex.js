@@ -58,7 +58,7 @@ function spiderMats() {
   const need = ["plaC", "mtlC"]; if (need.some(k => !TIMG[k].complete || !TIMG[k].naturalWidth)) return;
   const P = (m, k, rx, ry) => { m.map = imgTex(k + "C", rx, ry); m.normalMap = imgTex(k + "N", rx, ry); m.roughnessMap = imgTex(k + "R", rx, ry); m.normalScale.set(.8, .8); m.needsUpdate = true; };
   P(matLight, "pla", 1.5, 1.5); matLight.color.setHex(0xffffff); matLight.emissive.setHex(0x70757e); matLight.roughness = 1; matLight.metalness = .1;
-  P(matBrass, "mtl", 1.5, 1.5); matBrass.color.setHex(0x4fa9a3); matBrass.roughness = 1; matBrass.metalness = .2; matBrass.emissive.setHex(0x0c2a28);
+  matBrass.map = null; matBrass.normalMap = null; matBrass.roughnessMap = null; matBrass.color.setHex(0x4fa9a3); matBrass.roughness = .55; matBrass.metalness = .25; matBrass.emissive.setHex(0x000000); matBrass.needsUpdate = true; // reine Farbe, keine Textur
 }
 for (const k of ["plaC", "mtlC"]) { if (TIMG[k].complete) setTimeout(spiderMats, 0); else TIMG[k].addEventListener("load", spiderMats); }
 function fenceMat(rx, ry) { return new THREE.MeshStandardMaterial({map:imgTex("fncC", rx, ry), alphaMap:imgTex("fncA", rx, ry), normalMap:imgTex("fncN", rx, ry), transparent:true, alphaTest:.5, side:THREE.DoubleSide, roughness:.6, metalness:.5, color:0xb8c0d0}); }
