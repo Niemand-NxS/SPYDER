@@ -186,15 +186,33 @@ function updateAttack(dt) {
 /* ======================= Kamera / Fotos ======================= */
 let shot = false;
 function takePhoto() { if (shot || !fp) return; shot = true; $("flash").style.opacity = .85; setTimeout(() => $("flash").style.opacity = 0, 90); if (ac) { beep(1800,.03,0,.05); beep(900,.05,.04,.05); } try { obsShot(); } catch (e) {} }
+const photoList = []; let phIdx = 0, phWas = false;
+function photoPile() {
+  const gal = $("gallery"); gal.innerHTML = ""; const n = photoList.length; gal.classList.toggle("has", n > 0); if (!n) return;
+  const sh = photoList.slice(-6);
+  sh.forEach((p, i) => { const k = sh.length - 1 - i, im = document.createElement("img"); im.src = p.url; im.alt = ""; im.style.setProperty("--r", (((p.n*47) % 11) - 5) + "deg"); im.style.setProperty("--x", (k*9) + "px"); im.style.setProperty("--y", (-k*5) + "px"); im.style.zIndex = i; gal.appendChild(im); });
+  if (n > 1) { const b = document.createElement("b"); b.textContent = n; gal.appendChild(b); }
+}
+function phShow() {
+  const p = photoList[phIdx]; $("phImg").src = p.url; $("phCap").textContent = "SPYDER-CAM · " + T("Foto") + " " + String(p.n).padStart(3, "0") + "  ·  " + (phIdx + 1) + " / " + photoList.length;
+  $("phPrev").disabled = phIdx <= 0; $("phNext").disabled = phIdx >= photoList.length - 1; $("phDl").textContent = "⬇ " + T("Herunterladen"); $("phDel").textContent = "🗑 " + T("Löschen"); $("phX").textContent = T("Schließen");
+}
+function phOpen(i) { if (!photoList.length) return; const v = $("phView"); if (!v.classList.contains("show")) { phWas = paused; paused = true; unlockPtr(); } phIdx = clamp(i, 0, photoList.length - 1); phShow(); v.classList.add("show"); }
+function phClose() { const v = $("phView"); if (!v.classList.contains("show")) return; v.classList.remove("show"); if (!phWas) paused = false; try { lock(); } catch (e) {} }
+function phDel() { photoList.splice(phIdx, 1); photoPile(); if (!photoList.length) phClose(); else { phIdx = Math.min(phIdx, photoList.length - 1); phShow(); } }
+function phDl() { const p = photoList[phIdx]; if (!p) return; const a = document.createElement("a"); a.href = p.url; a.download = "spyder-" + p.n + ".jpg"; document.body.appendChild(a); a.click(); a.remove(); }
+$("gallery").addEventListener("click", () => phOpen(photoList.length - 1));
+$("phPrev").onclick = () => phOpen(phIdx - 1); $("phNext").onclick = () => phOpen(phIdx + 1); $("phDl").onclick = phDl; $("phDel").onclick = phDel; $("phX").onclick = phClose;
+$("phView").addEventListener("click", e => { if (e.target === $("phView")) phClose(); });
+addEventListener("keydown", e => { if (!$("phView").classList.contains("show")) return; if (e.key === "Escape" || e.key === "Backspace") phClose(); else if (e.key === "ArrowLeft") phOpen(phIdx - 1); else if (e.key === "ArrowRight") phOpen(phIdx + 1); else if (e.key === "Delete") phDel(); else if (e.key === "Enter" || e.key === "d") phDl(); e.preventDefault(); e.stopImmediatePropagation(); }, true);
 function savePhoto() {
-  const src = renderer.domElement, w = 640, h = Math.round(640*src.height/src.width);
+  const src = renderer.domElement, w = Math.min(1280, src.width), h = Math.round(w*src.height/src.width), s = w/640;
   const c = document.createElement("canvas"); c.width = w; c.height = h; const x = c.getContext("2d"); x.drawImage(src, 0, 0, w, h);
-  x.strokeStyle = "rgba(232,230,223,.85)"; x.lineWidth = 2;
-  [[16,16,1,1],[w-16,16,-1,1],[16,h-16,1,-1],[w-16,h-16,-1,-1]].forEach(([px,py,sx,sy]) => { x.beginPath(); x.moveTo(px,py+sy*26); x.lineTo(px,py); x.lineTo(px+sx*26,py); x.stroke(); });
-  x.fillStyle = "rgba(240,245,255,.92)"; x.font = "12px ui-monospace,Menlo,monospace";
-  x.fillText("SPYDER-CAM 01 · " + new Date().toLocaleTimeString("de-DE") + " · ZOOM " + zoom.toFixed(1) + "x · Nr. " + String(++photos).padStart(3,"0"), 24, h-24);
-  const url = c.toDataURL("image/jpeg", .85), a = document.createElement("a"); a.href = url; a.download = "spyder-" + photos + ".jpg";
-  const im = document.createElement("img"); im.src = url; a.appendChild(im); const gal = $("gallery"); gal.prepend(a); while (gal.children.length > 5) gal.lastChild.remove();
+  x.strokeStyle = "rgba(232,230,223,.85)"; x.lineWidth = 2*s; const m = 16*s, l = 26*s;
+  [[m,m,1,1],[w-m,m,-1,1],[m,h-m,1,-1],[w-m,h-m,-1,-1]].forEach(([px,py,sx,sy]) => { x.beginPath(); x.moveTo(px,py+sy*l); x.lineTo(px,py); x.lineTo(px+sx*l,py); x.stroke(); });
+  x.fillStyle = "rgba(240,245,255,.92)"; x.font = (12*s) + "px ui-monospace,Menlo,monospace";
+  x.fillText("SPYDER-CAM 01 · " + new Date().toLocaleTimeString("de-DE") + " · ZOOM " + zoom.toFixed(1) + "x · Nr. " + String(++photos).padStart(3,"0"), 24*s, h - 24*s);
+  photoList.push({url:c.toDataURL("image/jpeg", .88), n:photos}); while (photoList.length > 30) photoList.shift(); photoPile();
   $("hFoto").textContent = photos; $("fpN").textContent = photos; shot = false;
 }
 function setFP(on) {

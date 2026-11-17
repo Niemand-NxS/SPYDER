@@ -151,8 +151,20 @@
   #enFill{background:linear-gradient(90deg,#a85a1a,#f08a2c)}
   #toast{position:fixed;left:50%;top:22px;transform:translateX(-50%);padding:8px 16px;background:rgba(12,24,52,.88);color:#f2f6ff;
          border-radius:5px;border-left:3px solid #f08a2c;font-size:14px;pointer-events:none;opacity:0;transition:opacity .3s}
-  #gallery{position:fixed;left:14px;bottom:14px;display:flex;gap:6px;z-index:5}
-  #gallery img{height:54px;border:2px solid #f2f6ff;border-radius:3px;display:block}
+  #gallery{position:fixed;left:18px;bottom:18px;width:150px;height:96px;z-index:5;cursor:pointer;display:none}
+  #gallery.has{display:block}
+  #gallery img{position:absolute;left:0;bottom:0;height:62px;border:2px solid #f2f6ff;border-radius:3px;box-shadow:0 3px 10px rgba(0,0,0,.5);transform:translate(var(--x),var(--y)) rotate(var(--r));transition:transform .25s ease;background:#10182a}
+  #gallery:hover img{transform:translate(calc(var(--x)*2.2),calc(var(--y)*2)) rotate(calc(var(--r)*1.8))}
+  #gallery b{position:absolute;left:-8px;top:-2px;z-index:20;min-width:20px;padding:1px 6px;border-radius:10px;background:#e0701e;color:#fff;font:700 11px ui-monospace,Menlo,monospace;text-align:center}
+  #phView{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:rgba(6,10,22,.82);backdrop-filter:blur(8px);padding:16px}
+  #phView.show{display:flex}
+  #phImg{max-width:min(92vw,1100px);max-height:72vh;border:2px solid #f2f6ff;border-radius:4px;box-shadow:0 10px 40px rgba(0,0,0,.6);background:#10182a}
+  #phCap{color:#cfd8ee;font:12px ui-monospace,Menlo,monospace;letter-spacing:.08em}
+  #phBar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  #phBar button{font:600 13px system-ui,sans-serif;padding:9px 16px;border-radius:9px;border:1px solid rgba(255,255,255,.25);background:rgba(20,30,56,.75);color:#f2f6ff;cursor:pointer}
+  #phBar button:hover:not(:disabled){background:rgba(224,112,30,.85);border-color:#e0701e}
+  #phBar button:disabled{opacity:.35;cursor:default}
+  #phBar button.del:hover:not(:disabled){background:#a83232;border-color:#d05050}
   #flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .28s}
   #fp{position:fixed;inset:0;pointer-events:none;display:none;font-family:ui-monospace,Menlo,Consolas,monospace;color:#f2f6ff;font-size:13px}
   #vig{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 55%,rgba(6,12,30,.55) 100%)}
@@ -323,6 +335,7 @@
   <div id="fpB">[ENTER] FOTO &nbsp;·&nbsp; [RAD] ZOOM &nbsp;·&nbsp; [A/D] DREHEN &nbsp;·&nbsp; [V] ZURÜCK</div>
 </div>
 <div id="gallery"></div>
+<div id="phView"><img id="phImg" alt=""><div id="phCap"></div><div id="phBar"><button id="phPrev">◀</button><button id="phDl"></button><button id="phDel" class="del"></button><button id="phNext">▶</button><button id="phX"></button></div></div>
 <div id="flash"></div>
 <div id="camBtn" title="Kamera wechseln (V)"><svg viewBox="0 0 24 24"><path d="M3 8h4l2-3h6l2 3h4v11H3z"/><circle cx="12" cy="13" r="3.6"/></svg></div>
 <div id="mapBtn" title="Karte (M)" style="display:none"><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg></div>
@@ -1194,6 +1207,7 @@ const EN = {
   "Mhm… noch… einen…":"Mhm… another… one…","Hörst du das? Die Rohre. KRONOS atmet.":"Do you hear that? The pipes. KRONOS is breathing.","Nicht… zerlegen…":"Don't… take apart…",
   "Er träumt oft davon. Ich frage nicht nach.":"He dreams of it often. I don't ask.","Du bist ein seltsamer Gast. Aber ich habe schon seltsamere bedient.":"You're a strange guest. But I've served stranger ones.",
   "Mit den Beinen kannst du ja schlecht bestellen.":"You can hardly order with those legs.","Wenn du Ärger hast, bleib hier. Hier sucht keiner.":"If you're in trouble, stay here. Nobody looks here.","Rost… überall…":"Rust… everywhere…",
+  "Foto":"Photo","Herunterladen":"Download","Löschen":"Delete","Schließen":"Close",
   "Ich sag dir … die Sonne … die kommt gar nicht.":"I'm telling you … the sun … it's not coming at all.",
   "Doch … kommt. Is' nur … spät dran.":"It is … coming. It's just … running late.",
   "Dann … prost auf die Sonne.":"Then … cheers to the sun.",
@@ -2268,15 +2282,33 @@ function updateAttack(dt) {
 /* ======================= Kamera / Fotos ======================= */
 let shot = false;
 function takePhoto() { if (shot || !fp) return; shot = true; $("flash").style.opacity = .85; setTimeout(() => $("flash").style.opacity = 0, 90); if (ac) { beep(1800,.03,0,.05); beep(900,.05,.04,.05); } try { obsShot(); } catch (e) {} }
+const photoList = []; let phIdx = 0, phWas = false;
+function photoPile() {
+  const gal = $("gallery"); gal.innerHTML = ""; const n = photoList.length; gal.classList.toggle("has", n > 0); if (!n) return;
+  const sh = photoList.slice(-6);
+  sh.forEach((p, i) => { const k = sh.length - 1 - i, im = document.createElement("img"); im.src = p.url; im.alt = ""; im.style.setProperty("--r", (((p.n*47) % 11) - 5) + "deg"); im.style.setProperty("--x", (k*9) + "px"); im.style.setProperty("--y", (-k*5) + "px"); im.style.zIndex = i; gal.appendChild(im); });
+  if (n > 1) { const b = document.createElement("b"); b.textContent = n; gal.appendChild(b); }
+}
+function phShow() {
+  const p = photoList[phIdx]; $("phImg").src = p.url; $("phCap").textContent = "SPYDER-CAM · " + T("Foto") + " " + String(p.n).padStart(3, "0") + "  ·  " + (phIdx + 1) + " / " + photoList.length;
+  $("phPrev").disabled = phIdx <= 0; $("phNext").disabled = phIdx >= photoList.length - 1; $("phDl").textContent = "⬇ " + T("Herunterladen"); $("phDel").textContent = "🗑 " + T("Löschen"); $("phX").textContent = T("Schließen");
+}
+function phOpen(i) { if (!photoList.length) return; const v = $("phView"); if (!v.classList.contains("show")) { phWas = paused; paused = true; unlockPtr(); } phIdx = clamp(i, 0, photoList.length - 1); phShow(); v.classList.add("show"); }
+function phClose() { const v = $("phView"); if (!v.classList.contains("show")) return; v.classList.remove("show"); if (!phWas) paused = false; try { lock(); } catch (e) {} }
+function phDel() { photoList.splice(phIdx, 1); photoPile(); if (!photoList.length) phClose(); else { phIdx = Math.min(phIdx, photoList.length - 1); phShow(); } }
+function phDl() { const p = photoList[phIdx]; if (!p) return; const a = document.createElement("a"); a.href = p.url; a.download = "spyder-" + p.n + ".jpg"; document.body.appendChild(a); a.click(); a.remove(); }
+$("gallery").addEventListener("click", () => phOpen(photoList.length - 1));
+$("phPrev").onclick = () => phOpen(phIdx - 1); $("phNext").onclick = () => phOpen(phIdx + 1); $("phDl").onclick = phDl; $("phDel").onclick = phDel; $("phX").onclick = phClose;
+$("phView").addEventListener("click", e => { if (e.target === $("phView")) phClose(); });
+addEventListener("keydown", e => { if (!$("phView").classList.contains("show")) return; if (e.key === "Escape" || e.key === "Backspace") phClose(); else if (e.key === "ArrowLeft") phOpen(phIdx - 1); else if (e.key === "ArrowRight") phOpen(phIdx + 1); else if (e.key === "Delete") phDel(); else if (e.key === "Enter" || e.key === "d") phDl(); e.preventDefault(); e.stopImmediatePropagation(); }, true);
 function savePhoto() {
-  const src = renderer.domElement, w = 640, h = Math.round(640*src.height/src.width);
+  const src = renderer.domElement, w = Math.min(1280, src.width), h = Math.round(w*src.height/src.width), s = w/640;
   const c = document.createElement("canvas"); c.width = w; c.height = h; const x = c.getContext("2d"); x.drawImage(src, 0, 0, w, h);
-  x.strokeStyle = "rgba(232,230,223,.85)"; x.lineWidth = 2;
-  [[16,16,1,1],[w-16,16,-1,1],[16,h-16,1,-1],[w-16,h-16,-1,-1]].forEach(([px,py,sx,sy]) => { x.beginPath(); x.moveTo(px,py+sy*26); x.lineTo(px,py); x.lineTo(px+sx*26,py); x.stroke(); });
-  x.fillStyle = "rgba(240,245,255,.92)"; x.font = "12px ui-monospace,Menlo,monospace";
-  x.fillText("SPYDER-CAM 01 · " + new Date().toLocaleTimeString("de-DE") + " · ZOOM " + zoom.toFixed(1) + "x · Nr. " + String(++photos).padStart(3,"0"), 24, h-24);
-  const url = c.toDataURL("image/jpeg", .85), a = document.createElement("a"); a.href = url; a.download = "spyder-" + photos + ".jpg";
-  const im = document.createElement("img"); im.src = url; a.appendChild(im); const gal = $("gallery"); gal.prepend(a); while (gal.children.length > 5) gal.lastChild.remove();
+  x.strokeStyle = "rgba(232,230,223,.85)"; x.lineWidth = 2*s; const m = 16*s, l = 26*s;
+  [[m,m,1,1],[w-m,m,-1,1],[m,h-m,1,-1],[w-m,h-m,-1,-1]].forEach(([px,py,sx,sy]) => { x.beginPath(); x.moveTo(px,py+sy*l); x.lineTo(px,py); x.lineTo(px+sx*l,py); x.stroke(); });
+  x.fillStyle = "rgba(240,245,255,.92)"; x.font = (12*s) + "px ui-monospace,Menlo,monospace";
+  x.fillText("SPYDER-CAM 01 · " + new Date().toLocaleTimeString("de-DE") + " · ZOOM " + zoom.toFixed(1) + "x · Nr. " + String(++photos).padStart(3,"0"), 24*s, h - 24*s);
+  photoList.push({url:c.toDataURL("image/jpeg", .88), n:photos}); while (photoList.length > 30) photoList.shift(); photoPile();
   $("hFoto").textContent = photos; $("fpN").textContent = photos; shot = false;
 }
 function setFP(on) {
@@ -2716,13 +2748,13 @@ const OPTD = [   // [Schlüssel, Bezeichnung, min, max, Teiler, Standard, Format
   ["menuDof","Tiefenschärfe im Startmenü",0,0,0,true,null,"GRAFIK","Der Hintergrund des Startmenüs ist weich fokussiert, mit starker Farbsaum-Verzerrung (nur WebGL, Kantenglättung aus)"],
   ["nearBlur","Unschärfe bei Nähe zur Kamera",0,0,0,true,null,"GRAFIK","Dinge direkt vor der Kamera werden unscharf (nur WebGL; Kantenglättung aus, solange etwas sehr nah ist)"],
   ["cine","Film-Look in Cutscenes",0,0,0,true,null,"GRAFIK","Tiefenschärfe und Filmkorn (nur WebGL; Kantenglättung aus während der Cutscene)"],
-  ["mblur","Bewegungsunschärfe",0,100,100,0,v => v ? Math.round(v*100) + "%" : "Aus","GRAFIK","Verwischt schnelle Kamerabewegungen (nur WebGL, deaktiviert Kantenglättung)"],
-  ["ao","Ambient Occlusion",0,100,100,0,v => v ? Math.round(v*100) + "%" : "Aus","GRAFIK","Dunkelt Ecken, Spalten und Kontaktstellen ab, für mehr Tiefe (nur WebGL, deaktiviert Kantenglättung, kostet Leistung)"],
-  ["vfog","Volumetrischer Nebel",0,100,100,.4,v => v ? Math.round(v*100) + "%" : "Aus","GRAFIK","Dichter, wabernder Nebel mit Streulicht der Lampen; im Schatten dunkel. Nur in Gasse, Straße, Treppenhaus und auf dem Dach (nur WebGL, deaktiviert Kantenglättung)"],
+  ["mblur","Bewegungsunschärfe",0,100,100,.05,v => v ? Math.round(v*100) + "%" : "Aus","GRAFIK","Verwischt schnelle Kamerabewegungen (nur WebGL, deaktiviert Kantenglättung)"],
+  ["ao","Ambient Occlusion",0,100,100,.5,v => v ? Math.round(v*100) + "%" : "Aus","GRAFIK","Dunkelt Ecken, Spalten und Kontaktstellen ab, für mehr Tiefe (nur WebGL, deaktiviert Kantenglättung, kostet Leistung)"],
+  ["vfog","Volumetrischer Nebel",0,100,100,0,v => v ? Math.round(v*100) + "%" : "Aus","GRAFIK","Dichter, wabernder Nebel mit Streulicht der Lampen; im Schatten dunkel. Nur in Gasse, Straße, Treppenhaus und auf dem Dach (nur WebGL, deaktiviert Kantenglättung)"],
   ["gpu","WebGPU (experimentell)",0,0,0,false,null,"GRAFIK","Gilt nach Neuladen. Bei Problemen wechselt das Spiel automatisch zurück auf WebGL"]];
 const opt = {}; OPTD.forEach(d => opt[d[0]] = d[5]);
-try { const o = JSON.parse(localStorage.getItem("spyderOpt") || "{}"); OPTD.forEach(d => { const k = d[0]; if (typeof d[5] === "boolean") { if (typeof o[k] === "boolean") opt[k] = o[k]; } else if (typeof o[k] === "number") opt[k] = clamp(o[k], d[2]/d[4], d[3]/d[4]); }); } catch (e) {}
-function saveOpt() { try { localStorage.setItem("spyderOpt", JSON.stringify(opt)); } catch (e) {} }
+try { const o = JSON.parse(localStorage.getItem("spyderOpt") || "{}"); OPTD.forEach(d => { const k = d[0]; if (typeof d[5] === "boolean") { if (typeof o[k] === "boolean") opt[k] = o[k]; } else if (typeof o[k] === "number") opt[k] = clamp(o[k], d[2]/d[4], d[3]/d[4]); });   if (!(o.optV >= 2)) { opt.vfog = 0; opt.ao = .5; opt.mblur = .05; } } catch (e) {}
+function saveOpt() { try { localStorage.setItem("spyderOpt", JSON.stringify(Object.assign({optV:2}, opt))); } catch (e) {} }
 let fpsN = 0, fpsT = performance.now();
 (function fpsLoop() { fpsN++; const n = performance.now(); if (n - fpsT > 500) { if (opt.fps) $("fpsC").textContent = Math.round(fpsN*1000/(n - fpsT)) + " FPS"; fpsN = 0; fpsT = n; } requestAnimationFrame(fpsLoop); })();
 function applyOpt() {

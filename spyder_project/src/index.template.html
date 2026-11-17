@@ -151,8 +151,20 @@
   #enFill{background:linear-gradient(90deg,#a85a1a,#f08a2c)}
   #toast{position:fixed;left:50%;top:22px;transform:translateX(-50%);padding:8px 16px;background:rgba(12,24,52,.88);color:#f2f6ff;
          border-radius:5px;border-left:3px solid #f08a2c;font-size:14px;pointer-events:none;opacity:0;transition:opacity .3s}
-  #gallery{position:fixed;left:14px;bottom:14px;display:flex;gap:6px;z-index:5}
-  #gallery img{height:54px;border:2px solid #f2f6ff;border-radius:3px;display:block}
+  #gallery{position:fixed;left:18px;bottom:18px;width:150px;height:96px;z-index:5;cursor:pointer;display:none}
+  #gallery.has{display:block}
+  #gallery img{position:absolute;left:0;bottom:0;height:62px;border:2px solid #f2f6ff;border-radius:3px;box-shadow:0 3px 10px rgba(0,0,0,.5);transform:translate(var(--x),var(--y)) rotate(var(--r));transition:transform .25s ease;background:#10182a}
+  #gallery:hover img{transform:translate(calc(var(--x)*2.2),calc(var(--y)*2)) rotate(calc(var(--r)*1.8))}
+  #gallery b{position:absolute;left:-8px;top:-2px;z-index:20;min-width:20px;padding:1px 6px;border-radius:10px;background:#e0701e;color:#fff;font:700 11px ui-monospace,Menlo,monospace;text-align:center}
+  #phView{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:rgba(6,10,22,.82);backdrop-filter:blur(8px);padding:16px}
+  #phView.show{display:flex}
+  #phImg{max-width:min(92vw,1100px);max-height:72vh;border:2px solid #f2f6ff;border-radius:4px;box-shadow:0 10px 40px rgba(0,0,0,.6);background:#10182a}
+  #phCap{color:#cfd8ee;font:12px ui-monospace,Menlo,monospace;letter-spacing:.08em}
+  #phBar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  #phBar button{font:600 13px system-ui,sans-serif;padding:9px 16px;border-radius:9px;border:1px solid rgba(255,255,255,.25);background:rgba(20,30,56,.75);color:#f2f6ff;cursor:pointer}
+  #phBar button:hover:not(:disabled){background:rgba(224,112,30,.85);border-color:#e0701e}
+  #phBar button:disabled{opacity:.35;cursor:default}
+  #phBar button.del:hover:not(:disabled){background:#a83232;border-color:#d05050}
   #flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .28s}
   #fp{position:fixed;inset:0;pointer-events:none;display:none;font-family:ui-monospace,Menlo,Consolas,monospace;color:#f2f6ff;font-size:13px}
   #vig{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 55%,rgba(6,12,30,.55) 100%)}
@@ -323,6 +335,7 @@
   <div id="fpB">[ENTER] FOTO &nbsp;·&nbsp; [RAD] ZOOM &nbsp;·&nbsp; [A/D] DREHEN &nbsp;·&nbsp; [V] ZURÜCK</div>
 </div>
 <div id="gallery"></div>
+<div id="phView"><img id="phImg" alt=""><div id="phCap"></div><div id="phBar"><button id="phPrev">◀</button><button id="phDl"></button><button id="phDel" class="del"></button><button id="phNext">▶</button><button id="phX"></button></div></div>
 <div id="flash"></div>
 <div id="camBtn" title="Kamera wechseln (V)"><svg viewBox="0 0 24 24"><path d="M3 8h4l2-3h6l2 3h4v11H3z"/><circle cx="12" cy="13" r="3.6"/></svg></div>
 <div id="mapBtn" title="Karte (M)" style="display:none"><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg></div>
