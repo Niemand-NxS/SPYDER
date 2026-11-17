@@ -460,15 +460,18 @@ const tut = {on:false, i:0, t:0, ok:0, x:0, z:0, jumped:false, look:0};
 const tutEl = document.createElement("div"); tutEl.id = "tut"; tutEl.innerHTML = '<i></i><span></span>'; document.body.appendChild(tutEl);
 { const st = document.createElement("style"); st.textContent = `#tut{position:fixed;left:50%;top:22%;transform:translate(-50%,-8px);z-index:21;display:flex;align-items:center;gap:12px;padding:10px 20px 10px 12px;border-radius:999px;background:rgba(27,30,36,.38);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;font-size:14px;letter-spacing:.06em;opacity:0;pointer-events:none;transition:opacity .4s,transform .4s;box-shadow:0 4px 18px rgba(0,0,0,.2)}#tut.on{opacity:1;transform:translate(-50%,0)}
 #tut i{font-style:normal;font-size:11px;font-weight:700;min-width:26px;height:26px;padding:0 6px;box-sizing:border-box;border-radius:7px;display:flex;align-items:center;justify-content:center;background:#4fa9a3;color:#1d2026;letter-spacing:.04em}#tut.done i{background:#5fd38d}#tut span small{display:block;font-size:10px;letter-spacing:.24em;color:rgba(255,255,255,.5);margin-bottom:1px}`; document.head.appendChild(st); }
-function tutStart() { tut.on = true; tut.i = 0; tut.t = 0; tut.ok = 0; tut.x = pos.x; tut.z = pos.z; tut.jumped = false; tut.look = 0; }
+function tutStart() { tut.on = true; tut.i = 0; tut.t = 0; tut.ok = 0; tut.x = pos.x; tut.z = pos.z; tut.jumped = false; tut.look = 0; tut.fpT = 0; }
 function tutSteps() { const m = window.inputMode || "keyboard", tch = m === "touch", pad = m === "pad";
   return [{k:tch ? "◐" : pad ? "L" : "WASD", h:"Laufen", t:tch ? "Joystick links bewegen" : pad ? "Linker Stick" : "Bewege dich mit W A S D", c:() => Math.hypot(pos.x - tut.x, pos.z - tut.z) > 1.6},
     {k:tch ? "▲" : pad ? "A" : "␣", h:"Springen", t:tch ? "Tippe auf SPRUNG" : pad ? "A-Knopf zum Springen" : "Leertaste zum Springen", c:() => tut.jumped},
     {k:"↗", h:"Klettern", t:"Lauf gegen eine Wand – ARACHNE-8 haftet und klettert", c:() => nB.y < .5},
-    {k:"⬆", h:"Decke", t:"Weiter nach oben – auch die Decke trägt dich", c:() => nB.y < -.6}]; }
+    {k:"⬆", h:"Decke", t:"Weiter nach oben – auch die Decke trägt dich", c:() => nB.y < -.6},
+    {k:tch ? "◉" : pad ? "Y" : "V", h:"Ich-Perspektive", t:tch ? "Kamera-Knopf oben: Blick durch Arachs Augen" : pad ? "Y-Knopf: Blick durch Arachs Augen" : "Drücke V – du siehst durch Arachs Augen", c:() => fp},
+    {k:"◎", h:"In der Ich-Perspektive", t:tch ? "Wische zum Umsehen, links bewegen; Tippen macht ein Foto" : pad ? "Rechter Stick: Kopf drehen, linker Stick: laufen; RT macht ein Foto" : "A/D drehen den Körper, die Maus den Kopf, W/S laufen. Klick oder Enter macht ein Foto", c:() => fp && tut.fpT > 4},
+    {k:tch ? "◉" : pad ? "Y" : "V", h:"Zurück", t:"Wechsle mit der gleichen Taste wieder in die 3. Person", c:() => !fp}]; }
 function tutTick(dt) {
   if (!tut.on || opt.tut === false || xs.on) { tutEl.classList.remove("on"); return; } if (mode === "cut" || story.ph !== "test") { tutEl.classList.remove("on"); return; }
-  if (keys.Space || keys.Jump) tut.jumped = true; const S = tutSteps(), s = S[tut.i];
+  if (keys.Space || keys.Jump) tut.jumped = true; if (fp) tut.fpT = (tut.fpT || 0) + dt; const S = tutSteps(), s = S[tut.i];
   if (!s) { tut.on = false; tutEl.classList.remove("on"); return; }
   tut.t += dt; if (tut.t < 2.2) return;
   const sp = tutEl.querySelector("span"); tutEl.querySelector("i").textContent = s.k; sp.innerHTML = "<small></small>"; sp.querySelector("small").textContent = T(s.h).toUpperCase(); sp.appendChild(document.createTextNode(T(s.t)));

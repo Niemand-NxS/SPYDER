@@ -674,6 +674,7 @@ function obsSusp(r, dt) {
   r.susp = clamp(r.susp + (rate > 0 ? rate*dt : -.3*dt), 0, 1);
 }
 function obsTick(dt) {
+  obsGuide(dt);
   const O = gear.obs; if (!O || !O.st) { obsHud.classList.remove("on"); return; }
   obsGateMain(); if (xs.scene !== "side") { if (obs.run) obsClear(); obsHud.classList.remove("on"); return; }
   if (mode === "cut" || mode === "menu") return;
@@ -797,4 +798,27 @@ function buildSide() {
   exBox(.3, 3.0, 3.2, mStd(0x4a4e58, .5, .6), hw - .2, 1.5, hd - 1.8); exPl(2.4, .5, sign("PRIVAT · NICHT PARKEN", "#78c4bd", 2.4, .5, "#1c1816"), hw - .06, 3.4, hd - 1.8, -Math.PI/2);
   scene.fog = new THREE.FogExp2(0xc8a690, .03); scene.background = new THREE.Color(0xc8a690);
   Object.assign(xs, {scene:"side", env:"alley", dark:false, hI:1.1, hC:0xffe2c4, hG:0x3a3030, bell:null, drunkT:99, dl:0, drunk:null});
+}
+
+/* ---------- Beschattung: Schritt-für-Schritt-Anleitung ---------- */
+const obsGd = document.createElement("div"); obsGd.id = "obsGd"; obsGd.innerHTML = '<i></i><span></span>'; document.body.appendChild(obsGd);
+{ const st = document.createElement("style"); st.textContent = `#obsGd{position:fixed;left:50%;bottom:11%;transform:translate(-50%,8px);z-index:21;display:flex;align-items:flex-start;gap:12px;max-width:min(560px,90vw);padding:11px 18px 11px 12px;border-radius:16px;background:rgba(11,14,20,.55);border:1px solid rgba(226,232,240,.16);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#e2e8f0;font-size:14px;line-height:1.45;letter-spacing:.03em;opacity:0;pointer-events:none;transition:opacity .35s,transform .35s}#obsGd.on{opacity:1;transform:translate(-50%,0)}#obsGd i{font-style:normal;font-size:11px;font-weight:700;min-width:26px;height:26px;padding:0 6px;box-sizing:border-box;border-radius:7px;display:flex;align-items:center;justify-content:center;background:#4fa9a3;color:#0b0e14;flex:none}#obsGd.warn i{background:#d9695f;color:#fff}#obsGd small{display:block;font-size:10px;letter-spacing:.24em;color:rgba(226,232,240,.55);margin-bottom:2px}`; document.head.appendChild(st); }
+const obsG = {t:0, last:"", min:0};
+function obsGuide(dt) {
+  const O = gear.obs, show = (k, h, t, warn) => { const key = h + t; if (obsG.last !== key) { obsG.last = key; obsGd.querySelector("i").textContent = k; const sp = obsGd.querySelector("span"); sp.innerHTML = "<small></small>"; sp.querySelector("small").textContent = T(h).toUpperCase(); sp.appendChild(document.createTextNode(Array.isArray(t) ? t.map(x => T(x)).join("") : T(t))); } obsGd.classList.toggle("warn", !!warn); obsGd.classList.add("on"); };
+  if (!O || !O.st || xs.scene !== "side" || mode !== "surf" || paused || opt.tut === false) { obsGd.classList.remove("on"); if (xs.scene !== "side") obsG.t = 0; return; }
+  obsG.t += dt; const tch = window.inputMode === "touch", pad = window.inputMode === "pad", r = obs.run;
+  const kPhoto = tch ? "Foto-Knopf" : pad ? "RT" : "Linksklick oder Enter", kFp = tch ? "Kamera-Knopf" : pad ? "Y" : "V";
+  if (!r) { if (O.st === 3) { obsGd.classList.remove("on"); return; }
+    if (obsG.t < 7) show("1/3", "Auftrag", "Du beschattest Herrn Varga und machst 4 Beweisfotos – Morgen, Mittag, Nachmittag, Abend. Jede Szene ist ein kurzer Moment."); 
+    else if (obsG.t < 14) show("2/3", "So geht's", "Bleib unauffällig: nicht direkt vor Varga stehen und ihm nicht nahe kommen. Klettere an Wände, Laternen oder Dächer – oben sieht er dich kaum.");
+    else if (obsG.t < 21) show("3/3", "Foto machen", ["Wechsle mit ", kFp, " in die Ich-Perspektive, ziele auf Varga und drücke ", kPhoto, ", sobald oben „JETZT FOTOGRAFIEREN“ leuchtet."]);
+    else obsGd.classList.remove("on"); return; }
+  const slot = r.slot, taken = !!O.shots[slot], mom = r.a.some(a => a.ok) && !taken, need = slot === 1 ? "Varga UND der Roboter müssen im Bild sein." : slot === 3 ? "Varga UND seine Begleitung müssen im Bild sein." : "Varga muss im Bild sein.";
+  if (r.susp > .35 && !taken) show("!", "Er wird misstrauisch", "Geh sofort aus seinem Blickfeld – hinter ihn, weit weg oder hoch an die Wand. Sonst beginnt der Tag von vorn.", true);
+  else if (taken) show("✓", "Foto im Kasten", "Gut gemacht. Bleib versteckt, bis die nächste Szene beginnt.");
+  else if (r.t < 5) show("1", "Position suchen", "Varga kommt gleich. Such dir einen Platz mit freier Sicht, mindestens 3 m Abstand – am besten erhöht an einer Wand oder Laterne.");
+  else if (!fp) show(kFp, "Ich-Perspektive", ["Drücke ", kFp, " und richte die Kamera auf Varga (Maus bzw. A/D drehen). ", mom ? "Jetzt ist der Moment!" : "Warte auf den Moment: „JETZT FOTOGRAFIEREN“ erscheint oben."]);
+  else if (!mom) show("⏳", "Warten", ["Halte Varga im Bild und warte, bis oben „JETZT FOTOGRAFIEREN“ erscheint. ", need]);
+  else show("📷", "Jetzt!", [need, " Dann ", kPhoto, "."]);
 }

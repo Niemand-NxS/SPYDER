@@ -144,8 +144,8 @@ function shaftInteract() {
 function exitCut() {
   const hw = HIP_H*S, z0 = pos.z, k = [[0, pos.x,pos.y,pos.z, hd.x,hd.y,hd.z, nS.x,nS.y,nS.z], [.9, pos.x + .35,hw,z0, 1,0,0, 0,1,0], [3.8, W + 1.9,hw,z0, 1,0,0, 0,1,0]];
   startCut({dur:6.4, bin:.3, bout:0,
-    shots:[{t0:0,t1:2.4,a:() => [pos.x - 1.3,.5,z0 + .55,"S",0,0,54],b:() => [pos.x - .9,.4,z0 + .4,"S",0,0,48]},{t0:2.4,t1:6.4,a:[W - .9,.32,z0 + .35,"S",0,0,46],b:[W - .55,.3,z0 + .2,"S",0,0,42]}],
-    ev:[[4.0,() => { $("fade").style.background = "#f4f8ff"; $("fade").classList.add("on"); }]],
+    shots:[{t0:0,t1:6.4,a:() => [pos.x - 1.3,.5,z0 + .55,"S",0,0,54],b:() => [pos.x - 1.0,.38,z0 + .3,"S",0,0,44]}],
+    ev:[[4.0,() => { $("fade").style.background = "#000"; $("fade").classList.add("on"); }]],
     subs:[[.4,3.2,"ARACHNE-8","Außenluft. Sensoren melden: Freigelände."],[3.4,5.8,"ARACHNE-8","Geschafft. Ab jetzt entscheide ich selbst."]],
     spider(t, dt) { pathPose(k, Math.min(t, 3.8), dt); }, final() {}, onEnd() { enterAlley(); }});
 }
