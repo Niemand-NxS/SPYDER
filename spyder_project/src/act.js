@@ -1,6 +1,6 @@
 
 /* ======================= Skript-Aktionen: Lüftungsgitter aufbrechen, Tür öffnen ======================= */
-const OR = 0xe0701e, mOr = mStd(OR, .5, .45);
+const OR = 0xb86a85, mOr = mStd(OR, .5, .45);
 const VC = V3(W, 2.75, -2.0), vent = {broken:false};
 const ventG = new THREE.Group(); ventG.position.set(W-.045, VC.y, VC.z); scene.add(ventG);
 box(.03,.7,.9,mStd(0x2a3550,.5,.55),0,0,0,ventG);

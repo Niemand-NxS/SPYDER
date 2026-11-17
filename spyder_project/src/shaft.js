@@ -33,7 +33,7 @@ const ductBase = canvasTex(256,256,(x,w,h)=>{ x.fillStyle="#4b5d88"; x.fillRect(
   const g = x.createLinearGradient(0,0,0,h); g.addColorStop(0,"rgba(255,255,255,.10)"); g.addColorStop(1,"rgba(20,30,70,.18)"); x.fillStyle = g; x.fillRect(0,0,w,h);
   x.strokeStyle="rgba(210,225,255,.28)"; x.lineWidth=2; x.strokeRect(1,1,w-2,h-2); x.lineWidth=1; x.beginPath(); x.moveTo(w/2,0); x.lineTo(w/2,h); x.stroke();
   x.fillStyle="#aebbd8"; for (const [a,b] of [[14,14],[w-14,14],[14,h-14],[w-14,h-14],[w/2-12,h/2],[w/2+12,h/2]]) { x.beginPath(); x.arc(a,b,3.5,0,7); x.fill(); }
-  x.fillStyle="#e0701e"; x.globalAlpha=.85; x.fillRect(0,h-26,w,8); x.globalAlpha=1; }, 1, 1);
+  x.fillStyle="#b86a85"; x.globalAlpha=.85; x.fillRect(0,h-26,w,8); x.globalAlpha=1; }, 1, 1);
 function ductFor(wm, hm) { const t = ductBase.clone(); t.needsUpdate = true; t.repeat.set(Math.max(1, wm/1.2), Math.max(1, hm/1.2)); return t; }
 function setBox(w, h, d) { TAU = .07; skyLim = 1e9; W = w/2; H = h; D = d/2; DN = D; PLANES[1].c = -H; PLANES[2].c = -W; PLANES[3].c = -W; PLANES[4].c = -D; PLANES[5].c = -D; }
 function rebuildRoom() {
@@ -43,7 +43,7 @@ function rebuildRoom() {
   roomPlane(4, 2*W, H, ductFor(2*W, H), V3(0,H/2,-D)); roomPlane(5, 2*W, H, ductFor(2*W, H), V3(0,H/2,D));
 }
 function stencil(text, sw, sh, col) {
-  const t = canvasTex(512, Math.round(512*sh/sw), (x,w,h)=>{ x.clearRect(0,0,w,h); x.fillStyle = col || "#f08a2c"; x.globalAlpha = .9; x.font = "bold " + Math.round(h*.46) + "px monospace"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(text, w/2, h/2, w*.94); }, 1, 1);
+  const t = canvasTex(512, Math.round(512*sh/sw), (x,w,h)=>{ x.clearRect(0,0,w,h); x.fillStyle = col || "#d8849f"; x.globalAlpha = .9; x.font = "bold " + Math.round(h*.46) + "px monospace"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(text, w/2, h/2, w*.94); }, 1, 1);
   return new THREE.Mesh(new THREE.PlaneGeometry(sw, sh), new THREE.MeshBasicMaterial({map:t, transparent:true, depthWrite:false}));
 }
 // Öffnungen zeigen einen hellen Gang dahinter (kein Schwarz)
@@ -183,7 +183,7 @@ function drawMap() {
   for (const n of NODEDEF) for (const sx of [-1,1]) for (const sz of [-1,1]) for (const yy of [0, n.h]) { const p = prj(n.c[0] + sx*n.w/2, n.c[1] + yy, n.c[2] + sz*n.d/2); a0 = Math.min(a0, p[0]); a1 = Math.max(a1, p[0]); b0 = Math.min(b0, p[1]); b1 = Math.max(b1, p[1]); }
   const pad = 14, top = 22, sc = Math.min((cw - 2*pad)/(a1 - a0), (ch - pad - top)/(b1 - b0)), ox = cw/2 - (a0 + a1)/2*sc, oy = top + (ch - top - pad)/2 + (b0 + b1)/2*sc;
   const P = (X, Y, Z) => { const p = prj(X, Y, Z); return [ox + p[0]*sc, oy - p[1]*sc, p[2]]; };
-  x.fillStyle = "#f08a2c"; x.font = "600 " + (mapBig ? 12 : 9) + "px system-ui,sans-serif"; x.textBaseline = "alphabetic"; x.fillText("KARTE · " + T(shaft.cur.name).toUpperCase(), pad, 14);
+  x.fillStyle = "#d8849f"; x.font = "600 " + (mapBig ? 12 : 9) + "px system-ui,sans-serif"; x.textBaseline = "alphabetic"; x.fillText("KARTE · " + T(shaft.cur.name).toUpperCase(), pad, 14);
   x.fillStyle = "rgba(225,235,255,.7)"; x.textAlign = "right"; x.fillText("TIEFE −" + Math.max(0, -(shaft.cur.c[1] + pos.y)).toFixed(1) + " m", cw - pad, 14); x.textAlign = "left";
   // sichtbare Zellen als Quader, von hinten nach vorn
   const boxes = [];
@@ -205,14 +205,14 @@ function drawMap() {
   // Öffnungen, Ausgang, gesperrte Enden
   const dot = (X, Y, Z, r, col) => { const p = P(X, Y, Z); x.fillStyle = col; x.beginPath(); x.arc(p[0], p[1], r, 0, 7); x.fill(); return p; };
   for (const n of NODEDEF) { if (!n.entered) continue;
-    for (const e of n.ex) { const w = faceWorld(n, e); if (seenAtLocal(n, w.u, w.yy)) dot(w.x, w.y, w.z, Math.max(2.2, sc*.2), NODES[e.to].entered ? "#ffffff" : "#f08a2c"); }
+    for (const e of n.ex) { const w = faceWorld(n, e); if (seenAtLocal(n, w.u, w.yy)) dot(w.x, w.y, w.z, Math.max(2.2, sc*.2), NODES[e.to].entered ? "#ffffff" : "#d8849f"); }
     if (n.ax === "x") for (const [k, s] of [[n.endE, 1], [n.endW, -1]]) { if (!k) continue; if (!seenAtLocal(n, s*(n.L/2 - .3), .6)) continue; const X = n.c[0] + s*n.w/2, Y = n.c[1] + .6, Z = n.c[2];
-      if (k === "goal") { const p = P(X, Y, Z), R = sc*.9 + 4; x.fillStyle = "#fff"; x.beginPath(); for (let i = 0; i < 10; i++) { const r = i%2 ? R*.4 : R, ang = -Math.PI/2 + i*Math.PI/5; x.lineTo(p[0] + Math.cos(ang)*r, p[1] + Math.sin(ang)*r); } x.closePath(); x.fill(); x.fillStyle = "#f08a2c"; x.fillText("AUSGANG", p[0] - 22, p[1] - R - 3); }
+      if (k === "goal") { const p = P(X, Y, Z), R = sc*.9 + 4; x.fillStyle = "#fff"; x.beginPath(); for (let i = 0; i < 10; i++) { const r = i%2 ? R*.4 : R, ang = -Math.PI/2 + i*Math.PI/5; x.lineTo(p[0] + Math.cos(ang)*r, p[1] + Math.sin(ang)*r); } x.closePath(); x.fill(); x.fillStyle = "#d8849f"; x.fillText("AUSGANG", p[0] - 22, p[1] - R - 3); }
       else if (k === "sealed") dot(X, Y, Z, Math.max(2, sc*.18), "#ff5a30"); } }
   // Spieler + Blickrichtung
   const n = shaft.cur, wx = n.c[0] + pos.x, wy = n.c[1] + pos.y, wz = n.c[2] + pos.z, pm = P(wx, wy, wz), pf = P(wx + hd.x*1.1, wy + hd.y*1.1, wz + hd.z*1.1), pulse = 3.4 + 1.6*Math.abs(Math.sin(clockT*3));
   x.strokeStyle = "rgba(255,255,255,.9)"; x.lineWidth = 1.6; x.beginPath(); x.moveTo(pm[0], pm[1]); x.lineTo(pf[0], pf[1]); x.stroke();
-  x.strokeStyle = "rgba(240,138,44,.95)"; x.lineWidth = 1.8; x.beginPath(); x.arc(pm[0], pm[1], pulse + 1.5, 0, 7); x.stroke(); x.fillStyle = "#fff"; x.beginPath(); x.arc(pm[0], pm[1], 2.8, 0, 7); x.fill();
+  x.strokeStyle = "rgba(216,132,159,.95)"; x.lineWidth = 1.8; x.beginPath(); x.arc(pm[0], pm[1], pulse + 1.5, 0, 7); x.stroke(); x.fillStyle = "#fff"; x.beginPath(); x.arc(pm[0], pm[1], 2.8, 0, 7); x.fill();
   x.fillStyle = "rgba(225,235,255,.6)"; x.font = "9px system-ui,sans-serif"; x.textAlign = "right"; x.fillText(mapBig ? "ziehen = drehen · M = schließen" : "M · vergrößern", cw - pad, ch - 5); x.textAlign = "left";
 }
 function shaftTick(dt) {
