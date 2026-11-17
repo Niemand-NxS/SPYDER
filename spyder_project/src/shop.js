@@ -118,7 +118,7 @@ function shieldSnd(on) {
 function shieldHumTick(u) { if (!shS.hum || !ac) return; shS.hum.g.gain.setTargetAtTime(u > .6 ? .045*u : 0, ac.currentTime, .06); shS.hum.lp.frequency.setTargetAtTime(420 + 260*u + 80*Math.sin(clockT*3) + shd.flash*500, ac.currentTime, .05); }
 function takeHit(n) {      // für kommende Gegner: Holo-Schild blockt Treffer
   if (shd.on) { shd.flash = 1; clang(.3); beep(900, .1, 0, .04); return false; }
-  const ks = Object.keys(PARTS), k = ks[(Math.random()*ks.length)|0]; PARTS[k] = Math.max(.02, PARTS[k] - (n || .15)); dmgHit = 1; clang(.4); return true;
+  const ks = Object.keys(PARTS), k = ks[(Math.random()*ks.length)|0]; PARTS[k] = Math.max(.02, PARTS[k] - (n || .22)); dmgHit = 1; clang(.4); return true;
 }
 /* ---------- Gespräch mit Mase ---------- */
 function maseCut() {

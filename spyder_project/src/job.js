@@ -356,8 +356,8 @@ function botShoot(b) {
   const R = b.R, g = R.g; _wp.set(g.position.x, 1.2, g.position.z); const sh = hz.shot; if (sh) { sh.visible = true; sh.position.copy(_wp).lerp(pos, .5); sh.scale.z = _wp.distanceTo(pos); sh.lookAt(pos); hz.shotT = .09; }
   beep(1400, .06, 0, .04); beep(600, .1, .03, .04);
   const ceil = nB.y < -.5; if (Math.random() < (ceil ? .4 : .62) && !(shd.on && shd.u > .5)) {
-    const keys2 = Object.keys(PARTS), n = keys2[(Math.random()*keys2.length)|0], amt = (.07 + Math.random()*.08)*uPz(); PARTS[n] = Math.max(.02, PARTS[n] - amt); emitSparks(pos, nB); dmgHit = 1; story.sk += .15; thud(5); clang(.15);
-    if (dmgAvg() < .3 && !hz.fail) { hz.fail = 1; showDeath("Integrität kritisch – Wachroboter haben ARACHNE-8 schwer beschädigt.", () => { for (const k in PARTS) PARTS[k] = Math.max(PARTS[k], .7); hz.fail = 0; enterHeist("bank"); }, 2800); } }
+    const keys2 = Object.keys(PARTS), n = keys2[(Math.random()*keys2.length)|0], amt = (.12 + Math.random()*.12)*uPz(); PARTS[n] = Math.max(.02, PARTS[n] - amt); emitSparks(pos, nB); dmgHit = 1; story.sk += .15; thud(5); clang(.15);
+    if (dmgAvg() < .4 && !hz.fail) { hz.fail = 1; showDeath("Integrität kritisch – Wachroboter haben ARACHNE-8 schwer beschädigt.", () => { for (const k in PARTS) PARTS[k] = Math.max(PARTS[k], .7); hz.fail = 0; enterHeist("bank"); }, 2800); } }
   else if (shd.on) { shd.flash = 1; }
 }
 function botDamage(b, dt) { if (b.dead) return; b.hp -= .4*dt*uLs(); if (!b.st) { b.st = 1; b.seen = 0; hz.alert = 1; } if (b.hp <= 0) { b.dead = true; b.fall = 0; { const g = b.R.g, dx = g.position.x - pos.x, dz = g.position.z - pos.z, L = Math.hypot(dx, dz) || 1; b.fa = {dx:dx/L, dz:dz/L, th:0, w:.25 + Math.random()*.2, bn:0, t:0, a1:(Math.random() - .5)*1.6, a2:(Math.random() - .5)*1.6, hit:false}; } clang(.6); emitSparks(_t3, nB); toast("Wachroboter ausgeschaltet"); b.R.chest.material.color.setHex(0x444a58); } }
