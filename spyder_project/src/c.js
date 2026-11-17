@@ -14,8 +14,8 @@ ex.fillStyle = "rgba(255,255,255,.55)"; ex.fillRect(330,40,90,26); ex.fillRect(2
 const envTex = new THREE.PMREMGenerator(renderer).fromEquirectangular(new THREE.CanvasTexture(ev)).texture;
 const mat = (c, m=.55, r=.45) => new THREE.MeshStandardMaterial({color:c, metalness:m, roughness:r, envMap:envTex, envMapIntensity:.9});
 const matBody = mat(0x16254a, .65, .38), matDark = mat(0x0d1632, .5, .5), matLight = mat(0xdde4f2, .15, .36);
-const matBrass = mat(0xb86a85, .6, .4), matRubber = mat(0x111214, 0, .9);
-const matLens = new THREE.MeshStandardMaterial({color:0x0e0e10, emissive:0xb86a85, emissiveIntensity:.5, roughness:.2, metalness:.3});
+const matBrass = mat(0x3c8680, .6, .4), matRubber = mat(0x111214, 0, .9);
+const matLens = new THREE.MeshStandardMaterial({color:0x0e0e10, emissive:0x3c8680, emissiveIntensity:.5, roughness:.2, metalness:.3});
 
 const spider = new THREE.Group(); spider.rotation.order = "YXZ"; scene.add(spider);
 function add(geo, m, x=0, y=0, z=0, parent=spider) { const o = new THREE.Mesh(geo, m); o.position.set(x,y,z); o.castShadow = true; o.receiveShadow = true; parent.add(o); return o; }

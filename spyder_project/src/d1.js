@@ -274,7 +274,7 @@ function hitRefresh() {
   while (hitG.children.length) { const o = hitG.children.pop(); o.geometry.dispose(); }
   if (!hitOn) return;
   for (const b of blocks) { const y0 = b.y0 !== undefined ? b.y0 : 0, y1 = b.y1 !== undefined ? b.y1 : 2.4;
-    const m = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(b.x1 - b.x0, y1 - y0, b.z1 - b.z0)), new THREE.LineBasicMaterial({color:0xd8849f, depthTest:false}));
+    const m = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(b.x1 - b.x0, y1 - y0, b.z1 - b.z0)), new THREE.LineBasicMaterial({color:0x4fa9a3, depthTest:false}));
     m.position.set((b.x0 + b.x1)/2, (y0 + y1)/2, (b.z0 + b.z1)/2); m.renderOrder = 9; hitG.add(m); }
 }
 function toggleHit() { hitOn = !hitOn; opt.hit = hitOn; try { saveOpt(); buildOpts(); } catch (e) {} hitG.visible = hitOn; hitRefresh(); toast(hitOn ? "Hitboxen sichtbar (H)" : "Hitboxen aus"); }

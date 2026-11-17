@@ -171,7 +171,7 @@ function buildStreet() {
   exBox(1.2, 2.4, .5, new THREE.MeshBasicMaterial({color:0x1a1a1e}), DOORX, 1.2, -hd - .27);       // dunkler Hausflur hinter der Tür
   exPl(.6, .3, sign("Nr. 14", "#d8a24a", .6, .3), DOORX, 2.85, -hd + .31, 0);
   { const gg = new THREE.Group(); gg.position.set(GARX, 3.5, hd - .08); exG.add(gg); const gm = pbrMat("met2", 3, 2, 0xc0bcb0), sl = mStd(0x2a2c30, .6, .5);
-    const slab = box(4.8, 3.4, .12, gm, 0, -1.7, 0, gg); box(4.8, .1, .2, mStd(0xb86a85, .4, .6), 0, -3.44, -.02, gg);
+    const slab = box(4.8, 3.4, .12, gm, 0, -1.7, 0, gg); box(4.8, .1, .2, mStd(0x3c8680, .4, .6), 0, -3.44, -.02, gg);
     for (let y = .3; y < 3.4; y += .25) box(4.78, .02, .14, sl, 0, y - 3.5, -.09, gg);
     const n0 = blocks.length; solidOf(slab, blocks); xs.gar = {g:gg, u:0, tgt:0, bl:blocks.slice(n0), gone:false, glow:null};
     holeWall(5, SW, SH, [[-(GARX + 2.4), -(GARX - 2.4), .01, 3.4]], roomMeshes[5].material.map, 0, 0, 0);
@@ -232,7 +232,7 @@ function buildStairs() {
   exPt(0xffb878, 1.4, 6, xs.doorX, top + 1.9, hz - 1.4); const hw2 = exBox(.35, .8, .05, mStd(0x5a3a2a), xs.doorX + 1.1 - .2, top + 1.4, -hd + .06);
   exBox(.35, .5, .05, mStd(0x7a6a58), xs.doorX - 1.1 + 0.2, top + 1.7, -hd + .06);
   // Klingel (neben der linken Tür) und Namensschilder
-  const bellM = new THREE.Mesh(new THREE.CylinderGeometry(.045, .045, .03, 12), new THREE.MeshStandardMaterial({color:0xb86a85, emissive:0xb86a85, emissiveIntensity:.8})); bellM.rotation.x = Math.PI/2; bellM.position.set(xs.doorX + .85, top + 1.3, -hd + .08); exG.add(bellM);
+  const bellM = new THREE.Mesh(new THREE.CylinderGeometry(.045, .045, .03, 12), new THREE.MeshStandardMaterial({color:0x3c8680, emissive:0x3c8680, emissiveIntensity:.8})); bellM.rotation.x = Math.PI/2; bellM.position.set(xs.doorX + .85, top + 1.3, -hd + .08); exG.add(bellM);
   exBox(.12, .2, .03, mStd(0x15171b), xs.doorX + .85, top + 1.3, -hd + .05); xs.bell = V3(xs.doorX + .85, top + 1.3, -hd + .08); xs.bellM = bellM;
   exPl(.5, .2, sign("4 · LINKS", "#d8a24a", .5, .2), xs.doorX, top + 2.6, -hd + .06, 0); exPl(.5, .2, sign("4 · RECHTS", "#6a7a98", .5, .2), 1.1, top + 2.6, -hd + .06, 0);
   // Glühbirnen
@@ -240,7 +240,7 @@ function buildStairs() {
   xs.bl = []; for (const [bx, by, sz] of [[-.6, 2.4, -1], [-.6, FL + 2.4, -1], [.6, 2*FL + 2.4, 1], [.6, 3*FL + 2.3, -1]]) { const zw = sz*hd, b = new THREE.Mesh(new THREE.SphereGeometry(.07, 8, 6), bulb); b.position.set(bx, by, zw - sz*.2); exG.add(b); exBox(.05, .05, .14, mStd(0x15171b, .6, .5), bx, by, zw - sz*.07); exBox(.16, .035, .03, mStd(0x15171b, .6, .5), bx, by - .06, zw - sz*.2); const bl = exPt(0xffc890, 2.0, 9.5, bx, by - .02, zw - sz*.3); bl.userData.aim = [-bx*.6, -1, -sz*1.3]; xs.bl.push(bl); }
   xs.sl = xs.bl[0];
   // ---- Geländer ----
-  const railM = mStd(0x1c2438, .7, .4), capM = mStd(0xb86a85, .4, .5), balM = mStd(0x2a3550, .6, .5);
+  const railM = mStd(0x1c2438, .7, .4), capM = mStd(0x3c8680, .4, .5), balM = mStd(0x2a3550, .6, .5);
   const slope = (x, y0, z0, z1) => { const za = z0 + (z1 - z0)*.0, yA = y0 + FL*.0556 + .92, yB = y0 + FL*1.0556 + .92 - FL/9*.5 + FL/9*.5, dz = z1 - z0, dy = yB - yA, L = Math.hypot(dz, dy);
     const r = new THREE.Mesh(new THREE.BoxGeometry(.05, .05, L), railM); r.position.set(x, (yA + yB)/2, (z0 + z1)/2); r.rotation.x = Math.atan2(-dy, dz); exG.add(r);
     for (let i = 0; i < 9; i += 2) { const zc = z0 + dz*(i + .5)/9, st = y0 + (i + 1)*FL/9; exBox(.022, yA + dy*(i + .5)/9 - st, .022, balM, x, (st + yA + dy*(i + .5)/9)/2, zc); }
@@ -258,7 +258,7 @@ function buildStairs() {
   for (let r = 0; r < 2; r++) for (let c = 0; c < 6; c++) { exBox(.2, .15, .08, dark, -1.9 + c*.24, 1.05 + r*.19, hd - .05); exBox(.12, .025, .01, capM, -1.9 + c*.24, 1.07 + r*.19, hd - .095); exBox(.1, .015, .01, whiteM, -1.9 + c*.24, 1.12 + r*.19, hd - .095); }
   // Fahrrad (Westwand)
   { const bx = -hw + .3; for (const z of [-1.3, -.5]) { const t = new THREE.Mesh(new THREE.TorusGeometry(.32, .018, 6, 22), dark); t.rotation.y = Math.PI/2; t.position.set(bx, .34, z); exG.add(t); }
-    exBox(.03, .03, .8, mStd(0xb86a85, .4, .5), bx, .62, -.9); exBox(.03, .3, .03, dark, bx, .76, -1.15); exBox(.07, .03, .2, dark, bx, .92, -1.17); exBox(.03, .35, .03, dark, bx, .52, -.55); exBox(.4, .03, .03, dark, bx, .88, -.52); }
+    exBox(.03, .03, .8, mStd(0x3c8680, .4, .5), bx, .62, -.9); exBox(.03, .3, .03, dark, bx, .76, -1.15); exBox(.07, .03, .2, dark, bx, .92, -1.17); exBox(.03, .35, .03, dark, bx, .52, -.55); exBox(.4, .03, .03, dark, bx, .88, -.52); }
   // Mülltonnen, Kartons, Feuerlöscher
   cyl(.22, .75, dark, 1.85, 0, -hd + .35); cyl(.24, .05, whiteM, 1.85, .75, -hd + .35); cyl(.22, .75, dark, 1.3, 0, -hd + .3); cyl(.24, .05, whiteM, 1.3, .75, -hd + .3);
   exBox(.5, .4, .4, cardb, -1.5, .2, -hd + .3, true); exBox(.4, .3, .35, cardb, -1.5, .55, -hd + .3); exBox(.35, .3, .35, cardb, -.2, .15, -hd + .25);
@@ -369,7 +369,7 @@ function bellLeg(tt, bell, t0) {
 }
 function doorCut(job) {
   const top = 3*FL, hd = STD/2, dx = xs.doorX, hz = -hd - .06, hw = hwS(), c = {ev:[], subs:[]};
-  const F = makeRobot({body:0x8a5a6a, acc:0xd8a24a, glow:0xf2a0a8, scarf:0x6a2a3a}), R = makeRobot({body:0x3a4a5a, acc:0xb86a85, glow:0x8ad0a0, tape:true, apron:0x2a2c30, cool:true});
+  const F = makeRobot({body:0x8a5a6a, acc:0xd8a24a, glow:0xf2a0a8, scarf:0x6a2a3a}), R = makeRobot({body:0x3a4a5a, acc:0x3c8680, glow:0x8ad0a0, tape:true, apron:0x2a2c30, cool:true});
   F.glass.visible = R.glass.visible = false; exG.add(F.g, R.g); exAct.push(F, R); SPK.F.R = F; SPK.R.R = R; const fA = mkActor(F, dx - .15, hz - .5, 0, {y:top, bob:true}), rA = mkActor(R, dx - .3, hz - 3.0, 0, {y:top, bob:true}); R.g.visible = false;
   const p = [-.3, top + hw, -hd + 1.05], bz = -hd + hw, bx = -.42, by = top + 1.2, bell = xs.bell;
   const KB = [[0, p[0] - .15, p[1], p[2] + .1, 0, 0, -1, 0, 1, 0], [1.0, bx, p[1], -hd + .4, 0, 0, -1, 0, 1, 0], [1.35, bx, top + hw*1.1, -hd + hw*1.1, 0, .7, -.7, 0, .7, .7], [1.6, bx, top + hw*1.6, bz, 0, 1, 0, 0, 0, 1], [3.3, bx, by, bz, 0, 1, 0, 0, 0, 1], [4.4, bx, by, bz, 0, 1, 0, 0, 0, 1], [6.1, bx, top + hw*1.6, bz, 0, 1, 0, 0, 0, 1], [6.4, bx, top + hw*1.1, -hd + hw*1.1, 0, .7, -.7, 0, .7, .7], [6.7, bx, p[1], -hd + .4, 0, 0, -1, 0, 1, 0], [7.5, p[0], p[1], p[2], 0, 0, -1, 0, 1, 0], [9, p[0], p[1], p[2], 0, 0, -1, 0, 1, 0]];
@@ -393,7 +393,7 @@ function doorCut(job) {
 
 /* ---------- Cutscene: In der Wohnung ---------- */
 function flatCut() {
-  const hd = 2.8, hw = hwS(), c = {ev:[], subs:[]}, F = makeRobot({body:0x8a5a6a, acc:0xd8a24a, glow:0xf2a0a8, scarf:0x6a2a3a}), R = makeRobot({body:0x3a4a5a, acc:0xb86a85, glow:0x8ad0a0, tape:true, apron:0x2a2c30, cool:true});
+  const hd = 2.8, hw = hwS(), c = {ev:[], subs:[]}, F = makeRobot({body:0x8a5a6a, acc:0xd8a24a, glow:0xf2a0a8, scarf:0x6a2a3a}), R = makeRobot({body:0x3a4a5a, acc:0x3c8680, glow:0x8ad0a0, tape:true, apron:0x2a2c30, cool:true});
   F.glass.visible = R.glass.visible = false; exG.add(F.g, R.g); exAct.push(F, R); SPK.F.R = F; SPK.R.R = R; const rA = mkActor(R, 1.9, -.15, -2.2, {bob:true, sit:true, y:-.35}), fA = mkActor(F, -1.7, hd - .5, Math.PI, {bob:true}); sitPose(R);
   const tr = 0, tf = actorGo(fA, 1.2, [[-1.7, hd - .5], [-2.3, .9], [-2.7, .3]], .9), sp = [[-1.5, hd - .6], [-.9, 1.7], [-.1, 1.0]];
   const sSeg = [{t0:1.0, pts:sp, spd:.9, L:wayLen(sp)}], keys = walkKeys([-1.5, hd - .6, 0, -1], sSeg, 0); let t = 2.0;

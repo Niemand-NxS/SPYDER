@@ -117,7 +117,7 @@ function speckle(x, w, h, n, a) { for (let i=0;i<n;i++){ const g = Math.random()
 const floorTex = canvasTex(256,256,(x,w,h)=>{ x.fillStyle="#3b4b73"; x.fillRect(0,0,w,h); speckle(x,w,h,5000,.18); x.strokeStyle="rgba(38,40,43,.65)"; x.lineWidth=3; x.strokeRect(0,0,w,h); }, 2*W, 2*D);
 const ceilTex = canvasTex(256,256,(x,w,h)=>{ x.fillStyle="#e4eaf7"; x.fillRect(0,0,w,h); speckle(x,w,h,2500,.12); x.strokeStyle="rgba(90,92,96,.7)"; x.lineWidth=2; x.strokeRect(0,0,w,h); }, W, D);
 const wallDraw = (x,w,h)=>{ x.fillStyle="#aab6d2"; x.fillRect(0,0,w,h); speckle(x,w,h,4000,.14);
-  x.fillStyle="#1c3166"; x.fillRect(0,h*.62,w,h*.38); x.fillStyle="#b86a85"; x.fillRect(0,h*.62-3,w,6);
+  x.fillStyle="#1c3166"; x.fillRect(0,h*.62,w,h*.38); x.fillStyle="#3c8680"; x.fillRect(0,h*.62-3,w,6);
   x.strokeStyle="rgba(50,54,52,.5)"; x.lineWidth=3; x.beginPath(); x.moveTo(1,0); x.lineTo(1,h); x.stroke(); };
 const wallTexA = canvasTex(256,430,wallDraw, D, 1), wallTexB = canvasTex(256,430,wallDraw, W, 1);
 const roomMeshes = [];
@@ -149,9 +149,9 @@ function box(w,h,d,mt,x,y,z,parent=scene){ const o = new THREE.Mesh(new THREE.Bo
 const lightMat = new THREE.MeshStandardMaterial({color:0xf4f7ff, emissive:0xf4f7ff, emissiveIntensity:.8});
 const ceilLights = []; for (const [x,z] of [[-2,-1.4],[2,-1.4],[-2,1.4],[2,1.4]]) ceilLights.push(box(1.1,.05,.5,lightMat,x,H-.025,z));
 const doorG = new THREE.Group(); doorG.position.set(-W+.03,0,1.6); scene.add(doorG);                      // Tür (schiebt sich zur Seite)
-box(.06,2.1,1.0,mStd(0x23335e,.5,.55),0,1.05,0,doorG); box(.04,.08,.12,mStd(0xb86a85,.7,.4),.05,1.0,-.35,doorG);
+box(.06,2.1,1.0,mStd(0x23335e,.5,.55),0,1.05,0,doorG); box(.04,.08,.12,mStd(0x3c8680,.7,.4),.05,1.0,-.35,doorG);
 const doorway = new THREE.Mesh(new THREE.PlaneGeometry(1.0,2.1), new THREE.MeshBasicMaterial({color:0x050a18})); doorway.position.set(-W+.01,1.05,1.6); doorway.rotation.y = Math.PI/2; scene.add(doorway);
-{ const fm = mStd(0x1b2a52,.5,.6); box(.07,.06,1.14,fm,-W+.035,2.13,1.6); box(.075,.025,1.14,mStd(0xb86a85,.5,.45),-W+.037,2.17,1.6); box(.07,2.1,.06,fm,-W+.035,1.05,1.05); box(.07,2.1,.06,fm,-W+.035,1.05,2.15); }
+{ const fm = mStd(0x1b2a52,.5,.6); box(.07,.06,1.14,fm,-W+.035,2.13,1.6); box(.075,.025,1.14,mStd(0x3c8680,.5,.45),-W+.037,2.17,1.6); box(.07,2.1,.06,fm,-W+.035,1.05,1.05); box(.07,2.1,.06,fm,-W+.035,1.05,2.15); }
 let doorOpen = 0, doorT = 0;
 // Lüftung: siehe act.js
 
@@ -159,7 +159,7 @@ let doorOpen = 0, doorT = 0;
 const terms = [];
 function makeTerminal(name, base, n) {      // Datensäule: Sockel, Achteck-Pfeiler, Anzeigekopf, Andockbuchse
   const g = new THREE.Group(); g.position.copy(base); scene.add(g); g.lookAt(base.x+n.x, base.y, base.z+n.z);
-  const metal = mStd(0x3a4a70,.55,.55), dark = mStd(0x15213f,.5,.5), light = mStd(0xcfd8ee,.5,.4), ora = mStd(0xb86a85,.7,.4), PZ = .45, RP = .33;
+  const metal = mStd(0x3a4a70,.55,.55), dark = mStd(0x15213f,.5,.5), light = mStd(0xcfd8ee,.5,.4), ora = mStd(0x3c8680,.7,.4), PZ = .45, RP = .33;
   const cyl = (r0, r1, h, seg, mat, y, rotY) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(r1, r0, h, seg), mat); m.position.set(0, y, PZ); m.rotation.y = rotY || 0; m.castShadow = m.receiveShadow = true; g.add(m); return m; };
   cyl(.48,.46,.1,16,dark,.05); cyl(.5,.5,.02,16,ora,.11);
   cyl(RP,RP*.92,.95,8,metal,.6,Math.PI/8);                       // Pfeiler (Fläche zeigt zum Raum)
@@ -187,17 +187,17 @@ function makeTerminal(name, base, n) {      // Datensäule: Sockel, Achteck-Pfei
 function drawScreen(T, t, p) {
   const x = T.ctx, w = 256; x.fillStyle = "#0b1630"; x.fillRect(0,0,w,144);
   x.font = "10px ui-monospace,Menlo,Consolas,monospace"; x.textBaseline = "top";
-  x.fillStyle = "#d8849f"; x.fillRect(0,0,w,14); x.fillStyle = "#0b1630";
+  x.fillStyle = "#4fa9a3"; x.fillRect(0,0,w,14); x.fillStyle = "#0b1630";
   x.fillText(T.name+" · "+(T.hacked?"OFFEN":p>0?"ANGRIFF":"GESPERRT"), 4, 2);
   x.fillStyle = "#e4ecfc";
   if (T.hacked) {
     (T.lines||["ZUGRIFF GEWÄHRT","","› Kameras: deaktiviert","› Türen: entriegelt","› Protokolle: gelöscht","› Datenpaket: kopiert"]).forEach((s,i)=>x.fillText(s,6,22+i*13));
-    x.fillStyle = "#d8849f"; x.fillRect(6,108,244,3);
+    x.fillStyle = "#4fa9a3"; x.fillRect(6,108,244,3);
   } else if (p > 0) {
     for (let r=0;r<8;r++){ let s = ""; const seed = Math.floor(t*10)+r*7;
       for (let k=0;k<14;k++) s += (((seed*(k+3)*2654435761)>>>0)%256).toString(16).padStart(2,"0")+" ";
       x.fillText(s,4,20+r*11); }
-    x.strokeStyle = "#e4ecfc"; x.strokeRect(6,112,244,14); x.fillStyle = "#d8849f"; x.fillRect(8,114,240*p,10);
+    x.strokeStyle = "#e4ecfc"; x.strokeRect(6,112,244,14); x.fillStyle = "#4fa9a3"; x.fillRect(8,114,240*p,10);
     x.fillStyle = "#0b1630"; x.fillText(Math.floor(p*100)+"%",118,114);
   } else {
     x.fillText("Passwort:",6,26); x.fillText("********",6,40);

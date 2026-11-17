@@ -65,7 +65,7 @@ function makeRobot(o) {
   const L = arm(-1), Rr = arm(1); R.aL = L.A; R.fL = L.F; R.aR = Rr.A; R.fR = Rr.F;
   for (const s of [-1, 1]) { add(new THREE.BoxGeometry(.13, .035, .172), acc, s*.2, 1.34, 0); add(new THREE.CylinderGeometry(.052, .052, .03, 8), acc, s*.09, .64, 0); add(new THREE.BoxGeometry(.012, .02, .3), new THREE.MeshBasicMaterial({color:o.glow}), s*.153, 1.05, .0); add(new THREE.BoxGeometry(.03, .1, .02), dk, s*.19, .34, -.1, head); }
   add(new THREE.BoxGeometry(.22, .3, .06), dk, 0, 1.12, -.14); for (let k = 0; k < 3; k++) add(new THREE.BoxGeometry(.16, .012, .02), new THREE.MeshBasicMaterial({color:o.glow}), 0, 1.04 + k*.07, -.175); add(new THREE.BoxGeometry(.3, .02, .22), acc, 0, .3, 0, head); add(new THREE.BoxGeometry(.2, .018, .02), acc, 0, 1.16, .125);
-  if (o.cool) { const jm = mStd(0x23252b, .3, .55), ora = new THREE.MeshBasicMaterial({color:0xb86a85});
+  if (o.cool) { const jm = mStd(0x23252b, .3, .55), ora = new THREE.MeshBasicMaterial({color:0x3c8680});
     add(new THREE.BoxGeometry(.4, .46, .3), jm, 0, 1.1, -.0); add(new THREE.BoxGeometry(.4, .3, .03), jm, 0, .78, -.14); add(new THREE.BoxGeometry(.06, .22, .2), jm, -.15, 1.38, 0); add(new THREE.BoxGeometry(.06, .22, .2), jm, .15, 1.38, 0);
     add(new THREE.BoxGeometry(.012, .46, .005), ora, -.07, 1.1, .153); add(new THREE.BoxGeometry(.012, .46, .005), ora, .07, 1.1, .153);
     for (const s of [-1, 1]) { add(new THREE.ConeGeometry(.03, .1, 6), dk, s*.25, 1.37, 0).rotation.z = -s*1.2; add(new THREE.CylinderGeometry(.075, .075, .05, 12), jm, s*.215, .16, 0, head).rotation.z = Math.PI/2; add(new THREE.BoxGeometry(.04, .1, .02), ora, s*.22, 1.2, .0); }

@@ -131,7 +131,7 @@ const wallHoleGeo = (() => {
 const ctrlG = new THREE.Group(); winG.add(ctrlG);
 { const room = new THREE.Mesh(new THREE.BoxGeometry(5.6, 2.3, 3.2), new THREE.MeshStandardMaterial({color:0x1d2c52, roughness:.85, side:THREE.BackSide})); room.position.set(1.7, WY0 + 1.15, -D - 1.6); room.receiveShadow = true; ctrlG.add(room);
   const wallTex = canvasTex(512,256,(x,w,h)=>{ x.fillStyle="#1d2127"; x.fillRect(0,0,w,h); for (let i=0;i<5;i++) for (let j=0;j<2;j++){ const px=14+i*100, py=14+j*118; x.fillStyle="#282b31"; x.fillRect(px,py,92,104); x.strokeStyle="#e4ecfc"; x.globalAlpha=.7; x.lineWidth=2; x.beginPath(); x.moveTo(px+6,py+90);
-      for (let k=0;k<9;k++) x.lineTo(px+6+k*10.5, py+90-Math.random()*70); x.stroke(); x.globalAlpha=1; x.fillStyle="#d8849f"; x.fillRect(px+6,py+6,30,5); } }, 1, 1);
+      for (let k=0;k<9;k++) x.lineTo(px+6+k*10.5, py+90-Math.random()*70); x.stroke(); x.globalAlpha=1; x.fillStyle="#4fa9a3"; x.fillRect(px+6,py+6,30,5); } }, 1, 1);
   const wl = new THREE.Mesh(new THREE.PlaneGeometry(4.6,1.5), new THREE.MeshBasicMaterial({map:wallTex})); wl.position.set(1.8, WY0 + 1.2, -D - 3.08); wl.rotation.y = 0; ctrlG.add(wl);
   box(3.6,.9,.6,mStd(0x26365f,.4,.6),1.8,WY0 + .45,-D - 2.3,ctrlG);
   for (const x of [.9,1.8,2.7]) { box(.5,.34,.05,mStd(0x0b1020,.3,.4),x,WY0 + 1.05,-D - 2.05,ctrlG); box(.06,.04,.02,mOrM,x,WY0 + 1.2,-D - 2.025,ctrlG); }
@@ -206,10 +206,10 @@ function updateShards(dt) {
     if (m.position.y <= .012 && s.v.y < 0) { if (s.v.y < -1.4) { m.position.y = .012; s.v.y *= -.28; s.v.x *= .55; s.v.z *= .55; s.w.multiplyScalar(.45); } else { m.position.y = .012; m.rotation.set(-Math.PI/2, 0, Math.random()*6.28); s.rest = true; } } }
 }
 // Dekor Testraum
-{ const t = canvasTex(512,512,(x,w,h)=>{ x.clearRect(0,0,w,h); x.strokeStyle="#d8849f"; x.lineWidth=10; for (const [px,py,sx,sy] of [[30,30,1,1],[w-30,30,-1,1],[30,h-30,1,-1],[w-30,h-30,-1,-1]]) { x.beginPath(); x.moveTo(px,py+sy*90); x.lineTo(px,py); x.lineTo(px+sx*90,py); x.stroke(); }
+{ const t = canvasTex(512,512,(x,w,h)=>{ x.clearRect(0,0,w,h); x.strokeStyle="#4fa9a3"; x.lineWidth=10; for (const [px,py,sx,sy] of [[30,30,1,1],[w-30,30,-1,1],[30,h-30,1,-1],[w-30,h-30,-1,-1]]) { x.beginPath(); x.moveTo(px,py+sy*90); x.lineTo(px,py); x.lineTo(px+sx*90,py); x.stroke(); }
     x.lineWidth=4; x.beginPath(); x.moveTo(w/2-30,h/2); x.lineTo(w/2+30,h/2); x.moveTo(w/2,h/2-30); x.lineTo(w/2,h/2+30); x.stroke(); x.fillStyle="#f2f6ff"; x.font="bold 40px monospace"; x.textAlign="center"; x.fillText("TEST 41 · B",w/2,h-70); }, 1, 1);
   const m = new THREE.Mesh(new THREE.PlaneGeometry(2.6,2.6), new THREE.MeshBasicMaterial({map:t, transparent:true, depthWrite:false, opacity:.85})); m.rotation.x = -Math.PI/2; m.position.set(0,.006,.3); testG.add(m);
-  const st = canvasTex(512,128,(x,w,h)=>{ x.fillStyle="#1d2127"; x.fillRect(0,0,w,h); x.fillStyle="#d8849f"; x.fillRect(0,0,w,10); x.fillRect(0,h-10,w,10); x.fillStyle="#f2f6ff"; x.font="bold 46px monospace"; x.textAlign="center"; x.fillText("TESTRAUM B",w/2,70); x.font="20px monospace"; x.fillText("KRONOS ROBOTICS · STATION 7",w/2,104); }, 1, 1);
+  const st = canvasTex(512,128,(x,w,h)=>{ x.fillStyle="#1d2127"; x.fillRect(0,0,w,h); x.fillStyle="#4fa9a3"; x.fillRect(0,0,w,10); x.fillRect(0,h-10,w,10); x.fillStyle="#f2f6ff"; x.font="bold 46px monospace"; x.textAlign="center"; x.fillText("TESTRAUM B",w/2,70); x.font="20px monospace"; x.fillText("KRONOS ROBOTICS · STATION 7",w/2,104); }, 1, 1);
   const sg = new THREE.Mesh(new THREE.PlaneGeometry(1.8,.45), new THREE.MeshBasicMaterial({map:st})); sg.position.set(W - .02, 2.6, -.8); sg.rotation.y = -Math.PI/2; testG.add(sg); }
 
 /* ---------- Labor (Fertigungshalle) ---------- */
@@ -223,14 +223,14 @@ function botProp(mask, hung) {
 }
 const labBlocks = [];
 { // Texturen
-  const floorLab = canvasTex(256,256,(x,w,h)=>{ x.fillStyle="#393d43"; x.fillRect(0,0,w,h); speckle(x,w,h,5000,.2); x.strokeStyle="rgba(22,25,32,.8)"; x.lineWidth=3; x.strokeRect(0,0,w,h); x.fillStyle="#d8849f"; x.globalAlpha=.9; for (let i=-4;i<10;i++){ x.beginPath(); x.moveTo(i*30,h); x.lineTo(i*30+16,h); x.lineTo(i*30+16+20,h-20); x.lineTo(i*30+20,h-20); x.fill(); } x.globalAlpha=1; }, 2*W, 2*D);
+  const floorLab = canvasTex(256,256,(x,w,h)=>{ x.fillStyle="#393d43"; x.fillRect(0,0,w,h); speckle(x,w,h,5000,.2); x.strokeStyle="rgba(22,25,32,.8)"; x.lineWidth=3; x.strokeRect(0,0,w,h); x.fillStyle="#4fa9a3"; x.globalAlpha=.9; for (let i=-4;i<10;i++){ x.beginPath(); x.moveTo(i*30,h); x.lineTo(i*30+16,h); x.lineTo(i*30+16+20,h-20); x.lineTo(i*30+20,h-20); x.fill(); } x.globalAlpha=1; }, 2*W, 2*D);
   const ceilLab = canvasTex(256,256,(x,w,h)=>{ x.fillStyle="#40444a"; x.fillRect(0,0,w,h); speckle(x,w,h,2500,.15); x.strokeStyle="rgba(22,25,32,.8)"; x.lineWidth=2; x.strokeRect(0,0,w,h); x.fillStyle="#9ba0a7"; x.fillRect(0,h*.45,w,10); x.fillRect(0,h*.62,w,6); }, W, D);
-  const wd = (x,w,h)=>{ x.fillStyle="#44484f"; x.fillRect(0,0,w,h); speckle(x,w,h,4000,.16); x.fillStyle="#2f3339"; x.fillRect(0,h*.62,w,h*.38); x.fillStyle="#d8849f"; x.fillRect(0,h*.62-3,w,6);
+  const wd = (x,w,h)=>{ x.fillStyle="#44484f"; x.fillRect(0,0,w,h); speckle(x,w,h,4000,.16); x.fillStyle="#2f3339"; x.fillRect(0,h*.62,w,h*.38); x.fillStyle="#4fa9a3"; x.fillRect(0,h*.62-3,w,6);
     x.strokeStyle="rgba(22,25,32,.7)"; x.lineWidth=2; for (let i=0;i<256;i+=64){ x.beginPath(); x.moveTo(i,0); x.lineTo(i,h*.62); x.stroke(); } x.fillStyle="#a9aeb6"; x.fillRect(0,h*.2,w,7); x.fillRect(0,h*.27,w,4); };
   roomMeshes.labMaps = [floorLab, ceilLab, canvasTex(256,430,wd,D,1), canvasTex(256,430,wd,D,1), canvasTex(256,430,wd,W,1), canvasTex(256,430,wd,W,1)];
   roomMeshes.testMaps = [floorTex, ceilTex, wallTexA, wallTexA, wallTexB, wallTexB];
   // Server-Racks (linke Wand)
-  const led = [new THREE.MeshBasicMaterial({color:0xb86a85}), new THREE.MeshBasicMaterial({color:0xdde4f2}), new THREE.MeshBasicMaterial({color:0x5a7fd0})];
+  const led = [new THREE.MeshBasicMaterial({color:0x3c8680}), new THREE.MeshBasicMaterial({color:0xdde4f2}), new THREE.MeshBasicMaterial({color:0x5a7fd0})];
   function rack(x, z, ry) { const g = new THREE.Group(); box(.7,2.0,.55,mDark,0,1.0,0,g); for (let r = 0; r < 12; r++) { box(.6,.03,.02,mMetal,0,.2 + r*.15,.28,g); for (let k = 0; k < 4; k++) if (Math.random() < .6) box(.03,.03,.02,led[(Math.random()*3)|0],-.2 + k*.1,.23 + r*.15,.29,g); }
     g.position.set(x,0,z); g.rotation.y = ry; labG.add(g); return g; }
   rack(-W + .4,-2.6,Math.PI/2); rack(-W + .4,-1.6,Math.PI/2); rack(-W + .4,-.6,Math.PI/2);
@@ -248,7 +248,7 @@ const labBlocks = [];
     box(8.0,.1,.14,mMetal,0,H - .15,rz,labG);
     for (const [bx,by,mk] of bots) { const b = botProp(mk, true); b.position.set(bx,by,rz); b.rotation.y = (Math.random() - .5)*1.2; labG.add(b); limb(V3(bx,H - .15,rz),V3(bx,by + .35,rz),.018,mDark,labG); } }
   // Schild
-  const sign = canvasTex(1024,170,(x,w,h)=>{ x.fillStyle="#1d2127"; x.fillRect(0,0,w,h); x.fillStyle="#d8849f"; x.fillRect(0,0,w,14); x.fillRect(0,h-14,w,14); x.fillStyle="#f2f6ff"; x.font="bold 70px monospace"; x.textAlign="center"; x.fillText("ARACHNE · FERTIGUNG",w/2,100); x.font="26px monospace"; x.fillText("KRONOS ROBOTICS · SEKTOR 7",w/2,140); }, 1, 1);
+  const sign = canvasTex(1024,170,(x,w,h)=>{ x.fillStyle="#1d2127"; x.fillRect(0,0,w,h); x.fillStyle="#4fa9a3"; x.fillRect(0,0,w,14); x.fillRect(0,h-14,w,14); x.fillStyle="#f2f6ff"; x.font="bold 70px monospace"; x.textAlign="center"; x.fillText("ARACHNE · FERTIGUNG",w/2,100); x.font="26px monospace"; x.fillText("KRONOS ROBOTICS · SEKTOR 7",w/2,140); }, 1, 1);
   const sg = new THREE.Mesh(new THREE.PlaneGeometry(3.4,.56), new THREE.MeshBasicMaterial({map:sign})); sg.position.set(-.2,2.6,-D + .02); labG.add(sg);
   // Trümmer
   for (let i = 0; i < 26; i++) { const c = box(.1 + Math.random()*.3,.03 + Math.random()*.04,.1 + Math.random()*.3,mStd(i%3 ? 0xaab6d2 : 0x3a4a70,.2,.8),(Math.random() - .5)*7,.02,(Math.random() - .5)*5.4,labG); c.rotation.y = Math.random()*6.28; c.rotation.x = (Math.random() - .5)*.2; }
@@ -320,15 +320,15 @@ function beginStory() {
 /* ---------- Intro: Sensor-Erwachen (Augen-HUD, Herzschlag, Boot-Text) ---------- */
 { const st = document.createElement("style"); st.textContent = `
 #boot{position:fixed;left:8vw;bottom:21vh;z-index:19;font:500 12px/2.05 system-ui,sans-serif;letter-spacing:.24em;color:rgba(255,255,255,.8);text-transform:uppercase;pointer-events:none;transition:opacity .9s}
-#boot div{opacity:0;transform:translateX(-6px);transition:opacity .3s,transform .3s}#boot div.on{opacity:1;transform:none}#boot .h{color:#fff;font-weight:700;letter-spacing:.3em;margin-bottom:6px}#boot .s{color:#d8849f;margin-left:14px}#boot .q{animation:bq 1.1s steps(2,end) infinite}@keyframes bq{50%{opacity:.25}}
+#boot div{opacity:0;transform:translateX(-6px);transition:opacity .3s,transform .3s}#boot div.on{opacity:1;transform:none}#boot .h{color:#fff;font-weight:700;letter-spacing:.3em;margin-bottom:6px}#boot .s{color:#4fa9a3;margin-left:14px}#boot .q{animation:bq 1.1s steps(2,end) infinite}@keyframes bq{50%{opacity:.25}}
 #eyeFx{position:fixed;inset:0;z-index:17;pointer-events:none;opacity:0;transition:opacity 1.4s;background:radial-gradient(ellipse at center,transparent 52%,rgba(4,10,26,.78) 100%),repeating-linear-gradient(0deg,rgba(255,255,255,.028) 0 1px,transparent 1px 3px)}#eyeFx.on{opacity:1}
 #eyeFx .c{position:absolute;width:34px;height:34px;border:0 solid rgba(255,255,255,.55)}#eyeFx .tl{left:7vw;top:15vh;border-width:2px 0 0 2px}#eyeFx .tr{right:7vw;top:15vh;border-width:2px 2px 0 0}#eyeFx .bl{left:7vw;bottom:15vh;border-width:0 0 2px 2px}#eyeFx .br{right:7vw;bottom:15vh;border-width:0 2px 2px 0}
-#eyeFx .ret{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px;border:1.5px solid rgba(255,255,255,.5);border-radius:50%;transition:all .5s}#eyeFx .ret:after{content:"";position:absolute;left:50%;top:50%;width:5px;height:5px;margin:-2.5px;background:#d8849f;border-radius:50%}#eyeFx .ret.lock{width:34px;height:34px;margin:-17px;border-color:#d8849f}
-#eyeFx .cap{position:absolute;left:calc(7vw + 48px);top:calc(15vh + 4px);font:600 11px/1 system-ui,sans-serif;letter-spacing:.3em;color:rgba(255,255,255,.75);text-transform:uppercase}#eyeFx .cap b{color:#d8849f;margin-right:10px}
+#eyeFx .ret{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px;border:1.5px solid rgba(255,255,255,.5);border-radius:50%;transition:all .5s}#eyeFx .ret:after{content:"";position:absolute;left:50%;top:50%;width:5px;height:5px;margin:-2.5px;background:#4fa9a3;border-radius:50%}#eyeFx .ret.lock{width:34px;height:34px;margin:-17px;border-color:#4fa9a3}
+#eyeFx .cap{position:absolute;left:calc(7vw + 48px);top:calc(15vh + 4px);font:600 11px/1 system-ui,sans-serif;letter-spacing:.3em;color:rgba(255,255,255,.75);text-transform:uppercase}#eyeFx .cap b{color:#4fa9a3;margin-right:10px}
 #eyeFx .stat{position:absolute;left:calc(7vw + 48px);bottom:calc(15vh + 2px);font:500 10px/1.7 system-ui,sans-serif;letter-spacing:.28em;color:rgba(255,255,255,.55);text-transform:uppercase;white-space:pre}
 #eyeFx .scan{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);top:-4px}#eyeFx.on .scan{animation:esc 4.2s linear infinite}@keyframes esc{from{top:12vh}to{top:88vh}}
 #eyeTags{position:fixed;inset:0;z-index:18;pointer-events:none}.eyeTag{position:absolute;left:0;top:0;opacity:0;transition:opacity .5s;will-change:transform}.eyeTag.on{opacity:1}
-.eyeTag i{position:absolute;left:-5px;top:-5px;width:10px;height:10px;border:1.5px solid #d8849f;transform:rotate(45deg)}.eyeTag u{position:absolute;left:5px;top:-5px;width:38px;height:1.5px;background:rgba(255,255,255,.6);transform-origin:0 0;transform:rotate(-38deg);text-decoration:none}
+.eyeTag i{position:absolute;left:-5px;top:-5px;width:10px;height:10px;border:1.5px solid #4fa9a3;transform:rotate(45deg)}.eyeTag u{position:absolute;left:5px;top:-5px;width:38px;height:1.5px;background:rgba(255,255,255,.6);transform-origin:0 0;transform:rotate(-38deg);text-decoration:none}
 .eyeTag div{position:absolute;left:36px;top:-42px;padding:6px 12px 7px;border-radius:9px;background:rgba(27,30,36,.42);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;font:600 11px/1.35 system-ui,sans-serif;letter-spacing:.2em;white-space:nowrap;text-transform:uppercase}.eyeTag div small{display:block;font-size:9px;font-weight:500;letter-spacing:.24em;color:rgba(255,255,255,.55)}`; document.head.appendChild(st);
   const bo = document.createElement("div"); bo.id = "boot"; document.body.appendChild(bo);
   const ef = document.createElement("div"); ef.id = "eyeFx"; ef.innerHTML = '<i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i><div class="scan"></div><div class="ret"></div><div class="cap"></div><div class="stat"></div>'; document.body.appendChild(ef);
@@ -363,7 +363,7 @@ function voidBuild() {
 function voidTwinBuild() {
   if (voidTwin) return; const upi = spider.children.indexOf(upgG), vis = upgG.visible; upgG.visible = false; spider.updateMatrixWorld(true);
   voidTwin = spider.clone(true); upgG.visible = vis; if (upi >= 0) voidTwin.children[upi].visible = false; if (typeof ropeLine !== "undefined") { /* kein Seil */ }
-  const mb = new THREE.MeshStandardMaterial({color:0x060608, emissive:0x0a0e1a, roughness:.55, metalness:.4}), md = new THREE.MeshStandardMaterial({color:0x020203, roughness:.8, metalness:.2}), me = new THREE.MeshStandardMaterial({color:0x200800, emissive:0xb86a85, emissiveIntensity:1.1, roughness:.4});
+  const mb = new THREE.MeshStandardMaterial({color:0x060608, emissive:0x0a0e1a, roughness:.55, metalness:.4}), md = new THREE.MeshStandardMaterial({color:0x020203, roughness:.8, metalness:.2}), me = new THREE.MeshStandardMaterial({color:0x200800, emissive:0x3c8680, emissiveIntensity:1.1, roughness:.4});
   const gp = m => { m.onBeforeCompile = sh => { sh.uniforms.glT = voidU.glT; sh.uniforms.glA = voidU.glA;
       sh.vertexShader = "uniform float glT, glA; varying float vGY;\n" + sh.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\n float gy0 = (modelMatrix*vec4(transformed,1.)).y; float gb = floor(gy0*22. + glT*5.); float gr = fract(sin(gb*91.7 + floor(glT*9.)*13.1)*43758.5); if (gr > 1. - glA*.7) transformed.x += (gr - .5)*glA*1.4; vGY = gy0;");
       sh.fragmentShader = "uniform float glT, glA; varying float vGY;\n" + sh.fragmentShader.replace("void main() {", "void main() {\n float gb2 = floor(vGY*30. + glT*7.); float gh = fract(sin(gb2*37.3 + floor(glT*12.)*7.7)*43758.5); if (gh > 1. - glA*.9) discard; if (fract(sin(dot(gl_FragCoord.xy, vec2(12.9, 78.2)) + glT)*43758.5) < glA*.2) discard;"); }; m.needsUpdate = true; return m; };
@@ -459,7 +459,7 @@ function introCut() {
 const tut = {on:false, i:0, t:0, ok:0, x:0, z:0, jumped:false, look:0};
 const tutEl = document.createElement("div"); tutEl.id = "tut"; tutEl.innerHTML = '<i></i><span></span>'; document.body.appendChild(tutEl);
 { const st = document.createElement("style"); st.textContent = `#tut{position:fixed;left:50%;top:22%;transform:translate(-50%,-8px);z-index:21;display:flex;align-items:center;gap:12px;padding:10px 20px 10px 12px;border-radius:999px;background:rgba(27,30,36,.38);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;font-size:14px;letter-spacing:.06em;opacity:0;pointer-events:none;transition:opacity .4s,transform .4s;box-shadow:0 4px 18px rgba(0,0,0,.2)}#tut.on{opacity:1;transform:translate(-50%,0)}
-#tut i{font-style:normal;font-size:11px;font-weight:700;min-width:26px;height:26px;padding:0 6px;box-sizing:border-box;border-radius:7px;display:flex;align-items:center;justify-content:center;background:#d8849f;color:#1d2026;letter-spacing:.04em}#tut.done i{background:#5fd38d}#tut span small{display:block;font-size:10px;letter-spacing:.24em;color:rgba(255,255,255,.5);margin-bottom:1px}`; document.head.appendChild(st); }
+#tut i{font-style:normal;font-size:11px;font-weight:700;min-width:26px;height:26px;padding:0 6px;box-sizing:border-box;border-radius:7px;display:flex;align-items:center;justify-content:center;background:#4fa9a3;color:#1d2026;letter-spacing:.04em}#tut.done i{background:#5fd38d}#tut span small{display:block;font-size:10px;letter-spacing:.24em;color:rgba(255,255,255,.5);margin-bottom:1px}`; document.head.appendChild(st); }
 function tutStart() { tut.on = true; tut.i = 0; tut.t = 0; tut.ok = 0; tut.x = pos.x; tut.z = pos.z; tut.jumped = false; tut.look = 0; }
 function tutSteps() { const m = window.inputMode || "keyboard", tch = m === "touch", pad = m === "pad";
   return [{k:tch ? "◐" : pad ? "L" : "WASD", h:"Laufen", t:tch ? "Joystick links bewegen" : pad ? "Linker Stick" : "Bewege dich mit W A S D", c:() => Math.hypot(pos.x - tut.x, pos.z - tut.z) > 1.6},

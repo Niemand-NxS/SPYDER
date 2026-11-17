@@ -16,7 +16,7 @@ function buildMase(ix, hd) {
   pl(IW, ID + .2, conc, ix, .01, hd + ID/2 + .05, -Math.PI/2, 0); pl(IW, ID, mStd(0x24262c, .3, .8), ix, IH, hd + ID/2 + .15, Math.PI/2, 0);
   pl(IW, IH, brick(IW, IH), ix, IH/2, D2, 0, Math.PI); pl(ID - .3, IH, brick(ID, IH), x0, IH/2, hd + .3 + (ID - .3)/2, 0, Math.PI/2); pl(ID - .3, IH, brick(ID, IH), x1, IH/2, hd + .3 + (ID - .3)/2, 0, -Math.PI/2);
   const fw = GX - 2.4 - x0; pl(fw, IH, brick(fw, IH), x0 + fw/2, IH/2, z0, 0, 0); pl(fw, IH, brick(fw, IH), x1 - fw/2, IH/2, z0, 0, 0);
-  const steel = mStd(0x2a2c32, .7, .45), orange = mStd(0xb86a85, .4, .6), blue = mStd(0x23304a, .5, .6), tm = mStd(0x5a5e66, .6, .5), woodM = pbrMat("wood", 1, 1, 0xb89878, 0), dk = mStd(0x16181c, .6, .5);
+  const steel = mStd(0x2a2c32, .7, .45), orange = mStd(0x3c8680, .4, .6), blue = mStd(0x23304a, .5, .6), tm = mStd(0x5a5e66, .6, .5), woodM = pbrMat("wood", 1, 1, 0xb89878, 0), dk = mStd(0x16181c, .6, .5);
   const B = (w, h, d, m, x, y, z, solid) => exBox(w, h, d, m, x, y, z, solid);
   // Torrahmen
   B(.16, 3.4, .36, steel, GX - 2.48, 1.7, hd + .15); B(.16, 3.4, .36, steel, GX + 2.48, 1.7, hd + .15); B(5.1, .22, .36, steel, GX, 3.5, hd + .15);
@@ -46,7 +46,7 @@ function buildMase(ix, hd) {
   // Teppich/Ölflecken, Poster, Schild
   const oil = new THREE.MeshStandardMaterial({map:canvasTex(64, 64, (x, w, h) => { const g = x.createRadialGradient(w/2, h/2, 2, w/2, h/2, w/2); g.addColorStop(0, "rgba(10,10,14,.55)"); g.addColorStop(.6, "rgba(10,10,14,.3)"); g.addColorStop(1, "rgba(10,10,14,0)"); x.clearRect(0, 0, w, h); x.fillStyle = g; x.fillRect(0, 0, w, h); }, 1, 1), transparent:true, depthWrite:false, roughness:.3, metalness:0, polygonOffset:true, polygonOffsetFactor:-2});
   for (const o of [pl(2.6, 1.8, oil, GX - .6, .02, hd + 2.6, -Math.PI/2, 0), pl(1.4, 1.0, oil, GX + 2.6, .02, hd + 1.6, -Math.PI/2, .4)]) o.userData.noSh = 1;
-  pl(1.2, .7, sign("OFFEN BIS DIE FUNKEN AUSGEHEN", "#d8849f", 1.2, .7, "#14161a"), x1 - .02, 2.3, hd + 2.8, 0, -Math.PI/2);
+  pl(1.2, .7, sign("OFFEN BIS DIE FUNKEN AUSGEHEN", "#4fa9a3", 1.2, .7, "#14161a"), x1 - .02, 2.3, hd + 2.8, 0, -Math.PI/2);
   // Mase und Werkbank-Waffe
   const M = makeRobot({body:0x6a5a48, acc:0xd8902a, glow:0xf2c070, apron:0x3a2a1a, pouch:true}); M.smile = true; M.mode = "bar";
   const gm = mStd(0x16181c, .6, .4); for (const s2 of [-1, 1]) { const o = new THREE.Mesh(new THREE.CylinderGeometry(.05, .05, .05, 10), gm); o.rotation.x = Math.PI/2; o.position.set(s2*.07, .36, .1); M.head.add(o); }
@@ -63,7 +63,7 @@ function buildMase(ix, hd) {
 
   const wp = new THREE.Group(); wp.position.set(bx, .96, D2 - .5); exG.add(wp);
   [[.9, .06, .12, 0, 0, 0], [.3, .1, .14, -.5, .04, 0], [.12, .14, .18, .35, .08, 0]].forEach(([w, h, d, x, y, z]) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), steel); o.position.set(x, y + .03, z); o.castShadow = true; wp.add(o); });
-  const gl = new THREE.Mesh(new THREE.BoxGeometry(.5, .02, .03), new THREE.MeshBasicMaterial({color:0xb86a85})); gl.position.set(.1, .075, .0); wp.add(gl);
+  const gl = new THREE.Mesh(new THREE.BoxGeometry(.5, .02, .03), new THREE.MeshBasicMaterial({color:0x3c8680})); gl.position.set(.1, .075, .0); wp.add(gl);
   const L = new THREE.PointLight(0xffb060, 1.2, 4.5, 1.6); L.position.set(bx, 1.4, D2 - 1.0); exG.add(L); xs.lights.push(L); xs.maseL = L; M.sparkT = 0;
   // Behandlungstisch
   const tx = GX + 1.8, tz = hd + 3.4; Object.assign(SHOP, {tx, tz}); exBox(1.5, .08, .9, tm, tx, .85, tz, true); for (const [dx, dz] of [[-.65, -.38], [.65, -.38], [-.65, .38], [.65, .38]]) exBox(.07, .85, .07, tm, tx + dx, .42, tz + dz);
@@ -213,7 +213,7 @@ function toggleCMap() {
 }
 function drawCMap() {
   if (!cmapOpen) return; const cv = $("cmapC"), g = cv.getContext("2d"), W = cv.width = 760, H = cv.height = 460; cmapT += .05;
-  const O = "#d8849f", Wt = "#e8eefc", B = "#22252b", mut = "rgba(210,224,250,.5)";
+  const O = "#4fa9a3", Wt = "#e8eefc", B = "#22252b", mut = "rgba(210,224,250,.5)";
   g.fillStyle = "#1d2026"; g.fillRect(0, 0, W, H);
   g.strokeStyle = "rgba(210,224,250,.06)"; g.lineWidth = 1; for (let x = 0; x < W; x += 40) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke(); } for (let y = 0; y < H; y += 40) { g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); }
   const CX = 385, KX = 16, AZ = 118, SZ = 318, KZ = 12;               // Welt → Karte: x*16, z*12
@@ -237,7 +237,7 @@ function drawCMap() {
   const wA = x => CX + x*KX, wS = x => CX + x*KX;
   const P = {bar:[wA(3.5), AZ - 2.6*KZ - 14], halle:[560, 45], werk:[wS(4), SZ + 3.2*KZ + 22], haus:[wS(8), SZ - 3.2*KZ - 24], kred:[290, 217], fe:[wA(-9.5), AZ + 2.6*KZ + 4]};
   const dot = (p, c, r) => { g.fillStyle = c; g.beginPath(); g.arc(p[0], p[1], r || 5, 0, 7); g.fill(); g.strokeStyle = B; g.lineWidth = 2; g.stroke(); };
-  g.strokeStyle = "rgba(216,132,159,.55)"; g.lineWidth = 3; g.beginPath(); g.moveTo(P.halle[0], 78); g.lineTo(P.halle[0], AZ); g.lineTo(P.halle[0] - 10, AZ); g.stroke();
+  g.strokeStyle = "rgba(79,169,163,.55)"; g.lineWidth = 3; g.beginPath(); g.moveTo(P.halle[0], 78); g.lineTo(P.halle[0], AZ); g.lineTo(P.halle[0] - 10, AZ); g.stroke();
   dot([P.halle[0], P.halle[1]], Wt); dot(P.bar, Wt); dot(P.werk, O, 8); dot(P.haus, Wt); dot(P.kred, gear.job === 1 ? O : mut, gear.job === 1 ? 8 : 5);
   txt("Fertigungshalle", P.halle[0], P.halle[1] - 12); txt("Gasse", wA(-5), AZ + 4, mut); txt("Bar „Klirr“", P.bar[0], P.bar[1] - 10); txt("Haus Nr. 14 · Rackson", P.haus[0], P.haus[1] - 10);
   txt("Mases Werkstatt", P.werk[0], P.werk[1] + 20, O); txt("Straße", wS(-3), SZ - 40, mut); txt("Kreditkontor Brandt & Co.", P.kred[0], P.kred[1] + (gear.job === 1 ? 22 : 20), gear.job === 1 ? O : mut, 11);
@@ -258,8 +258,8 @@ function drawCMap() {
 
 /* ===== Sichtbare Upgrades an ARACHNE-8 ===== */
 const upgG = new THREE.Group(); spider.add(upgG); let upgSig = "", upgLeds = [], upgPods = [];
-const mUOr = mat(0xb86a85, .4, .4), mUSt = mat(0x6a7488, .8, .35), mUBl = mat(0x0f2250, .5, .25), mUWh = mat(0xe8eefc, .3, .5), mUPod = mat(0xcfe4ff, .2, .3), mUDk = mat(0x14161c, .5, .6);
-mUOr.emissive = new THREE.Color(0xb86a85); mUOr.emissiveIntensity = .35; mUPod.emissive = new THREE.Color(0x9fc4ff); mUPod.emissiveIntensity = .3;
+const mUOr = mat(0x3c8680, .4, .4), mUSt = mat(0x6a7488, .8, .35), mUBl = mat(0x0f2250, .5, .25), mUWh = mat(0xe8eefc, .3, .5), mUPod = mat(0xcfe4ff, .2, .3), mUDk = mat(0x14161c, .5, .6);
+mUOr.emissive = new THREE.Color(0x3c8680); mUOr.emissiveIntensity = .35; mUPod.emissive = new THREE.Color(0x9fc4ff); mUPod.emissiveIntensity = .3;
 function upgBuild() {
   while (upgG.children.length) upgG.remove(upgG.children[0]); upgLeds = []; upgPods = []; const u = gear.upg, ad = (g, m, x, y, z) => add(g, m, x, y, z, upgG);
   for (let i = 0; i < u.laser; i++) for (const s of [-1, 1]) { ad(new THREE.CylinderGeometry(.045, .05, .3, 10), mUSt, s*.2, .08, 1.12).rotation.x = Math.PI/2; ad(new THREE.TorusGeometry(.055, .014, 6, 12), mUOr, s*.2, .08, 1.0 + i*.1).rotation.y = Math.PI/2; }
