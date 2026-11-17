@@ -1207,6 +1207,7 @@ const EN = {
   "Mhm… noch… einen…":"Mhm… another… one…","Hörst du das? Die Rohre. KRONOS atmet.":"Do you hear that? The pipes. KRONOS is breathing.","Nicht… zerlegen…":"Don't… take apart…",
   "Er träumt oft davon. Ich frage nicht nach.":"He dreams of it often. I don't ask.","Du bist ein seltsamer Gast. Aber ich habe schon seltsamere bedient.":"You're a strange guest. But I've served stranger ones.",
   "Mit den Beinen kannst du ja schlecht bestellen.":"You can hardly order with those legs.","Wenn du Ärger hast, bleib hier. Hier sucht keiner.":"If you're in trouble, stay here. Nobody looks here.","Rost… überall…":"Rust… everywhere…",
+  "Kantenglättung (FXAA)":"Anti-aliasing (FXAA)","Aus (MSAA)":"Off (MSAA)","Glättet Kanten, wenn Nachbearbeitung aktiv ist (Ambient Occlusion, Nebel, Unschärfe …). Bei „Aus“ wird MSAA genutzt – das geht aber nur, solange keine Nachbearbeitung läuft.":"Smooths edges while post-processing is active (ambient occlusion, fog, blur …). When off, MSAA is used – but that only works while no post-processing runs.",
   "Foto":"Photo","Herunterladen":"Download","Löschen":"Delete","Schließen":"Close",
   "Ich sag dir … die Sonne … die kommt gar nicht.":"I'm telling you … the sun … it's not coming at all.",
   "Doch … kommt. Is' nur … spät dran.":"It is … coming. It's just … running late.",
@@ -2749,6 +2750,7 @@ const OPTD = [   // [Schlüssel, Bezeichnung, min, max, Teiler, Standard, Format
   ["nearBlur","Unschärfe bei Nähe zur Kamera",0,0,0,true,null,"GRAFIK","Dinge direkt vor der Kamera werden unscharf (nur WebGL; Kantenglättung aus, solange etwas sehr nah ist)"],
   ["cine","Film-Look in Cutscenes",0,0,0,true,null,"GRAFIK","Tiefenschärfe und Filmkorn (nur WebGL; Kantenglättung aus während der Cutscene)"],
   ["mblur","Bewegungsunschärfe",0,100,100,.05,v => v ? Math.round(v*100) + "%" : "Aus","GRAFIK","Verwischt schnelle Kamerabewegungen (nur WebGL, deaktiviert Kantenglättung)"],
+  ["fxaa","Kantenglättung (FXAA)",0,100,100,1,v => v ? Math.round(v*100) + "%" : "Aus (MSAA)","GRAFIK","Glättet Kanten, wenn Nachbearbeitung aktiv ist (Ambient Occlusion, Nebel, Unschärfe …). Bei „Aus“ wird MSAA genutzt – das geht aber nur, solange keine Nachbearbeitung läuft."],
   ["ao","Ambient Occlusion",0,100,100,.5,v => v ? Math.round(v*100) + "%" : "Aus","GRAFIK","Dunkelt Ecken, Spalten und Kontaktstellen ab, für mehr Tiefe (nur WebGL, deaktiviert Kantenglättung, kostet Leistung)"],
   ["vfog","Volumetrischer Nebel",0,100,100,0,v => v ? Math.round(v*100) + "%" : "Aus","GRAFIK","Dichter, wabernder Nebel mit Streulicht der Lampen; im Schatten dunkel. Nur in Gasse, Straße, Treppenhaus und auf dem Dach (nur WebGL, deaktiviert Kantenglättung)"],
   ["gpu","WebGPU (experimentell)",0,0,0,false,null,"GRAFIK","Gilt nach Neuladen. Bei Problemen wechselt das Spiel automatisch zurück auf WebGL"]];
@@ -2955,7 +2957,17 @@ void main() {
   if (gl > 0.) { col.r += sp*gl*.25; col *= 1. - sp*gl*.2; col += (h31(vec3(gl_FragCoord.xy, floor(time*30.))) - .5)*gl*.18; }
   gl_FragColor = vec4(col, 1.);
 }`;
+const AA_FS = `precision highp float; uniform sampler2D tC; uniform vec2 res; uniform float k; varying vec2 vUv;
+float lm(vec3 c){ return dot(c, vec3(.299, .587, .114)); }
+void main(){ vec2 px = 1./res; vec3 M = texture2D(tC, vUv).rgb, NW = texture2D(tC, vUv + vec2(-1., -1.)*px).rgb, NE = texture2D(tC, vUv + vec2(1., -1.)*px).rgb, SW = texture2D(tC, vUv + vec2(-1., 1.)*px).rgb, SE = texture2D(tC, vUv + vec2(1., 1.)*px).rgb;
+  float lM = lm(M), lNW = lm(NW), lNE = lm(NE), lSW = lm(SW), lSE = lm(SE), lo = min(lM, min(min(lNW, lNE), min(lSW, lSE))), hi = max(lM, max(max(lNW, lNE), max(lSW, lSE)));
+  vec2 dir = vec2(-((lNW + lNE) - (lSW + lSE)), (lNW + lSW) - (lNE + lSE)); float red = max((lNW + lNE + lSW + lSE)*.03125, 1./128.), rcp = 1./(min(abs(dir.x), abs(dir.y)) + red);
+  dir = clamp(dir*rcp, vec2(-8.), vec2(8.))*px;
+  vec3 A = .5*(texture2D(tC, vUv + dir*(1./3. - .5)).rgb + texture2D(tC, vUv + dir*(2./3. - .5)).rgb), B = A*.5 + .25*(texture2D(tC, vUv + dir*-.5).rgb + texture2D(tC, vUv + dir*.5).rgb);
+  float lB = lm(B); vec3 o = (lB < lo || lB > hi) ? A : B; gl_FragColor = vec4(mix(M, o, k), 1.); }`;
 function postInit() {
+  post.rt2 = new THREE.WebGLRenderTarget(4, 4, {minFilter:THREE.LinearFilter, magFilter:THREE.LinearFilter, depthBuffer:false});
+  post.aa = new THREE.ShaderMaterial({uniforms:{tC:{value:null}, res:{value:new THREE.Vector2()}, k:{value:1}}, vertexShader:"varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0., 1.); }", fragmentShader:AA_FS, depthTest:false, depthWrite:false});
   post.rt = new THREE.WebGLRenderTarget(4, 4, {minFilter:THREE.LinearFilter, magFilter:THREE.LinearFilter, depthTexture:new THREE.DepthTexture(4, 4, THREE.UnsignedIntType)});
   post.mat = new THREE.ShaderMaterial({uniforms:{tC:{value:null}, tD:{value:null}, invP:{value:new THREE.Matrix4()}, invV:{value:new THREE.Matrix4()}, prevVP:{value:new THREE.Matrix4()}, curVP:{value:new THREE.Matrix4()}, res:{value:new THREE.Vector2()}, near:{value:.1}, ca:{value:0}, cine:{value:0}, dofK:{value:0}, nearK:{value:0}, gl:{value:0}, ao:{value:0}, projY:{value:1}, focus:{value:6}, far:{value:100}, time:{value:0}, mb:{value:0}, mbK:{value:1}, fogD:{value:0}, camP:{value:new THREE.Vector3()}, fogC:{value:new THREE.Color()}, lampP:{value:new THREE.Vector3()}, lampC:{value:new THREE.Color()}},
     vertexShader:"varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0., 1.); }", fragmentShader:POST_FS, depthTest:false, depthWrite:false});
@@ -2983,12 +2995,13 @@ function renderFinal(dt) {
   if (window.__gpu || (!mb && !aoK && !fg && !ca && post.cine < .01 && post.dof < .01 && post.nr < .02 && !(story.gl > .01))) { post.has = false; renderer.render(scene, camera); return; }
   if (post.err) { post.has = false; renderer.render(scene, camera); return; }
   try { if (!post.rt) postInit();
-  const sz = renderer.getDrawingBufferSize(new THREE.Vector2()); if (sz.x !== post.w || sz.y !== post.h) { post.w = sz.x; post.h = sz.y; post.rt.setSize(sz.x, sz.y); post.has = false; }
+  const sz = renderer.getDrawingBufferSize(new THREE.Vector2()); if (sz.x !== post.w || sz.y !== post.h) { post.w = sz.x; post.h = sz.y; post.rt.setSize(sz.x, sz.y); post.rt2.setSize(sz.x, sz.y); post.has = false; }
   camera.updateMatrixWorld(); const u = post.mat.uniforms;
   renderer.setRenderTarget(post.rt); renderer.render(scene, camera); renderer.setRenderTarget(null);
+  const aaK = opt.fxaa || 0; let tcol = post.rt.texture; if (aaK > 0) { post.aa.uniforms.tC.value = post.rt.texture; post.aa.uniforms.res.value.set(sz.x, sz.y); post.aa.uniforms.k.value = aaK; post.quad.material = post.aa; renderer.setRenderTarget(post.rt2); renderer.render(post.scn, post.cam); renderer.setRenderTarget(null); post.quad.material = post.mat; tcol = post.rt2.texture; }
   const vp = post.vp.copy(camera.projectionMatrix).multiply(_ppm.copy(camera.matrixWorld).invert());
   post.t += dt; const jump = camera.getWorldPosition(_ppv).distanceTo(post.pp) > 2.5; post.pp.copy(_ppv);
-  u.tC.value = post.rt.texture; u.tD.value = post.rt.depthTexture; u.invP.value.copy(camera.projectionMatrix).invert(); u.invV.value.copy(camera.matrixWorld);
+  u.tC.value = tcol; u.tD.value = post.rt.depthTexture; u.invP.value.copy(camera.projectionMatrix).invert(); u.invV.value.copy(camera.matrixWorld);
   if (!post.has || jump) post.prev.copy(vp); u.prevVP.value.copy(post.prev); u.curVP.value.copy(vp); u.near.value = camera.near; u.far.value = camera.far; u.res.value.set(sz.x, sz.y); u.time.value = post.t % 1000;
   u.mb.value = mb; u.ca.value = ca; u.cine.value = post.cine < .01 ? 0 : post.cine; u.dofK.value = post.dof < .01 ? 0 : post.dof; u.nearK.value = post.nr < .02 ? 0 : post.nr; u.gl.value = story.gl || 0; u.ao.value = aoK; u.projY.value = camera.projectionMatrix.elements[5]; u.focus.value = post.focus; u.mbK.value = Math.min(1, (1/60)/Math.max(dt, .004))*1.0; u.fogD.value = fg*.12; u.camP.value.copy(_ppv);
   const fc = scene.fog ? scene.fog.color : (scene.background && scene.background.isColor ? scene.background : null); if (fc) u.fogC.value.copy(fc).multiplyScalar(1.6).addScalar(.02);

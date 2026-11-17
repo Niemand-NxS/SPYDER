@@ -350,6 +350,7 @@ const EN = {
   "Mhm… noch… einen…":"Mhm… another… one…","Hörst du das? Die Rohre. KRONOS atmet.":"Do you hear that? The pipes. KRONOS is breathing.","Nicht… zerlegen…":"Don't… take apart…",
   "Er träumt oft davon. Ich frage nicht nach.":"He dreams of it often. I don't ask.","Du bist ein seltsamer Gast. Aber ich habe schon seltsamere bedient.":"You're a strange guest. But I've served stranger ones.",
   "Mit den Beinen kannst du ja schlecht bestellen.":"You can hardly order with those legs.","Wenn du Ärger hast, bleib hier. Hier sucht keiner.":"If you're in trouble, stay here. Nobody looks here.","Rost… überall…":"Rust… everywhere…",
+  "Kantenglättung (FXAA)":"Anti-aliasing (FXAA)","Aus (MSAA)":"Off (MSAA)","Glättet Kanten, wenn Nachbearbeitung aktiv ist (Ambient Occlusion, Nebel, Unschärfe …). Bei „Aus“ wird MSAA genutzt – das geht aber nur, solange keine Nachbearbeitung läuft.":"Smooths edges while post-processing is active (ambient occlusion, fog, blur …). When off, MSAA is used – but that only works while no post-processing runs.",
   "Foto":"Photo","Herunterladen":"Download","Löschen":"Delete","Schließen":"Close",
   "Ich sag dir … die Sonne … die kommt gar nicht.":"I'm telling you … the sun … it's not coming at all.",
   "Doch … kommt. Is' nur … spät dran.":"It is … coming. It's just … running late.",
