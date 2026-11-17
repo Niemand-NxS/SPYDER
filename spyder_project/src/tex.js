@@ -44,7 +44,7 @@ function pipeMat(len) { const k = Math.round(len*2); return _pm[k] || (_pm[k] = 
 function labMetal() {
   const R = TIMG.rustC, S = TIMG.steelC; if (!R.complete || !S.complete || !R.naturalWidth || !S.naturalWidth) return;
   const redraw = (tex, draw) => { const c = tex.image, x = c.getContext("2d"); draw(x, c.width, c.height); tex.needsUpdate = true; };
-  const band = (x, w, h) => { const y0 = h*.62, bh = h*.38; x.drawImage(R, 0, 0, 512, 512*bh/w, 0, y0, w, bh); x.fillStyle = "rgba(22,44,100,.55)"; x.fillRect(0, y0, w, bh); x.fillStyle = "#e0701e"; x.fillRect(0, y0 - 3, w, 6); x.fillStyle = "rgba(12,16,30,.7)"; for (let i = 0; i < 4; i++) x.fillRect(0, y0 + bh*(i + 1)/5, w, 2); };
+  const band = (x, w, h) => { const y0 = h*.62, bh = h*.38; x.drawImage(R, 0, 0, 512, 512*bh/w, 0, y0, w, bh); x.fillStyle = "rgba(22,44,100,.55)"; x.fillRect(0, y0, w, bh); x.fillStyle = "#4fa9a3"; x.fillRect(0, y0 - 3, w, 6); x.fillStyle = "rgba(12,16,30,.7)"; for (let i = 0; i < 4; i++) x.fillRect(0, y0 + bh*(i + 1)/5, w, 2); };
   const wall = (x, w, h) => { x.fillStyle = "#aab6d2"; x.fillRect(0, 0, w, h); speckle(x, w, h, 4000, .14); band(x, w, h); x.strokeStyle = "rgba(50,54,52,.5)"; x.lineWidth = 3; x.beginPath(); x.moveTo(1, 0); x.lineTo(1, h); x.stroke(); };
   redraw(wallTexA, wall); redraw(wallTexB, wall);
   redraw(floorTex, (x, w, h) => { x.drawImage(S, 0, 0, w, h); x.fillStyle = "rgba(46,66,128,.62)"; x.fillRect(0, 0, w, h); speckle(x, w, h, 3000, .12); x.strokeStyle = "rgba(14,18,34,.85)"; x.lineWidth = 4; x.strokeRect(0, 0, w, h); x.fillStyle = "rgba(14,18,34,.8)"; for (const [a, b] of [[12, 12], [w - 12, 12], [12, h - 12], [w - 12, h - 12]]) { x.beginPath(); x.arc(a, b, 3.5, 0, 7); x.fill(); } });
@@ -58,7 +58,7 @@ function spiderMats() {
   const need = ["plaC", "mtlC"]; if (need.some(k => !TIMG[k].complete || !TIMG[k].naturalWidth)) return;
   const P = (m, k, rx, ry) => { m.map = imgTex(k + "C", rx, ry); m.normalMap = imgTex(k + "N", rx, ry); m.roughnessMap = imgTex(k + "R", rx, ry); m.normalScale.set(.8, .8); m.needsUpdate = true; };
   P(matLight, "pla", 1.5, 1.5); matLight.color.setHex(0xffffff); matLight.emissive.setHex(0x70757e); matLight.roughness = 1; matLight.metalness = .1;
-  P(matBrass, "mtl", 1.5, 1.5); matBrass.color.setHex(0xff6a20); matBrass.roughness = 1; matBrass.metalness = .2; matBrass.emissive.setHex(0x2a0c02);
+  P(matBrass, "mtl", 1.5, 1.5); matBrass.color.setHex(0x4fa9a3); matBrass.roughness = 1; matBrass.metalness = .2; matBrass.emissive.setHex(0x0c2a28);
 }
 for (const k of ["plaC", "mtlC"]) { if (TIMG[k].complete) setTimeout(spiderMats, 0); else TIMG[k].addEventListener("load", spiderMats); }
 function fenceMat(rx, ry) { return new THREE.MeshStandardMaterial({map:imgTex("fncC", rx, ry), alphaMap:imgTex("fncA", rx, ry), normalMap:imgTex("fncN", rx, ry), transparent:true, alphaTest:.5, side:THREE.DoubleSide, roughness:.6, metalness:.5, color:0xb8c0d0}); }

@@ -176,7 +176,7 @@ function buildStreet() {
     const n0 = blocks.length; solidOf(slab, blocks); xs.gar = {g:gg, u:0, tgt:0, bl:blocks.slice(n0), gone:false, glow:null};
     holeWall(5, SW, SH, [[-(GARX + 2.4), -(GARX - 2.4), .01, 3.4]], roomMeshes[5].material.map, 0, 0, 0);
     buildMase(GARX, hd); }
-  exPl(4.2, .6, sign("MASE · CUSTOM & UMBAU", "#e0701e", 4.2, .6, "#14161a"), GARX, 3.85, hd - .16, Math.PI);
+  exPl(4.2, .6, sign("MASE · CUSTOM & UMBAU", "#4fa9a3", 4.2, .6, "#14161a"), GARX, 3.85, hd - .16, Math.PI);
   xs.gar.glow = exPl(4.6, .12, new THREE.MeshBasicMaterial({color:0xffb070}), GARX, .1, hd - .17, Math.PI);       // Licht unter dem Tor
   exPt(0xffb070, .9, 4.5, GARX, .5, hd - 1.0);
   // Straßenmöbel: Kisten, Tonnen, Rohre, Straßenlaterne
@@ -207,7 +207,7 @@ function buildStreet() {
 /* ---------- Treppenhaus ---------- */
 const STW = 4.4, STD = 5.6, STH = 14.4, FL = 3.6;
 function buildStairs() {
-  const conc = canvasTex(256, 256, (x, w, h) => { x.fillStyle = "#4c4f56"; x.fillRect(0, 0, w, h); speckle(x, w, h, 5000, .2); x.fillStyle = "#2c2f36"; x.fillRect(0, h*.62, w, h*.38); x.fillStyle = "#e0701e"; x.fillRect(0, h*.62 - 3, w, 6); }, 3, 5);
+  const conc = canvasTex(256, 256, (x, w, h) => { x.fillStyle = "#4c4f56"; x.fillRect(0, 0, w, h); speckle(x, w, h, 5000, .2); x.fillStyle = "#2c2f36"; x.fillRect(0, h*.62, w, h*.38); x.fillStyle = "#4fa9a3"; x.fillRect(0, h*.62 - 3, w, 6); }, 3, 5);
   const fl = canvasTex(128, 128, (x, w, h) => { x.fillStyle = "#3a3d44"; x.fillRect(0, 0, w, h); for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) { x.fillStyle = (i + j)%2 ? "#34373e" : "#40434a"; x.fillRect(i*32, j*32, 32, 32); } speckle(x, w, h, 900, .2); }, 3, 4);
   const ceil = canvasTex(8, 8, (x, w, h) => { x.fillStyle = "#26282e"; x.fillRect(0, 0, w, h); }, 1, 1);
   exRoom(STW, STH, STD, {floor:fl, ceil, wW:conc, wE:conc, wN:conc, wS:conc});
@@ -271,8 +271,8 @@ function buildStairs() {
   cyl(.04, STW - .2, pipeM, 0, STH - .25, -hd + .12).rotation.z = Math.PI/2; cyl(.04, STD - .2, pipeM, -hw + .12, STH - .4, 0).rotation.x = Math.PI/2;
   const pic = (txt, col, w, h, x, y, z, ry) => { exPl(w + .06, h + .06, mStd(0x15171b, .3, .6), x + (ry ? Math.sign(ry)*-.004 : 0), y, z, ry); exPl(w, h, sign(txt, col, w, h), x + (ry ? Math.sign(ry)*-.008 : .008), y, z + (ry ? 0 : .008), ry); };
   for (let f = 0; f < 4; f++) { const y = f*FL + 1.7; const ln = new THREE.Mesh(new THREE.BoxGeometry(.12, .22, .22), mStd(0x1c2438, .5, .5)); ln.position.set(hw - .06, y + .6, f%2 ? -.9 : .9); exG.add(ln); exPl(.1, .16, bulb, hw - .125, y + .6, f%2 ? -.9 : .9, -Math.PI/2); }
-  pic("HAUSORDNUNG", "#e0e4ec", .5, .7, hw - .02, 1.7, hd - .4, -Math.PI/2); pic("RUHE 22–6", "#e0701e", .5, .35, hw - .02, FL + 1.8, .4, -Math.PI/2); pic("TREPPE FREI!", "#e0e4ec", .5, .35, hw - .02, 2*FL + 1.8, hd - .4, -Math.PI/2); pic("DACHBODEN", "#6a7a98", .5, .3, -hw + .02, 3*FL + 1.8, -.3, Math.PI/2);
-  pic("EG", "#e0e4ec", .22, .22, -hw + .02, 1.1, 1.9, Math.PI/2); pic("1", "#e0e4ec", .22, .22, -hw + .02, FL + 1.1, -1.9, Math.PI/2); pic("2", "#e0e4ec", .22, .22, -hw + .02, 2*FL + 1.1, 1.9, Math.PI/2); pic("3", "#e0701e", .22, .22, -hw + .02, 3*FL + 1.1, -1.9, Math.PI/2);
+  pic("HAUSORDNUNG", "#e0e4ec", .5, .7, hw - .02, 1.7, hd - .4, -Math.PI/2); pic("RUHE 22–6", "#4fa9a3", .5, .35, hw - .02, FL + 1.8, .4, -Math.PI/2); pic("TREPPE FREI!", "#e0e4ec", .5, .35, hw - .02, 2*FL + 1.8, hd - .4, -Math.PI/2); pic("DACHBODEN", "#6a7a98", .5, .3, -hw + .02, 3*FL + 1.8, -.3, Math.PI/2);
+  pic("EG", "#e0e4ec", .22, .22, -hw + .02, 1.1, 1.9, Math.PI/2); pic("1", "#e0e4ec", .22, .22, -hw + .02, FL + 1.1, -1.9, Math.PI/2); pic("2", "#e0e4ec", .22, .22, -hw + .02, 2*FL + 1.1, 1.9, Math.PI/2); pic("3", "#4fa9a3", .22, .22, -hw + .02, 3*FL + 1.1, -1.9, Math.PI/2);
   // Fenster (Morgenlicht) im Halbgeschoss
   for (const y of [1.9, FL + 3.0, 2*FL + 1.9]) exPl(.6, 1.0, new THREE.MeshBasicMaterial({color:0x9a8a8a}), -hw + .02, y, 0, Math.PI/2);
   scene.fog = new THREE.FogExp2(0x1c1e24, .028); scene.background = new THREE.Color(0x0a0a0c);
@@ -305,7 +305,7 @@ function buildFlat() {
   exBox(.12, 1.7, .5, mStd(0x7a2a2a, 0, 1), hw - .1, 1.6, -1.2); exBox(.12, 1.7, .5, mStd(0x7a2a2a, 0, 1), hw - .1, 1.6, 1.2);
   { const g = new THREE.Mesh(new THREE.BoxGeometry(.3, .1, 2.0), new THREE.MeshBasicMaterial({color:0xf8c890, transparent:true, opacity:.0})); }
   // Tür Süd (Eingang), Pflanze, Lampen, Bilder
-  exBox(1.0, 2.1, .06, mStd(0x4a3224, .3, .7), -1.5, 1.05, hd - .03); exPl(.9, 1.2, new THREE.MeshBasicMaterial({map:canvasTex(64, 80, (x, w, h) => { x.fillStyle = "#2a3a5a"; x.fillRect(0, 0, w, h); x.fillStyle = "#e0701e"; x.beginPath(); x.arc(32, 44, 18, 0, 7); x.fill(); x.fillStyle = "#1a2236"; x.fillRect(0, 56, w, 24); }, 1, 1)}), 0, 1.7, -hd + .02, 0);
+  exBox(1.0, 2.1, .06, mStd(0x4a3224, .3, .7), -1.5, 1.05, hd - .03); exPl(.9, 1.2, new THREE.MeshBasicMaterial({map:canvasTex(64, 80, (x, w, h) => { x.fillStyle = "#2a3a5a"; x.fillRect(0, 0, w, h); x.fillStyle = "#4fa9a3"; x.beginPath(); x.arc(32, 44, 18, 0, 7); x.fill(); x.fillStyle = "#1a2236"; x.fillRect(0, 56, w, 24); }, 1, 1)}), 0, 1.7, -hd + .02, 0);
   { const p = new THREE.Mesh(new THREE.CylinderGeometry(.16, .12, .35, 10), mStd(0x6a3a2a, 0, .8)); p.position.set(-hw + .4, .18, hd - .4); exG.add(p); for (let i = 0; i < 7; i++) { const l = new THREE.Mesh(new THREE.SphereGeometry(.16, 7, 5), mStd(0x3a6a3a, 0, .8)); l.scale.set(1, .4, .6); l.position.set(-hw + .4 + Math.sin(i)*.18, .5 + i*.07, hd - .4 + Math.cos(i*1.7)*.18); exG.add(l); } }
   for (const [x, z, y] of [[2.0, -.6, 1.35], [-2.2, .2, 1.8]]) { const sh = new THREE.Mesh(new THREE.ConeGeometry(.24, .22, 12, 1, true), new THREE.MeshBasicMaterial({color:0xe0a860, side:THREE.DoubleSide})); sh.position.set(x, y, z); exG.add(sh); const b = new THREE.Mesh(new THREE.SphereGeometry(.06, 8, 6), new THREE.MeshBasicMaterial({color:0xfff0c8})); b.position.set(x, y - .05, z); exG.add(b); }
   exBox(.04, .8, .04, met, 2.0, .4, -.6);

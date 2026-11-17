@@ -3,7 +3,7 @@
 // kaum Tageslicht am Boden, dafür Neon. Ein Maschendraht-Netz sperrt den Zugang (man kann nicht hinaus).
 const CTY = {cars:[], t:0, nextCar:2.2};
 function ctyWin(seed, w, h) {
-  const pal = ["#d88a3a", "#f0b060", "#5aa0d0", "#c8d0e0", "#e0701e", "#8ab8e8"];
+  const pal = ["#d88a3a", "#f0b060", "#5aa0d0", "#c8d0e0", "#4fa9a3", "#8ab8e8"];
   let s = seed*9301 + 49297; const rnd = () => (s = (s*9301 + 49297)%233280)/233280;
   return canvasTex(w, h, (x, cw, ch) => {
     x.fillStyle = ["#0b0d14", "#0e1018", "#0a0c12"][seed%3]; x.fillRect(0, 0, cw, ch);
@@ -29,7 +29,7 @@ function buildCityMouth() {
     const hn = new THREE.Mesh(new THREE.BoxGeometry(.08, .22, .05), mStd(0xc0c4cc, .8, .3)); hn.position.set(gx + .1, 1.1, gz + .42); add(hn); const lk = new THREE.Mesh(new THREE.BoxGeometry(.1, .12, .08), mStd(0x3c8680, .4, .5)); lk.position.set(gx + .1, .95, gz + .42); add(lk); }
   // Gehweg, Fahrbahn, Gegenseite
   const walk = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 220), mStd(0x2c2e36, .1, .85)); walk.rotation.x = -Math.PI/2; walk.position.set(X0 - 1.2, .02, 0); add(walk);
-  const road = new THREE.Mesh(new THREE.PlaneGeometry(14, 220), new THREE.MeshStandardMaterial({map:canvasTex(128, 256, (x, w, h) => { x.fillStyle = "#14161c"; x.fillRect(0, 0, w, h); speckle(x, w, h, 900, .12); x.fillStyle = "#c8b890"; for (let y = 0; y < h; y += 64) x.fillRect(w/2 - 2, y, 4, 34); x.fillStyle = "#e0701e"; x.fillRect(5, 0, 3, h); x.fillRect(w - 8, 0, 3, h); }, 1, 220/16), roughness:.32, metalness:.35}));
+  const road = new THREE.Mesh(new THREE.PlaneGeometry(14, 220), new THREE.MeshStandardMaterial({map:canvasTex(128, 256, (x, w, h) => { x.fillStyle = "#14161c"; x.fillRect(0, 0, w, h); speckle(x, w, h, 900, .12); x.fillStyle = "#c8b890"; for (let y = 0; y < h; y += 64) x.fillRect(w/2 - 2, y, 4, 34); x.fillStyle = "#4fa9a3"; x.fillRect(5, 0, 3, h); x.fillRect(w - 8, 0, 3, h); }, 1, 220/16), roughness:.32, metalness:.35}));
   road.rotation.x = -Math.PI/2; road.position.set(X0 - 2.4 - 7, 0, 0); add(road);
   const walk2 = walk.clone(); walk2.position.x = X0 - 2.4 - 14 - 1.2; add(walk2);
   const FXo = X0 - 2.4 - 14 - 2.4;                 // Fassadenlinie der Gegenseite
@@ -56,18 +56,18 @@ function buildCityMouth() {
   const neon = (txt, col, w, h, x, y, z, ry, vert, br) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({map:neonTex(txt, col, w, h, vert, null), transparent:true, depthWrite:false, fog:false})); m.position.set(x, y, z); m.rotation.y = ry; add(m);
     const gl = new THREE.Mesh(new THREE.PlaneGeometry(w*2.2, h*2.2), new THREE.MeshBasicMaterial({map:canvasTex(64, 64, (c, cw, ch) => { const g = c.createRadialGradient(cw/2, ch/2, 2, cw/2, ch/2, cw/2); g.addColorStop(0, col); g.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = g; c.globalAlpha = .35; c.fillRect(0, 0, cw, ch); }, 1, 1), transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, fog:false})); gl.position.set(x - Math.sin(ry)*.05, y, z - Math.cos(ry)*.05 + 0); gl.rotation.y = ry; add(gl); return m; };
   const FA = FXo + .12;
-  neon("CJ-CITY", "#e0701e", 9, 2.4, FA, 20, -4, Math.PI/2, false);
+  neon("CJ-CITY", "#4fa9a3", 9, 2.4, FA, 20, -4, Math.PI/2, false);
   neon("KRONOS", "#cfd6e0", 6, 1.4, FA, 14.5, -14, Math.PI/2, false);
   neon("HOTEL", "#4aa0e8", 1.4, 7, FA, 9, 7, Math.PI/2, true);
-  neon("NOODLES", "#e0701e", 4.4, 1.1, FA, 4.4, 2, Math.PI/2, false);
+  neon("NOODLES", "#4fa9a3", 4.4, 1.1, FA, 4.4, 2, Math.PI/2, false);
   neon("ÖL+TEILE 24H", "#3fb8a8", 5, 1.0, FA, 6.5, -9, Math.PI/2, false);
   neon("BAR", "#4aa0e8", 2.6, 1.0, FA, 3.4, 15, Math.PI/2, false);
-  neon("ROBO-MED", "#e0701e", 1.2, 6, FA, 12, 24, Math.PI/2, true);
+  neon("ROBO-MED", "#4fa9a3", 1.2, 6, FA, 12, 24, Math.PI/2, true);
   neon("PAWN", "#cfd6e0", 3.0, .9, X0 - .16, 5.5, 8, -Math.PI/2, false);
-  neon("OPEN", "#e0701e", 1.4, .5, X0 - .16, 3.2, -9, -Math.PI/2, false);
+  neon("OPEN", "#4fa9a3", 1.4, .5, X0 - .16, 3.2, -9, -Math.PI/2, false);
   // Spiegelungen auf der nassen Fahrbahn
   const refl = (col, z) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(9, 5), new THREE.MeshBasicMaterial({map:canvasTex(64, 64, (c, cw, ch) => { const g = c.createRadialGradient(cw/2, ch/2, 1, cw/2, ch/2, cw/2); g.addColorStop(0, col); g.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = g; c.fillRect(0, 0, cw, ch); }, 1, 1), transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, opacity:.45, fog:false})); m.rotation.x = -Math.PI/2; m.position.set(X0 - 9, .03, z); add(m); };
-  refl("#e0701e", -4); refl("#4aa0e8", 7); refl("#3fb8a8", -9); refl("#e0701e", 2);
+  refl("#4fa9a3", -4); refl("#4aa0e8", 7); refl("#3fb8a8", -9); refl("#4fa9a3", 2);
   // Kabel quer über die Schlucht + Lichterketten
   for (let k = 0; k < 8; k++) { const y = 9 + Math.random()*14, z0 = -16 + Math.random()*32, pts = [V3(X0 - .3, y, z0), V3(X0 - 9, y - 1.4 - Math.random()*1.2, z0 + Math.random()*5 - 2.5), V3(FXo + .3, y + Math.random()*2, z0 + Math.random()*6 - 3)], cv = new THREE.CatmullRomCurve3(pts), cp = cv.getPoints(30);
     add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(cp), new THREE.LineBasicMaterial({color:0x14161c, fog:false})));
@@ -131,16 +131,16 @@ function buildStreetWalls() {
     if (wood) { const gl = new THREE.Mesh(new THREE.PlaneGeometry(.5, .45), new THREE.MeshBasicMaterial({color:0x7a5a30})); gl.position.set(x, 1.7, z0 + inn*.1); gl.rotation.y = ry; exG.add(gl); for (let k = 0; k < 4; k++) nos(exBox(.9, .03, .02, mStd(0x35241a, .1, .9), x, .4 + k*.35, z0 + inn*.105)); }
     else for (let k = 0; k < 4; k++) nos(exBox(1.0, .06, .03, mStd(0x15202f, .6, .5), x, .45 + k*.5, z0 + inn*.105));
     nos(exBox(.1, .05, .08, mStd(0xc0c4cc, .8, .3), x + .4, 1.05, z0 + inn*.13)); nos(exBox(1.5, .12, .55, conc, x, .06, z0 + inn*.35));
-    exPl(.4, .22, sign(num, "#e0701e", .4, .22), x, 2.62, z0 + inn*.02, ry);
+    exPl(.4, .22, sign(num, "#4fa9a3", .4, .22), x, 2.62, z0 + inn*.02, ry);
     nos(exBox(.08, .08, .3, metal, x, 2.95, z0 + inn*.15)); const b = new THREE.Mesh(new THREE.SphereGeometry(.07, 8, 6), new THREE.MeshBasicMaterial({color:0xffe0b0})); b.position.set(x, 2.88, z0 + inn*.3); exG.add(b); nos(exBox(.2, .04, .2, metal, x, 2.98, z0 + inn*.3));
     const l = exPt(0xffb878, 1.0, 7, x, 2.85, z0 + inn*.4); l.userData.aim = [0, -1, inn*1.5]; };
   door(-6.8, -1, 0x23304a, "Nr. 12", false); door(-4.4, 1, 0x4a3224, "Nr. 11", true);
   // Poster / Graffiti
   const poster = (w, h, x, y, z, ry, draw) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({map:canvasTex(160, Math.round(160*h/w), draw, 1, 1)})); m.position.set(x, y, z); m.rotation.y = ry; exG.add(m); m.userData.noSh = 1; return m; };
-  poster(1.6, 2.2, 10.9, 3.2, -.4, -Math.PI/2, (x, w, h) => { x.fillStyle = "#16203a"; x.fillRect(0, 0, w, h); x.fillStyle = "#e0701e"; x.beginPath(); x.arc(w/2, h*.38, w*.26, 0, 7); x.fill(); x.fillStyle = "#e8ecf4"; x.font = "bold " + Math.round(w*.2) + "px sans-serif"; x.textAlign = "center"; x.fillText("ÖL", w/2, h*.82); x.globalAlpha = .4; speckle(x, w, h, 500, .3); });
-  poster(1.2, 1.7, 10.9, 2.4, 1.6, -Math.PI/2, (x, w, h) => { x.fillStyle = "#c8ccd6"; x.fillRect(0, 0, w, h); x.fillStyle = "#16203a"; x.fillRect(10, 10, w - 20, h*.5); x.fillStyle = "#e0701e"; x.fillRect(10, h*.62, w - 20, 10); x.fillStyle = "#16203a"; x.font = "bold " + Math.round(w*.14) + "px monospace"; x.textAlign = "center"; x.fillText("KRONOS", w/2, h*.87); speckle(x, w, h, 400, .35); });
-  poster(1.3, 1.9, -1.0, 2.4, hd - .02, Math.PI, (x, w, h) => { x.fillStyle = "#1c2a44"; x.fillRect(0, 0, w, h); x.fillStyle = "#e8ecf4"; for (let i = 0; i < 5; i++) x.fillRect(14, 18 + i*32, w - 28 - i*14, 12); x.fillStyle = "#e0701e"; x.fillRect(14, h - 40, 50, 24); speckle(x, w, h, 450, .35); });
-  poster(2.2, 1.2, -9.2, 3.0, -hd + .02, 0, (x, w, h) => { x.fillStyle = "#101828"; x.fillRect(0, 0, w, h); x.strokeStyle = "#e0701e"; x.lineWidth = 6; x.beginPath(); x.moveTo(10, h*.7); x.bezierCurveTo(w*.3, h*.1, w*.6, h*.9, w - 10, h*.3); x.stroke(); x.strokeStyle = "#e8ecf4"; x.lineWidth = 3; x.beginPath(); x.moveTo(10, h*.85); x.bezierCurveTo(w*.3, h*.3, w*.6, h*1.0, w - 10, h*.5); x.stroke(); speckle(x, w, h, 400, .3); });
+  poster(1.6, 2.2, 10.9, 3.2, -.4, -Math.PI/2, (x, w, h) => { x.fillStyle = "#16203a"; x.fillRect(0, 0, w, h); x.fillStyle = "#4fa9a3"; x.beginPath(); x.arc(w/2, h*.38, w*.26, 0, 7); x.fill(); x.fillStyle = "#e8ecf4"; x.font = "bold " + Math.round(w*.2) + "px sans-serif"; x.textAlign = "center"; x.fillText("ÖL", w/2, h*.82); x.globalAlpha = .4; speckle(x, w, h, 500, .3); });
+  poster(1.2, 1.7, 10.9, 2.4, 1.6, -Math.PI/2, (x, w, h) => { x.fillStyle = "#c8ccd6"; x.fillRect(0, 0, w, h); x.fillStyle = "#16203a"; x.fillRect(10, 10, w - 20, h*.5); x.fillStyle = "#4fa9a3"; x.fillRect(10, h*.62, w - 20, 10); x.fillStyle = "#16203a"; x.font = "bold " + Math.round(w*.14) + "px monospace"; x.textAlign = "center"; x.fillText("KRONOS", w/2, h*.87); speckle(x, w, h, 400, .35); });
+  poster(1.3, 1.9, -1.0, 2.4, hd - .02, Math.PI, (x, w, h) => { x.fillStyle = "#1c2a44"; x.fillRect(0, 0, w, h); x.fillStyle = "#e8ecf4"; for (let i = 0; i < 5; i++) x.fillRect(14, 18 + i*32, w - 28 - i*14, 12); x.fillStyle = "#4fa9a3"; x.fillRect(14, h - 40, 50, 24); speckle(x, w, h, 450, .35); });
+  poster(2.2, 1.2, -9.2, 3.0, -hd + .02, 0, (x, w, h) => { x.fillStyle = "#101828"; x.fillRect(0, 0, w, h); x.strokeStyle = "#4fa9a3"; x.lineWidth = 6; x.beginPath(); x.moveTo(10, h*.7); x.bezierCurveTo(w*.3, h*.1, w*.6, h*.9, w - 10, h*.3); x.stroke(); x.strokeStyle = "#e8ecf4"; x.lineWidth = 3; x.beginPath(); x.moveTo(10, h*.85); x.bezierCurveTo(w*.3, h*.3, w*.6, h*1.0, w - 10, h*.5); x.stroke(); speckle(x, w, h, 400, .3); });
   // Wandlampe + Rohr + Kasten an der Ostwand, Kabel
   nos(exBox(.2, .5, .4, mStd(0x3a3f46, .5, .6), hw - .12, 1.6, -2.2)); nos(exBox(.3, .5, .02, metal, hw - .04, 1.6, -2.2));
   const lcv = new THREE.CatmullRomCurve3([V3(-hw + .3, 6.3, -hd + .1), V3(-3, 5.5, 0), V3(hw - .3, 6.6, hd - .1)]); exG.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(lcv.getPoints(24)), new THREE.LineBasicMaterial({color:0x15161a})));

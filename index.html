@@ -144,11 +144,11 @@
           border-radius:5px;font-size:14px;border-bottom:2px solid #4fa9a3;pointer-events:none;display:none;white-space:nowrap;max-width:92vw;overflow:hidden}
   #pwr{position:fixed;left:50%;bottom:26px;width:220px;height:10px;margin-left:-110px;background:rgba(32,35,41,.7);border-radius:5px;
        overflow:hidden;opacity:0;transition:opacity .15s;pointer-events:none;border:1px solid rgba(210,224,250,.3)}
-  #pwrFill{height:100%;width:0;background:linear-gradient(90deg,#a87400,#78c4bd)}
+  #pwrFill{height:100%;width:0;background:linear-gradient(90deg,#2f6a66,#78c4bd)}
   #bars{position:fixed;right:14px;top:74px;width:150px;pointer-events:none;color:#d8dadc;font-size:12px;letter-spacing:.05em}
   .bar{height:8px;background:rgba(32,35,41,.8);border-radius:4px;overflow:hidden;margin:3px 0 8px;border:1px solid rgba(210,224,250,.3)}
   .bar i{display:block;height:100%;width:0}
-  #enFill{background:linear-gradient(90deg,#a87400,#4fa9a3)}
+  #enFill{background:linear-gradient(90deg,#2f6a66,#4fa9a3)}
   #toast{position:fixed;left:50%;top:22px;transform:translateX(-50%);padding:8px 16px;background:rgba(32,35,41,.88);color:#f2f6ff;
          border-radius:5px;border-left:3px solid #4fa9a3;font-size:14px;pointer-events:none;opacity:0;transition:opacity .3s}
   #gallery{position:fixed;left:18px;bottom:18px;width:150px;height:96px;z-index:5;cursor:pointer;display:none}
@@ -279,7 +279,7 @@
   #inFill{background:linear-gradient(90deg,rgba(220,232,255,.55),#e8f0ff)}
   #pwr{height:5px;border-radius:3px} #pwrFill{background:linear-gradient(90deg,rgba(79,169,163,.5),#78c4bd)}
   body.cine #hud,body.cine #bars,body.cine #camBtn,body.cine #setBtn,body.cine #mapBtn,body.cine #touch,body.cine #interact,body.cine #prompt,body.cine #pwr,body.cine #obj,body.cine #gallery,body.fpv #obj,body.menu #obj{display:none!important}
-  #inFill{background:linear-gradient(90deg,#a87400,#f2f6ff)}
+  #inFill{background:linear-gradient(90deg,#2f6a66,#f2f6ff)}
   #dmg{position:fixed;right:14px;top:150px;min-width:236px;max-width:92vw;white-space:nowrap;padding:9px 12px;background:rgba(32,35,41,.86);color:#f2f6ff;border-radius:8px;border-left:3px solid #4fa9a3;font-size:12.5px;line-height:1.5;opacity:0;transform:translateX(14px);transition:opacity .3s,transform .3s;pointer-events:none;z-index:9}
   #dmg.on{opacity:1;transform:none} #dmg i{display:block;font-style:normal;font-size:10px;letter-spacing:.24em;color:#4fa9a3;font-weight:600;margin-bottom:3px}
   #dmg div{display:flex;justify-content:space-between;gap:10px} #dmg b{color:#78c4bd;font-variant-numeric:tabular-nums}
@@ -1613,7 +1613,7 @@ function pipeMat(len) { const k = Math.round(len*2); return _pm[k] || (_pm[k] = 
 function labMetal() {
   const R = TIMG.rustC, S = TIMG.steelC; if (!R.complete || !S.complete || !R.naturalWidth || !S.naturalWidth) return;
   const redraw = (tex, draw) => { const c = tex.image, x = c.getContext("2d"); draw(x, c.width, c.height); tex.needsUpdate = true; };
-  const band = (x, w, h) => { const y0 = h*.62, bh = h*.38; x.drawImage(R, 0, 0, 512, 512*bh/w, 0, y0, w, bh); x.fillStyle = "rgba(22,44,100,.55)"; x.fillRect(0, y0, w, bh); x.fillStyle = "#e0701e"; x.fillRect(0, y0 - 3, w, 6); x.fillStyle = "rgba(12,16,30,.7)"; for (let i = 0; i < 4; i++) x.fillRect(0, y0 + bh*(i + 1)/5, w, 2); };
+  const band = (x, w, h) => { const y0 = h*.62, bh = h*.38; x.drawImage(R, 0, 0, 512, 512*bh/w, 0, y0, w, bh); x.fillStyle = "rgba(22,44,100,.55)"; x.fillRect(0, y0, w, bh); x.fillStyle = "#4fa9a3"; x.fillRect(0, y0 - 3, w, 6); x.fillStyle = "rgba(12,16,30,.7)"; for (let i = 0; i < 4; i++) x.fillRect(0, y0 + bh*(i + 1)/5, w, 2); };
   const wall = (x, w, h) => { x.fillStyle = "#aab6d2"; x.fillRect(0, 0, w, h); speckle(x, w, h, 4000, .14); band(x, w, h); x.strokeStyle = "rgba(50,54,52,.5)"; x.lineWidth = 3; x.beginPath(); x.moveTo(1, 0); x.lineTo(1, h); x.stroke(); };
   redraw(wallTexA, wall); redraw(wallTexB, wall);
   redraw(floorTex, (x, w, h) => { x.drawImage(S, 0, 0, w, h); x.fillStyle = "rgba(46,66,128,.62)"; x.fillRect(0, 0, w, h); speckle(x, w, h, 3000, .12); x.strokeStyle = "rgba(14,18,34,.85)"; x.lineWidth = 4; x.strokeRect(0, 0, w, h); x.fillStyle = "rgba(14,18,34,.8)"; for (const [a, b] of [[12, 12], [w - 12, 12], [12, h - 12], [w - 12, h - 12]]) { x.beginPath(); x.arc(a, b, 3.5, 0, 7); x.fill(); } });
@@ -1627,7 +1627,7 @@ function spiderMats() {
   const need = ["plaC", "mtlC"]; if (need.some(k => !TIMG[k].complete || !TIMG[k].naturalWidth)) return;
   const P = (m, k, rx, ry) => { m.map = imgTex(k + "C", rx, ry); m.normalMap = imgTex(k + "N", rx, ry); m.roughnessMap = imgTex(k + "R", rx, ry); m.normalScale.set(.8, .8); m.needsUpdate = true; };
   P(matLight, "pla", 1.5, 1.5); matLight.color.setHex(0xffffff); matLight.emissive.setHex(0x70757e); matLight.roughness = 1; matLight.metalness = .1;
-  P(matBrass, "mtl", 1.5, 1.5); matBrass.color.setHex(0xff6a20); matBrass.roughness = 1; matBrass.metalness = .2; matBrass.emissive.setHex(0x2a0c02);
+  P(matBrass, "mtl", 1.5, 1.5); matBrass.color.setHex(0x4fa9a3); matBrass.roughness = 1; matBrass.metalness = .2; matBrass.emissive.setHex(0x0c2a28);
 }
 for (const k of ["plaC", "mtlC"]) { if (TIMG[k].complete) setTimeout(spiderMats, 0); else TIMG[k].addEventListener("load", spiderMats); }
 function fenceMat(rx, ry) { return new THREE.MeshStandardMaterial({map:imgTex("fncC", rx, ry), alphaMap:imgTex("fncA", rx, ry), normalMap:imgTex("fncN", rx, ry), transparent:true, alphaTest:.5, side:THREE.DoubleSide, roughness:.6, metalness:.5, color:0xb8c0d0}); }
@@ -2791,7 +2791,7 @@ function applyReal() {
   scene.traverse(o => { if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => { if (!m.envMap && m.isMeshStandardMaterial && m !== matLight) m.envMapIntensity = on ? .3 : 1; m.needsUpdate = true; }); });
 }
 const DEVO = {joyF:"touch", joyS:"touch", joyO:"touch", joyDz:"touch", tbS:"touch", vib:"touch", lockP:"keyboard", padS:"pad", padDz:"pad", padVib:"pad"};
-const CHANGELOG = [["1.18", ["Akzentfarbe jetzt mattes Türkis (#4FA9A3) statt Pink", "Accent color is now matte turquoise (#4FA9A3) instead of pink"]], ["1.17", ["Neues Farbschema: Hintergrund #0B0E14, Text #E2E8F0 (Ice Silver), Akzent mattes Türkis", "New color scheme: background #0B0E14, text #E2E8F0 (ice silver), matte turquoise accent"]], ["1.16", ["Menü-Glitch betrifft jetzt den ganzen Bildschirm (Versatz + Entfärbung)", "The menu glitch now affects the whole screen (offset + decolor)"]], ["1.15", ["Neuer Tab „Updates“ in den Einstellungen mit den letzten 14 Updates", "New “Updates” tab in the settings showing the last 14 updates"]], ["1.14", ["FXAA-Regler: Kantenglättung auch bei aktiver Nachbearbeitung", "FXAA slider: edge smoothing now also works while post-processing is active"]], ["1.13", ["Fotos liegen als Stapel unten links; Klick öffnet die Großansicht mit Blättern, Download und Löschen", "Photos now form a stack at the bottom left; click opens a large view with browsing, download and delete"], ["Neue Grafik-Standardwerte: Nebel aus, Ambient Occlusion 50 %, Bewegungsunschärfe 5 %", "New default graphics: fog off, ambient occlusion 50%, motion blur 5%"]], ["1.12", ["Betrunkene Roboter: 17 neue Gespräche in zufälliger Reihenfolge", "Drunk robots: 17 new conversations in random order"], ["Ihre Untertitel erscheinen nicht mehr in Cutscenes, Anrufen und Gesprächen", "Their subtitles no longer appear during cutscenes, calls or conversations"], ["Z-Fighting an den Fassaden der Gegenseite behoben", "Fixed z-fighting on the far-side facades"]], ["1.11", ["Tiefenschärfe in Cutscenes dezenter, weicher und ohne künstliche Ringe", "Depth of field in cutscenes is subtler, softer and without artificial rings"]], ["1.10", ["Neu: Ambient Occlusion als Grafik-Regler (auch in Cutscenes angepasst)", "New: ambient occlusion as a graphics slider (also tuned for cutscenes)"], ["Spiel startet auf Englisch; rund 55 fehlende Übersetzungen ergänzt", "Game starts in English; about 55 missing translations added"]], ["1.9", ["Beschattung spielt jetzt in der Parallelstraße (Durchgang am Ostende der Hauptstraße)", "The surveillance job now takes place in the parallel street (passage at the east end of the main street)"], ["Parallelstraße detailreicher: Fenster, Schaufenster, Pfützen, Fahrrad, Regenrohre", "Parallel street with more detail: windows, shop windows, puddles, bicycle, drainpipes"]], ["1.8", ["Beschattung: Foto-Erkennung großzügiger, Foto-Moment im HUD angezeigt, Verdacht langsamer", "Surveillance: more forgiving photo detection, photo moment shown in the HUD, slower suspicion"]], ["1.7", ["Neuer Auftrag: Beschattung von Herrn Varga – vier Fotos über einen Tag, 6500 SE Belohnung", "New job: shadow Mr. Varga – four photos over one day, 6500 SE reward"]], ["1.6", ["Void-Intro in 3D mit der verglitchten Version von Arach", "3D void intro with the glitched version of Arach"], ["Genaueres Speichern der Position, matter Void-Boden", "More precise position saving, matte void floor"]], ["1.5", ["Kamera-Neigung überarbeitet (nur noch mit Boden unter der Kamera)", "Camera tilt reworked (only with ground below the camera)"], ["SPYDER-Logo glitcht gelegentlich", "The SPYDER logo glitches now and then"]]]; // neueste zuerst – bei jedem Update oben ergänzen, nur die letzten 14 behalten
+const CHANGELOG = [["1.19", ["Texturen, Schilder und Spinne: orange Details jetzt ebenfalls mattes Türkis", "Textures, signs and the spider: orange details are now matte turquoise too"]], ["1.18", ["Akzentfarbe jetzt mattes Türkis (#4FA9A3) statt Pink", "Accent color is now matte turquoise (#4FA9A3) instead of pink"]], ["1.17", ["Neues Farbschema: Hintergrund #0B0E14, Text #E2E8F0 (Ice Silver), Akzent mattes Türkis", "New color scheme: background #0B0E14, text #E2E8F0 (ice silver), matte turquoise accent"]], ["1.16", ["Menü-Glitch betrifft jetzt den ganzen Bildschirm (Versatz + Entfärbung)", "The menu glitch now affects the whole screen (offset + decolor)"]], ["1.15", ["Neuer Tab „Updates“ in den Einstellungen mit den letzten 14 Updates", "New “Updates” tab in the settings showing the last 14 updates"]], ["1.14", ["FXAA-Regler: Kantenglättung auch bei aktiver Nachbearbeitung", "FXAA slider: edge smoothing now also works while post-processing is active"]], ["1.13", ["Fotos liegen als Stapel unten links; Klick öffnet die Großansicht mit Blättern, Download und Löschen", "Photos now form a stack at the bottom left; click opens a large view with browsing, download and delete"], ["Neue Grafik-Standardwerte: Nebel aus, Ambient Occlusion 50 %, Bewegungsunschärfe 5 %", "New default graphics: fog off, ambient occlusion 50%, motion blur 5%"]], ["1.12", ["Betrunkene Roboter: 17 neue Gespräche in zufälliger Reihenfolge", "Drunk robots: 17 new conversations in random order"], ["Ihre Untertitel erscheinen nicht mehr in Cutscenes, Anrufen und Gesprächen", "Their subtitles no longer appear during cutscenes, calls or conversations"], ["Z-Fighting an den Fassaden der Gegenseite behoben", "Fixed z-fighting on the far-side facades"]], ["1.11", ["Tiefenschärfe in Cutscenes dezenter, weicher und ohne künstliche Ringe", "Depth of field in cutscenes is subtler, softer and without artificial rings"]], ["1.10", ["Neu: Ambient Occlusion als Grafik-Regler (auch in Cutscenes angepasst)", "New: ambient occlusion as a graphics slider (also tuned for cutscenes)"], ["Spiel startet auf Englisch; rund 55 fehlende Übersetzungen ergänzt", "Game starts in English; about 55 missing translations added"]], ["1.9", ["Beschattung spielt jetzt in der Parallelstraße (Durchgang am Ostende der Hauptstraße)", "The surveillance job now takes place in the parallel street (passage at the east end of the main street)"], ["Parallelstraße detailreicher: Fenster, Schaufenster, Pfützen, Fahrrad, Regenrohre", "Parallel street with more detail: windows, shop windows, puddles, bicycle, drainpipes"]], ["1.8", ["Beschattung: Foto-Erkennung großzügiger, Foto-Moment im HUD angezeigt, Verdacht langsamer", "Surveillance: more forgiving photo detection, photo moment shown in the HUD, slower suspicion"]], ["1.7", ["Neuer Auftrag: Beschattung von Herrn Varga – vier Fotos über einen Tag, 6500 SE Belohnung", "New job: shadow Mr. Varga – four photos over one day, 6500 SE reward"]], ["1.6", ["Void-Intro in 3D mit der verglitchten Version von Arach", "3D void intro with the glitched version of Arach"], ["Genaueres Speichern der Position, matter Void-Boden", "More precise position saving, matte void floor"]]]; // neueste zuerst – bei jedem Update oben ergänzen, nur die letzten 14 behalten
 const TABS = OPTD.map(d => d[7]).filter((t, i, a) => a.indexOf(t) === i).concat("UPDATES", "DEV"); let curTab = TABS[0];
 function buildUpdates(box) {
   const en = (typeof LANG !== "undefined" && LANG === "en");
@@ -4585,7 +4585,7 @@ function buildStreet() {
     const n0 = blocks.length; solidOf(slab, blocks); xs.gar = {g:gg, u:0, tgt:0, bl:blocks.slice(n0), gone:false, glow:null};
     holeWall(5, SW, SH, [[-(GARX + 2.4), -(GARX - 2.4), .01, 3.4]], roomMeshes[5].material.map, 0, 0, 0);
     buildMase(GARX, hd); }
-  exPl(4.2, .6, sign("MASE · CUSTOM & UMBAU", "#e0701e", 4.2, .6, "#14161a"), GARX, 3.85, hd - .16, Math.PI);
+  exPl(4.2, .6, sign("MASE · CUSTOM & UMBAU", "#4fa9a3", 4.2, .6, "#14161a"), GARX, 3.85, hd - .16, Math.PI);
   xs.gar.glow = exPl(4.6, .12, new THREE.MeshBasicMaterial({color:0xffb070}), GARX, .1, hd - .17, Math.PI);       // Licht unter dem Tor
   exPt(0xffb070, .9, 4.5, GARX, .5, hd - 1.0);
   // Straßenmöbel: Kisten, Tonnen, Rohre, Straßenlaterne
@@ -4616,7 +4616,7 @@ function buildStreet() {
 /* ---------- Treppenhaus ---------- */
 const STW = 4.4, STD = 5.6, STH = 14.4, FL = 3.6;
 function buildStairs() {
-  const conc = canvasTex(256, 256, (x, w, h) => { x.fillStyle = "#4c4f56"; x.fillRect(0, 0, w, h); speckle(x, w, h, 5000, .2); x.fillStyle = "#2c2f36"; x.fillRect(0, h*.62, w, h*.38); x.fillStyle = "#e0701e"; x.fillRect(0, h*.62 - 3, w, 6); }, 3, 5);
+  const conc = canvasTex(256, 256, (x, w, h) => { x.fillStyle = "#4c4f56"; x.fillRect(0, 0, w, h); speckle(x, w, h, 5000, .2); x.fillStyle = "#2c2f36"; x.fillRect(0, h*.62, w, h*.38); x.fillStyle = "#4fa9a3"; x.fillRect(0, h*.62 - 3, w, 6); }, 3, 5);
   const fl = canvasTex(128, 128, (x, w, h) => { x.fillStyle = "#3a3d44"; x.fillRect(0, 0, w, h); for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) { x.fillStyle = (i + j)%2 ? "#34373e" : "#40434a"; x.fillRect(i*32, j*32, 32, 32); } speckle(x, w, h, 900, .2); }, 3, 4);
   const ceil = canvasTex(8, 8, (x, w, h) => { x.fillStyle = "#26282e"; x.fillRect(0, 0, w, h); }, 1, 1);
   exRoom(STW, STH, STD, {floor:fl, ceil, wW:conc, wE:conc, wN:conc, wS:conc});
@@ -4680,8 +4680,8 @@ function buildStairs() {
   cyl(.04, STW - .2, pipeM, 0, STH - .25, -hd + .12).rotation.z = Math.PI/2; cyl(.04, STD - .2, pipeM, -hw + .12, STH - .4, 0).rotation.x = Math.PI/2;
   const pic = (txt, col, w, h, x, y, z, ry) => { exPl(w + .06, h + .06, mStd(0x15171b, .3, .6), x + (ry ? Math.sign(ry)*-.004 : 0), y, z, ry); exPl(w, h, sign(txt, col, w, h), x + (ry ? Math.sign(ry)*-.008 : .008), y, z + (ry ? 0 : .008), ry); };
   for (let f = 0; f < 4; f++) { const y = f*FL + 1.7; const ln = new THREE.Mesh(new THREE.BoxGeometry(.12, .22, .22), mStd(0x1c2438, .5, .5)); ln.position.set(hw - .06, y + .6, f%2 ? -.9 : .9); exG.add(ln); exPl(.1, .16, bulb, hw - .125, y + .6, f%2 ? -.9 : .9, -Math.PI/2); }
-  pic("HAUSORDNUNG", "#e0e4ec", .5, .7, hw - .02, 1.7, hd - .4, -Math.PI/2); pic("RUHE 22–6", "#e0701e", .5, .35, hw - .02, FL + 1.8, .4, -Math.PI/2); pic("TREPPE FREI!", "#e0e4ec", .5, .35, hw - .02, 2*FL + 1.8, hd - .4, -Math.PI/2); pic("DACHBODEN", "#6a7a98", .5, .3, -hw + .02, 3*FL + 1.8, -.3, Math.PI/2);
-  pic("EG", "#e0e4ec", .22, .22, -hw + .02, 1.1, 1.9, Math.PI/2); pic("1", "#e0e4ec", .22, .22, -hw + .02, FL + 1.1, -1.9, Math.PI/2); pic("2", "#e0e4ec", .22, .22, -hw + .02, 2*FL + 1.1, 1.9, Math.PI/2); pic("3", "#e0701e", .22, .22, -hw + .02, 3*FL + 1.1, -1.9, Math.PI/2);
+  pic("HAUSORDNUNG", "#e0e4ec", .5, .7, hw - .02, 1.7, hd - .4, -Math.PI/2); pic("RUHE 22–6", "#4fa9a3", .5, .35, hw - .02, FL + 1.8, .4, -Math.PI/2); pic("TREPPE FREI!", "#e0e4ec", .5, .35, hw - .02, 2*FL + 1.8, hd - .4, -Math.PI/2); pic("DACHBODEN", "#6a7a98", .5, .3, -hw + .02, 3*FL + 1.8, -.3, Math.PI/2);
+  pic("EG", "#e0e4ec", .22, .22, -hw + .02, 1.1, 1.9, Math.PI/2); pic("1", "#e0e4ec", .22, .22, -hw + .02, FL + 1.1, -1.9, Math.PI/2); pic("2", "#e0e4ec", .22, .22, -hw + .02, 2*FL + 1.1, 1.9, Math.PI/2); pic("3", "#4fa9a3", .22, .22, -hw + .02, 3*FL + 1.1, -1.9, Math.PI/2);
   // Fenster (Morgenlicht) im Halbgeschoss
   for (const y of [1.9, FL + 3.0, 2*FL + 1.9]) exPl(.6, 1.0, new THREE.MeshBasicMaterial({color:0x9a8a8a}), -hw + .02, y, 0, Math.PI/2);
   scene.fog = new THREE.FogExp2(0x1c1e24, .028); scene.background = new THREE.Color(0x0a0a0c);
@@ -4714,7 +4714,7 @@ function buildFlat() {
   exBox(.12, 1.7, .5, mStd(0x7a2a2a, 0, 1), hw - .1, 1.6, -1.2); exBox(.12, 1.7, .5, mStd(0x7a2a2a, 0, 1), hw - .1, 1.6, 1.2);
   { const g = new THREE.Mesh(new THREE.BoxGeometry(.3, .1, 2.0), new THREE.MeshBasicMaterial({color:0xf8c890, transparent:true, opacity:.0})); }
   // Tür Süd (Eingang), Pflanze, Lampen, Bilder
-  exBox(1.0, 2.1, .06, mStd(0x4a3224, .3, .7), -1.5, 1.05, hd - .03); exPl(.9, 1.2, new THREE.MeshBasicMaterial({map:canvasTex(64, 80, (x, w, h) => { x.fillStyle = "#2a3a5a"; x.fillRect(0, 0, w, h); x.fillStyle = "#e0701e"; x.beginPath(); x.arc(32, 44, 18, 0, 7); x.fill(); x.fillStyle = "#1a2236"; x.fillRect(0, 56, w, 24); }, 1, 1)}), 0, 1.7, -hd + .02, 0);
+  exBox(1.0, 2.1, .06, mStd(0x4a3224, .3, .7), -1.5, 1.05, hd - .03); exPl(.9, 1.2, new THREE.MeshBasicMaterial({map:canvasTex(64, 80, (x, w, h) => { x.fillStyle = "#2a3a5a"; x.fillRect(0, 0, w, h); x.fillStyle = "#4fa9a3"; x.beginPath(); x.arc(32, 44, 18, 0, 7); x.fill(); x.fillStyle = "#1a2236"; x.fillRect(0, 56, w, 24); }, 1, 1)}), 0, 1.7, -hd + .02, 0);
   { const p = new THREE.Mesh(new THREE.CylinderGeometry(.16, .12, .35, 10), mStd(0x6a3a2a, 0, .8)); p.position.set(-hw + .4, .18, hd - .4); exG.add(p); for (let i = 0; i < 7; i++) { const l = new THREE.Mesh(new THREE.SphereGeometry(.16, 7, 5), mStd(0x3a6a3a, 0, .8)); l.scale.set(1, .4, .6); l.position.set(-hw + .4 + Math.sin(i)*.18, .5 + i*.07, hd - .4 + Math.cos(i*1.7)*.18); exG.add(l); } }
   for (const [x, z, y] of [[2.0, -.6, 1.35], [-2.2, .2, 1.8]]) { const sh = new THREE.Mesh(new THREE.ConeGeometry(.24, .22, 12, 1, true), new THREE.MeshBasicMaterial({color:0xe0a860, side:THREE.DoubleSide})); sh.position.set(x, y, z); exG.add(sh); const b = new THREE.Mesh(new THREE.SphereGeometry(.06, 8, 6), new THREE.MeshBasicMaterial({color:0xfff0c8})); b.position.set(x, y - .05, z); exG.add(b); }
   exBox(.04, .8, .04, met, 2.0, .4, -.6);
@@ -4861,7 +4861,7 @@ function ch2Tick(dt) {
 // kaum Tageslicht am Boden, dafür Neon. Ein Maschendraht-Netz sperrt den Zugang (man kann nicht hinaus).
 const CTY = {cars:[], t:0, nextCar:2.2};
 function ctyWin(seed, w, h) {
-  const pal = ["#d88a3a", "#f0b060", "#5aa0d0", "#c8d0e0", "#e0701e", "#8ab8e8"];
+  const pal = ["#d88a3a", "#f0b060", "#5aa0d0", "#c8d0e0", "#4fa9a3", "#8ab8e8"];
   let s = seed*9301 + 49297; const rnd = () => (s = (s*9301 + 49297)%233280)/233280;
   return canvasTex(w, h, (x, cw, ch) => {
     x.fillStyle = ["#0b0d14", "#0e1018", "#0a0c12"][seed%3]; x.fillRect(0, 0, cw, ch);
@@ -4887,7 +4887,7 @@ function buildCityMouth() {
     const hn = new THREE.Mesh(new THREE.BoxGeometry(.08, .22, .05), mStd(0xc0c4cc, .8, .3)); hn.position.set(gx + .1, 1.1, gz + .42); add(hn); const lk = new THREE.Mesh(new THREE.BoxGeometry(.1, .12, .08), mStd(0x3c8680, .4, .5)); lk.position.set(gx + .1, .95, gz + .42); add(lk); }
   // Gehweg, Fahrbahn, Gegenseite
   const walk = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 220), mStd(0x2c2e36, .1, .85)); walk.rotation.x = -Math.PI/2; walk.position.set(X0 - 1.2, .02, 0); add(walk);
-  const road = new THREE.Mesh(new THREE.PlaneGeometry(14, 220), new THREE.MeshStandardMaterial({map:canvasTex(128, 256, (x, w, h) => { x.fillStyle = "#14161c"; x.fillRect(0, 0, w, h); speckle(x, w, h, 900, .12); x.fillStyle = "#c8b890"; for (let y = 0; y < h; y += 64) x.fillRect(w/2 - 2, y, 4, 34); x.fillStyle = "#e0701e"; x.fillRect(5, 0, 3, h); x.fillRect(w - 8, 0, 3, h); }, 1, 220/16), roughness:.32, metalness:.35}));
+  const road = new THREE.Mesh(new THREE.PlaneGeometry(14, 220), new THREE.MeshStandardMaterial({map:canvasTex(128, 256, (x, w, h) => { x.fillStyle = "#14161c"; x.fillRect(0, 0, w, h); speckle(x, w, h, 900, .12); x.fillStyle = "#c8b890"; for (let y = 0; y < h; y += 64) x.fillRect(w/2 - 2, y, 4, 34); x.fillStyle = "#4fa9a3"; x.fillRect(5, 0, 3, h); x.fillRect(w - 8, 0, 3, h); }, 1, 220/16), roughness:.32, metalness:.35}));
   road.rotation.x = -Math.PI/2; road.position.set(X0 - 2.4 - 7, 0, 0); add(road);
   const walk2 = walk.clone(); walk2.position.x = X0 - 2.4 - 14 - 1.2; add(walk2);
   const FXo = X0 - 2.4 - 14 - 2.4;                 // Fassadenlinie der Gegenseite
@@ -4914,18 +4914,18 @@ function buildCityMouth() {
   const neon = (txt, col, w, h, x, y, z, ry, vert, br) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({map:neonTex(txt, col, w, h, vert, null), transparent:true, depthWrite:false, fog:false})); m.position.set(x, y, z); m.rotation.y = ry; add(m);
     const gl = new THREE.Mesh(new THREE.PlaneGeometry(w*2.2, h*2.2), new THREE.MeshBasicMaterial({map:canvasTex(64, 64, (c, cw, ch) => { const g = c.createRadialGradient(cw/2, ch/2, 2, cw/2, ch/2, cw/2); g.addColorStop(0, col); g.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = g; c.globalAlpha = .35; c.fillRect(0, 0, cw, ch); }, 1, 1), transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, fog:false})); gl.position.set(x - Math.sin(ry)*.05, y, z - Math.cos(ry)*.05 + 0); gl.rotation.y = ry; add(gl); return m; };
   const FA = FXo + .12;
-  neon("CJ-CITY", "#e0701e", 9, 2.4, FA, 20, -4, Math.PI/2, false);
+  neon("CJ-CITY", "#4fa9a3", 9, 2.4, FA, 20, -4, Math.PI/2, false);
   neon("KRONOS", "#cfd6e0", 6, 1.4, FA, 14.5, -14, Math.PI/2, false);
   neon("HOTEL", "#4aa0e8", 1.4, 7, FA, 9, 7, Math.PI/2, true);
-  neon("NOODLES", "#e0701e", 4.4, 1.1, FA, 4.4, 2, Math.PI/2, false);
+  neon("NOODLES", "#4fa9a3", 4.4, 1.1, FA, 4.4, 2, Math.PI/2, false);
   neon("ÖL+TEILE 24H", "#3fb8a8", 5, 1.0, FA, 6.5, -9, Math.PI/2, false);
   neon("BAR", "#4aa0e8", 2.6, 1.0, FA, 3.4, 15, Math.PI/2, false);
-  neon("ROBO-MED", "#e0701e", 1.2, 6, FA, 12, 24, Math.PI/2, true);
+  neon("ROBO-MED", "#4fa9a3", 1.2, 6, FA, 12, 24, Math.PI/2, true);
   neon("PAWN", "#cfd6e0", 3.0, .9, X0 - .16, 5.5, 8, -Math.PI/2, false);
-  neon("OPEN", "#e0701e", 1.4, .5, X0 - .16, 3.2, -9, -Math.PI/2, false);
+  neon("OPEN", "#4fa9a3", 1.4, .5, X0 - .16, 3.2, -9, -Math.PI/2, false);
   // Spiegelungen auf der nassen Fahrbahn
   const refl = (col, z) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(9, 5), new THREE.MeshBasicMaterial({map:canvasTex(64, 64, (c, cw, ch) => { const g = c.createRadialGradient(cw/2, ch/2, 1, cw/2, ch/2, cw/2); g.addColorStop(0, col); g.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = g; c.fillRect(0, 0, cw, ch); }, 1, 1), transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, opacity:.45, fog:false})); m.rotation.x = -Math.PI/2; m.position.set(X0 - 9, .03, z); add(m); };
-  refl("#e0701e", -4); refl("#4aa0e8", 7); refl("#3fb8a8", -9); refl("#e0701e", 2);
+  refl("#4fa9a3", -4); refl("#4aa0e8", 7); refl("#3fb8a8", -9); refl("#4fa9a3", 2);
   // Kabel quer über die Schlucht + Lichterketten
   for (let k = 0; k < 8; k++) { const y = 9 + Math.random()*14, z0 = -16 + Math.random()*32, pts = [V3(X0 - .3, y, z0), V3(X0 - 9, y - 1.4 - Math.random()*1.2, z0 + Math.random()*5 - 2.5), V3(FXo + .3, y + Math.random()*2, z0 + Math.random()*6 - 3)], cv = new THREE.CatmullRomCurve3(pts), cp = cv.getPoints(30);
     add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(cp), new THREE.LineBasicMaterial({color:0x14161c, fog:false})));
@@ -4989,16 +4989,16 @@ function buildStreetWalls() {
     if (wood) { const gl = new THREE.Mesh(new THREE.PlaneGeometry(.5, .45), new THREE.MeshBasicMaterial({color:0x7a5a30})); gl.position.set(x, 1.7, z0 + inn*.1); gl.rotation.y = ry; exG.add(gl); for (let k = 0; k < 4; k++) nos(exBox(.9, .03, .02, mStd(0x35241a, .1, .9), x, .4 + k*.35, z0 + inn*.105)); }
     else for (let k = 0; k < 4; k++) nos(exBox(1.0, .06, .03, mStd(0x15202f, .6, .5), x, .45 + k*.5, z0 + inn*.105));
     nos(exBox(.1, .05, .08, mStd(0xc0c4cc, .8, .3), x + .4, 1.05, z0 + inn*.13)); nos(exBox(1.5, .12, .55, conc, x, .06, z0 + inn*.35));
-    exPl(.4, .22, sign(num, "#e0701e", .4, .22), x, 2.62, z0 + inn*.02, ry);
+    exPl(.4, .22, sign(num, "#4fa9a3", .4, .22), x, 2.62, z0 + inn*.02, ry);
     nos(exBox(.08, .08, .3, metal, x, 2.95, z0 + inn*.15)); const b = new THREE.Mesh(new THREE.SphereGeometry(.07, 8, 6), new THREE.MeshBasicMaterial({color:0xffe0b0})); b.position.set(x, 2.88, z0 + inn*.3); exG.add(b); nos(exBox(.2, .04, .2, metal, x, 2.98, z0 + inn*.3));
     const l = exPt(0xffb878, 1.0, 7, x, 2.85, z0 + inn*.4); l.userData.aim = [0, -1, inn*1.5]; };
   door(-6.8, -1, 0x23304a, "Nr. 12", false); door(-4.4, 1, 0x4a3224, "Nr. 11", true);
   // Poster / Graffiti
   const poster = (w, h, x, y, z, ry, draw) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({map:canvasTex(160, Math.round(160*h/w), draw, 1, 1)})); m.position.set(x, y, z); m.rotation.y = ry; exG.add(m); m.userData.noSh = 1; return m; };
-  poster(1.6, 2.2, 10.9, 3.2, -.4, -Math.PI/2, (x, w, h) => { x.fillStyle = "#16203a"; x.fillRect(0, 0, w, h); x.fillStyle = "#e0701e"; x.beginPath(); x.arc(w/2, h*.38, w*.26, 0, 7); x.fill(); x.fillStyle = "#e8ecf4"; x.font = "bold " + Math.round(w*.2) + "px sans-serif"; x.textAlign = "center"; x.fillText("ÖL", w/2, h*.82); x.globalAlpha = .4; speckle(x, w, h, 500, .3); });
-  poster(1.2, 1.7, 10.9, 2.4, 1.6, -Math.PI/2, (x, w, h) => { x.fillStyle = "#c8ccd6"; x.fillRect(0, 0, w, h); x.fillStyle = "#16203a"; x.fillRect(10, 10, w - 20, h*.5); x.fillStyle = "#e0701e"; x.fillRect(10, h*.62, w - 20, 10); x.fillStyle = "#16203a"; x.font = "bold " + Math.round(w*.14) + "px monospace"; x.textAlign = "center"; x.fillText("KRONOS", w/2, h*.87); speckle(x, w, h, 400, .35); });
-  poster(1.3, 1.9, -1.0, 2.4, hd - .02, Math.PI, (x, w, h) => { x.fillStyle = "#1c2a44"; x.fillRect(0, 0, w, h); x.fillStyle = "#e8ecf4"; for (let i = 0; i < 5; i++) x.fillRect(14, 18 + i*32, w - 28 - i*14, 12); x.fillStyle = "#e0701e"; x.fillRect(14, h - 40, 50, 24); speckle(x, w, h, 450, .35); });
-  poster(2.2, 1.2, -9.2, 3.0, -hd + .02, 0, (x, w, h) => { x.fillStyle = "#101828"; x.fillRect(0, 0, w, h); x.strokeStyle = "#e0701e"; x.lineWidth = 6; x.beginPath(); x.moveTo(10, h*.7); x.bezierCurveTo(w*.3, h*.1, w*.6, h*.9, w - 10, h*.3); x.stroke(); x.strokeStyle = "#e8ecf4"; x.lineWidth = 3; x.beginPath(); x.moveTo(10, h*.85); x.bezierCurveTo(w*.3, h*.3, w*.6, h*1.0, w - 10, h*.5); x.stroke(); speckle(x, w, h, 400, .3); });
+  poster(1.6, 2.2, 10.9, 3.2, -.4, -Math.PI/2, (x, w, h) => { x.fillStyle = "#16203a"; x.fillRect(0, 0, w, h); x.fillStyle = "#4fa9a3"; x.beginPath(); x.arc(w/2, h*.38, w*.26, 0, 7); x.fill(); x.fillStyle = "#e8ecf4"; x.font = "bold " + Math.round(w*.2) + "px sans-serif"; x.textAlign = "center"; x.fillText("ÖL", w/2, h*.82); x.globalAlpha = .4; speckle(x, w, h, 500, .3); });
+  poster(1.2, 1.7, 10.9, 2.4, 1.6, -Math.PI/2, (x, w, h) => { x.fillStyle = "#c8ccd6"; x.fillRect(0, 0, w, h); x.fillStyle = "#16203a"; x.fillRect(10, 10, w - 20, h*.5); x.fillStyle = "#4fa9a3"; x.fillRect(10, h*.62, w - 20, 10); x.fillStyle = "#16203a"; x.font = "bold " + Math.round(w*.14) + "px monospace"; x.textAlign = "center"; x.fillText("KRONOS", w/2, h*.87); speckle(x, w, h, 400, .35); });
+  poster(1.3, 1.9, -1.0, 2.4, hd - .02, Math.PI, (x, w, h) => { x.fillStyle = "#1c2a44"; x.fillRect(0, 0, w, h); x.fillStyle = "#e8ecf4"; for (let i = 0; i < 5; i++) x.fillRect(14, 18 + i*32, w - 28 - i*14, 12); x.fillStyle = "#4fa9a3"; x.fillRect(14, h - 40, 50, 24); speckle(x, w, h, 450, .35); });
+  poster(2.2, 1.2, -9.2, 3.0, -hd + .02, 0, (x, w, h) => { x.fillStyle = "#101828"; x.fillRect(0, 0, w, h); x.strokeStyle = "#4fa9a3"; x.lineWidth = 6; x.beginPath(); x.moveTo(10, h*.7); x.bezierCurveTo(w*.3, h*.1, w*.6, h*.9, w - 10, h*.3); x.stroke(); x.strokeStyle = "#e8ecf4"; x.lineWidth = 3; x.beginPath(); x.moveTo(10, h*.85); x.bezierCurveTo(w*.3, h*.3, w*.6, h*1.0, w - 10, h*.5); x.stroke(); speckle(x, w, h, 400, .3); });
   // Wandlampe + Rohr + Kasten an der Ostwand, Kabel
   nos(exBox(.2, .5, .4, mStd(0x3a3f46, .5, .6), hw - .12, 1.6, -2.2)); nos(exBox(.3, .5, .02, metal, hw - .04, 1.6, -2.2));
   const lcv = new THREE.CatmullRomCurve3([V3(-hw + .3, 6.3, -hd + .1), V3(-3, 5.5, 0), V3(hw - .3, 6.6, hd - .1)]); exG.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(lcv.getPoints(24)), new THREE.LineBasicMaterial({color:0x15161a})));
