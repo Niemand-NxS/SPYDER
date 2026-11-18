@@ -6,26 +6,6 @@ function robWear() {
     x.strokeStyle = "rgba(40,40,40,.45)"; x.lineWidth = 1; for (let i = 0; i < 14; i++) { x.beginPath(); const px = Math.random()*w, py = Math.random()*h; x.moveTo(px, py); x.lineTo(px + Math.random()*22 - 11, py + Math.random()*22 - 11); x.stroke(); } }, 1, 1);
   return robWearT;
 }
-function robotDetails(R, g, add, body, acc, dk, o) {
-  body.map = imgTex("m52C", 1.6, 1.6); body.normalMap = imgTex("m52N", 1.6, 1.6); body.roughnessMap = imgTex("m52R", 1.6, 1.6); body.normalScale.set(.9, .9); body.metalness = .55; body.roughness = 1; body.needsUpdate = true;   // Metal052C: gebürsteter, verwitterter Stahl
-  for (const m of new Set([dk, acc])) { if (!m || m.isMeshBasicMaterial || m.map) continue; m.map = imgTex("m38C", 1.4, 1.4); m.normalMap = imgTex("m38N", 1.4, 1.4); m.roughnessMap = imgTex("m38R", 1.4, 1.4); m.metalness = Math.max(m.metalness || 0, .5); m.roughness = 1; m.needsUpdate = true; }   // Metal038: dunkler Zinkstahl
-  R.legs = g.children.filter(c => c.isGroup && Math.abs(c.position.y - .78) < 1e-6); R.shins = R.legs.map(l => l.children.find(c => c.isGroup));
-  const steel = mStd(0x8a929c, .8, .35), slot = new THREE.MeshBasicMaterial({color:0x020304});
-  R.legs.forEach((leg, i) => { const s = i ? 1 : -1; add(new THREE.CylinderGeometry(.011, .011, .36, 6), steel, 0, -.22, .06, leg); add(new THREE.BoxGeometry(.09, .07, .02), acc, 0, -.46, .06, leg); add(new THREE.CylinderGeometry(.052, .052, .03, 8), dk, 0, -.1, 0, leg); R.shins[i].children.forEach(() => 0); add(new THREE.BoxGeometry(.01, .22, .01), steel, s*.03, -.15, .04, R.shins[i]); });
-  add(new THREE.BoxGeometry(.26, .035, .19), acc, 0, .9, 0);
-  add(new THREE.BoxGeometry(.2, .3, .08), dk, 0, 1.08, -.14); add(new THREE.BoxGeometry(.14, .04, .02), new THREE.MeshBasicMaterial({color:o.glow}), 0, 1.02, -.185);
-  for (let i = 0; i < 3; i++) add(new THREE.BoxGeometry(.1, .012, .01), dk, -.04, 1.02 + i*.03, .132);
-  for (const s of [-1, 1]) { add(new THREE.BoxGeometry(.12, .05, .14), acc, s*.19, 1.335, 0); add(new THREE.CylinderGeometry(.012, .012, .12, 6), dk, s*.045, 1.33, .02).rotation.z = Math.PI/2 + s*.3; }
-  for (const s of [-1, 1]) { const e = add(new THREE.CylinderGeometry(.055, .055, .03, 10), dk, s*.19, .16, 0, R.head); e.rotation.z = Math.PI/2; const e2 = add(new THREE.CylinderGeometry(.03, .03, .035, 10), acc, s*.2, .16, 0, R.head); e2.rotation.z = Math.PI/2; }
-  add(new THREE.BoxGeometry(.13, .024, .03), slot, 0, .025, .105, R.head);
-  for (let i = 0; i < 4; i++) add(new THREE.BoxGeometry(.04, .01, .01), dk, -.12 + i*.016, .3, .08, R.head);
-  if (o.pouch) { add(new THREE.BoxGeometry(.1, .09, .06), mStd(0x4a3a2a, .1, .9), .15, .86, .08); add(new THREE.BoxGeometry(.1, .02, .065), mStd(0x32261c, .1, .9), .15, .91, .08); }
-  if (o.scarf) { add(new THREE.CylinderGeometry(.085, .09, .06, 10), mStd(o.scarf, 0, .95), 0, 1.33, 0); const tl = add(new THREE.BoxGeometry(.06, .3, .015), mStd(o.scarf, 0, .95), .05, 1.18, .1); tl.rotation.z = .05; R.tail = tl; }
-  if (o.tape) { const tp = add(new THREE.CylinderGeometry(.037, .037, .06, 8), mStd(0xd8d2c0, 0, .9), 0, -.1, 0, R.aL); tp.scale.set(1, 1, 1); }
-  if (o.apron) { add(new THREE.BoxGeometry(.22, .34, .02), mStd(o.apron, 0, .95), 0, .98, .119); add(new THREE.BoxGeometry(.03, .03, .02), dk, .09, 1.15, .138); }
-  if (o.cracks) R.crack = true;
-  R.g.userData.d = 1;
-}
 /* ---- 2-Segment-IK für die Arme (im Roboter-Koordinatensystem) ---- */
 const _ia = V3(), _ib = V3(), _ic = V3(), _ie = V3(), _q1r = new THREE.Quaternion(), _q2r = new THREE.Quaternion(), _dn = V3(0, -1, 0), _px = V3(1, 0, 0);
 function arm2(A, F, tx, ty, tz, px, py, pz, out) {

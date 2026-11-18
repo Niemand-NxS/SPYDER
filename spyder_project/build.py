@@ -24,7 +24,7 @@ def ui(s):
         c[0] += 1; p = f'{A}/ui/ui_{c[0]:02d}.png'
         return 'data:image/png;base64,' + emb(p) if os.path.exists(p) else m.group(0)
     return re.sub(r'data:image/png;base64,[A-Za-z0-9+/=]+', f, s)
-ORDER = ['b.js(head4)', 'i18n.js', 'b.js(rest)', 'tex.js', 'c.js', 'd1.js', 'd2.js', 'melee.js', 'menu.js', 'act.js', 'story.js', 'dmg.js', 'shaft.js', 'alley.js', 'bar.js', 'ch2.js', 'city.js', 'shop.js', 'job.js', 'sfx.js', 'snd.js', 'uisnd.js', 'd3.js']
+ORDER = ['b.js(head4)', 'i18n.js', 'b.js(rest)', 'tex.js', 'c.js', 'd1.js', 'd2.js', 'melee.js', 'menu.js', 'act.js', 'story.js', 'dmg.js', 'shaft.js', 'robot.js', 'alley.js', 'bar.js', 'ch2.js', 'city.js', 'shop.js', 'job.js', 'sfx.js', 'snd.js', 'uisnd.js', 'd3.js']
 parts = []
 for f in ORDER:
     if f == 'b.js(head4)': parts.append(''.join(rd(S + '/b.js').splitlines(True)[:4]))

@@ -48,46 +48,6 @@ function speakVowels(text, v) {      // v: f0 (Hz), fs (Formant-Skala), vol, rob
 /* ---------- Roboter (Stil: Monitor-Köpfe wie in Stray) ---------- */
 const _npw = new THREE.Vector3();
 function npcPush(p) { const L = [...robots, ...(typeof barBots !== "undefined" ? barBots : []), ...(typeof exAct !== "undefined" ? exAct : [])]; for (const R of L) { if (!R.g.visible) continue; R.g.getWorldPosition(_npw); if (p.y < _npw.y + 1.85 && p.y > _npw.y - .5) { const dx = p.x - _npw.x, dz = p.z - _npw.z, d = Math.hypot(dx, dz); if (d < .36) { const k = d > 1e-3 ? .36/d : 0; p.x = _npw.x + (d > 1e-3 ? dx*k : .36); p.z = _npw.z + dz*k; } } } }
-function makeRobot(o) {
-  const g = new THREE.Group(), body = mStd(o.body, .55, .6), acc = mStd(o.acc, .5, .65), dk = mStd(0x16181c, .6, .5), R = {g, o, talkT:0, ev:[], drinkT:-1, lookT:0, blink:2 + Math.random()*3, face:0, gx:0, ph:Math.random()*6, cur:0};
-  const add = (geo, mat, x, y, z, p) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); (p || g).add(m); return m; };
-  for (const s of [-1, 1]) { const leg = new THREE.Group(); leg.position.set(s*.09, .78, 0); g.add(leg); add(new THREE.CylinderGeometry(.045, .04, .42, 8), body, 0, -.22, 0, leg); add(new THREE.SphereGeometry(.052, 8, 6), dk, 0, -.44, 0, leg);
-    const sh = new THREE.Group(); sh.position.set(0, -.46, 0); leg.add(sh); add(new THREE.CylinderGeometry(.04, .034, .3, 8), acc, 0, -.15, 0, sh); add(new THREE.BoxGeometry(.1, .05, .18), dk, 0, -.31, .03, sh); }
-  add(new THREE.BoxGeometry(.28, .1, .16), dk, 0, .82, 0); add(new THREE.CylinderGeometry(.14, .12, .5, 10), body, 0, 1.08, 0); add(new THREE.BoxGeometry(.2, .2, .02), acc, 0, 1.1, .12);
-  const chest = add(new THREE.SphereGeometry(.013, 6, 6), new THREE.MeshBasicMaterial({color:o.glow}), .06, 1.16, .135); R.chest = chest;
-  add(new THREE.CylinderGeometry(.045, .05, .1, 8), dk, 0, 1.37, 0); add(new THREE.BoxGeometry(.34, .06, .16), body, 0, 1.31, 0); add(new THREE.BoxGeometry(.04, .03, .12), acc, .15, 1.31, 0);
-  const head = new THREE.Group(); head.position.set(0, 1.38, 0); g.add(head); R.head = head;
-  add(new THREE.BoxGeometry(.36, .28, .2), dk, 0, .16, 0, head); add(new THREE.BoxGeometry(.3, .22, .06), acc, 0, .16, -.1, head); add(new THREE.CylinderGeometry(.008, .008, .2, 5), dk, .12, .38, -.03, head); add(new THREE.SphereGeometry(.018, 6, 6), new THREE.MeshBasicMaterial({color:o.glow}), .12, .49, -.03, head);
-  const cv = document.createElement("canvas"); cv.width = 160; cv.height = 120; R.cx = cv.getContext("2d"); R.tex = new THREE.CanvasTexture(cv);
-  add(new THREE.PlaneGeometry(.3, .225), new THREE.MeshBasicMaterial({map:R.tex}), 0, .16, .1055, head);
-  const arm = s => { const A = new THREE.Group(); A.position.set(s*.2, 1.27, 0); g.add(A); add(new THREE.SphereGeometry(.05, 8, 6), dk, 0, 0, 0, A); add(new THREE.CylinderGeometry(.034, .03, .3, 8), body, 0, -.15, 0, A);
-    const F = new THREE.Group(); F.position.set(0, -.3, 0); A.add(F); add(new THREE.SphereGeometry(.04, 8, 6), acc, 0, 0, 0, F); add(new THREE.CylinderGeometry(.03, .026, .28, 8), acc, 0, -.14, 0, F); add(new THREE.BoxGeometry(.07, .09, .05), dk, 0, -.31, 0, F); return {A, F}; };
-  const L = arm(-1), Rr = arm(1); R.aL = L.A; R.fL = L.F; R.aR = Rr.A; R.fR = Rr.F;
-  for (const s of [-1, 1]) { add(new THREE.BoxGeometry(.13, .035, .172), acc, s*.2, 1.34, 0); add(new THREE.CylinderGeometry(.052, .052, .03, 8), acc, s*.09, .64, 0); add(new THREE.BoxGeometry(.012, .02, .3), new THREE.MeshBasicMaterial({color:o.glow}), s*.153, 1.05, .0); add(new THREE.BoxGeometry(.03, .1, .02), dk, s*.19, .34, -.1, head); }
-  add(new THREE.BoxGeometry(.22, .3, .06), dk, 0, 1.12, -.14); for (let k = 0; k < 3; k++) add(new THREE.BoxGeometry(.16, .012, .02), new THREE.MeshBasicMaterial({color:o.glow}), 0, 1.04 + k*.07, -.175); add(new THREE.BoxGeometry(.3, .02, .22), acc, 0, .3, 0, head); add(new THREE.BoxGeometry(.2, .018, .02), acc, 0, 1.16, .125);
-  if (o.cool) { const jm = mStd(0x23252b, .3, .55), ora = new THREE.MeshBasicMaterial({color:0x3c8680});
-    add(new THREE.BoxGeometry(.4, .46, .3), jm, 0, 1.1, -.0); add(new THREE.BoxGeometry(.4, .3, .03), jm, 0, .78, -.14); add(new THREE.BoxGeometry(.06, .22, .2), jm, -.15, 1.38, 0); add(new THREE.BoxGeometry(.06, .22, .2), jm, .15, 1.38, 0);
-    add(new THREE.BoxGeometry(.012, .46, .005), ora, -.07, 1.1, .153); add(new THREE.BoxGeometry(.012, .46, .005), ora, .07, 1.1, .153);
-    for (const s of [-1, 1]) { add(new THREE.ConeGeometry(.03, .1, 6), dk, s*.25, 1.37, 0).rotation.z = -s*1.2; add(new THREE.CylinderGeometry(.075, .075, .05, 12), jm, s*.215, .16, 0, head).rotation.z = Math.PI/2; add(new THREE.BoxGeometry(.04, .1, .02), ora, s*.22, 1.2, .0); }
-    for (let k = 0; k < 4; k++) { const f = add(new THREE.BoxGeometry(.022, .16, .06), k % 2 ? acc : dk, 0, .36 + k*.0, -.07 + k*.06, head); f.rotation.x = -.35 - k*.08; f.position.y = .33 + (k === 1 || k === 2 ? .03 : 0); }
-    add(new THREE.BoxGeometry(.28, .03, .05), ora, 0, .27, .1, head); }
-  const glass = new THREE.Group(); glass.position.set(0, -.33, .02); R.fR.add(glass); R.glass = glass;
-  add(new THREE.CylinderGeometry(.036, .03, .1, 10), new THREE.MeshStandardMaterial({color:0xcad4de, transparent:true, opacity:.35, roughness:.1}), 0, 0, 0, glass);
-  R.liq = add(new THREE.CylinderGeometry(.031, .027, .066, 10), new THREE.MeshStandardMaterial({color:0x8a2018, emissive:0x50140e, roughness:.3}), 0, -.012, 0, glass); R.level = .85; setLevel(R, .85);
-  robotDetails(R, g, add, body, acc, dk, o);
-  g.traverse(m => { if (m.isMesh) m.castShadow = true; }); return R;
-}
-function setLevel(R, v) { R.level = v; const h = .066*Math.max(.02, v); R.liq.scale.y = Math.max(.02, v); R.liq.position.y = -.045 + h/2; R.liq.visible = v > .03; }
-function drawFace(R, t) {
-  const x = R.cx, o = R.o, w = 160, h = 120, col = "#" + o.glow.toString(16).padStart(6, "0"); x.fillStyle = "#05080b"; x.fillRect(0, 0, w, h);
-  const look = R.lookT > 0, bl = R.blink < .12 ? .12 : 1, ey = look ? 30 : 24, ew = look ? 22 : 18; x.fillStyle = col; x.globalAlpha = .92;
-  for (const s of [-1, 1]) { const cx = w/2 + s*34 + R.gx*8, cy = 48; x.beginPath(); x.roundRect ? x.roundRect(cx - ew/2, cy - ey*bl/2, ew, ey*bl, 5) : x.rect(cx - ew/2, cy - ey*bl/2, ew, ey*bl); x.fill(); }
-  if (R.talkT > 0) { const k = R.ev.find(e => R.tAt >= e.t0 && R.tAt <= e.t1); for (let i = 0; i < 5; i++) { const hh = k ? 6 + (.5 + .5*Math.sin(t*38 + i*1.7))*18*(.5 + .5*Math.min(1, k.s)) : 3; x.fillRect(w/2 - 30 + i*13, 96 - hh/2, 8, hh); } }
-  else if (R.drinkT >= 0) { x.fillRect(w/2 - 12, 96, 24, 4); } else if (R.smile) { x.strokeStyle = col; x.lineWidth = 5; x.lineCap = "round"; x.beginPath(); x.arc(w/2, 72, 30, .22*Math.PI, .78*Math.PI); x.stroke(); } else { x.fillRect(w/2 - 16, 95, 32, 4); }
-  if (look) { x.font = "bold 26px monospace"; x.fillText("?", w - 30, 30); }
-  x.globalAlpha = .13; x.fillStyle = "#000"; for (let y = 0; y < h; y += 4) x.fillRect(0, y, w, 2); x.globalAlpha = 1; if (Math.random() < .03) { x.fillStyle = "rgba(255,255,255,.07)"; x.fillRect(0, Math.random()*h, w, 4); }
-  R.tex.needsUpdate = true;
-}
 const VOICES = [{f0:96, fs:.92, vol:.55, robot:.85, speed:1.08}, {f0:158, fs:1.08, vol:.5, robot:.7, speed:.95}];
 const ROBN = ["ROBOTER · BRUMM", "ROBOTER · FIEP"];
 function alleyTexts() {
