@@ -186,12 +186,12 @@ function drawFace(R, t) {     // Anime-Augen (2-farbig) auf dem Visier + Linsen-
   const key = [open.toFixed(2), look.toFixed(2), smile, mouth.toFixed(1), hex].join();
   if (R._fk !== key) { R._fk = key;
     c.fillStyle = "#07090c"; c.fillRect(0, 0, W, H);
-    for (const ex of [W*.3, W*.7]) { const cx = ex + look*30, cy = H*.5, rw = 24, rh = 32*open;
-      c.fillStyle = hex;
-      if (smile && open > .5) { c.lineWidth = 9; c.strokeStyle = hex; c.lineCap = "round"; c.beginPath(); c.arc(cx, cy + 12, 19, Math.PI*1.12, Math.PI*1.88); c.stroke(); }
-      else { c.beginPath(); c.ellipse(cx, cy, rw, Math.max(2, rh), 0, 0, Math.PI*2); c.fill();
-        if (open > .5) { c.fillStyle = "#07090c"; c.beginPath(); c.ellipse(cx + look*10, cy + 3, 6, 10*open, 0, 0, Math.PI*2); c.fill();      // Pupille
-          c.fillStyle = "#f4f6f8"; c.beginPath(); c.arc(cx - 8, cy - 12*open, 5.5, 0, Math.PI*2); c.fill(); c.beginPath(); c.arc(cx + 9, cy + 10*open, 2.6, 0, Math.PI*2); c.fill(); } } }   // Augenlicht
+    for (const sx of [-1, 1]) { const cx = W/2 + sx*50 + look*26, cy = H*.5, hw = 34, h = 17*open;     // Schlitzaugen: schmal, außen hochgezogen
+      c.fillStyle = hex; c.strokeStyle = hex; c.lineCap = "round";
+      if (smile && open > .5) { c.lineWidth = 8; c.beginPath(); c.moveTo(cx - hw*.8, cy + 8); c.quadraticCurveTo(cx, cy - 16, cx + hw*.8, cy + 8); c.stroke(); }
+      else { const ox = cx + sx*hw, oy = cy - 9*Math.max(open, .3), ix = cx - sx*hw, iy = cy + 6;                   // außen oben, innen unten
+        c.beginPath(); c.moveTo(ix, iy); c.quadraticCurveTo(cx, iy - 2 - h*1.9, ox, oy);                          // Oberlid
+        c.quadraticCurveTo(cx + sx*hw*.2, oy + 5 + h*.5, ix, iy); c.closePath(); c.fill(); } }
     if (mouth > 0) { c.fillStyle = hex; c.beginPath(); c.ellipse(W/2, H*.88, 10, 3 + 7*mouth, 0, 0, Math.PI*2); c.fill(); }
     R.tex.needsUpdate = true; }
   const k = open < .2 ? .2 : .75 + .15*Math.sin(t*1.7 + R.ph), r = (col >> 16 & 255)/255, g2 = (col >> 8 & 255)/255, b = (col & 255)/255;
