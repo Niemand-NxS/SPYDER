@@ -116,21 +116,16 @@ function makeRobot(o) {
   H(0, FULL, shell);
   // Zierlinien: dunkle Nähte (Torus-Bögen) über den Helm, wie die Fugen auf dem Referenzbild
   for (const y of [.262, .335]) L([[y - .004, .1285 - (y - .262)*.4, .1595 - (y - .262)*.3, 0, -.058 - (y - .262)*.35], [y, .1285 - (y - .262)*.4, .1595 - (y - .262)*.3, 0, -.058 - (y - .262)*.35], [y + .004, .1285 - (y - .262)*.4, .1595 - (y - .262)*.3, 0, -.058 - (y - .262)*.35]], 0, FULL, dkm, head, 30, 1);   // Fugenbänder
-  L([[.16, .1225, .1285, 0, -.0215], [.2, .1355, .16, 0, -.044], [.25, .1345, .167, 0, -.056], [.28, .126, .164, 0, -.064]], -.95, .0, mStd(0x07090c, .9, .1), head, 16, 3);   // dunkles Visier-Feld (Frontpartie, links der Mitte)
-  // Kamera-Linse: tief in einer Aussparung an der rechten Kopfseite, Tubus ragt heraus (wie Referenzbild 3)
-  { const ex = .122, ey = HY + .005, ez = .03;
-    P(cyl(.07, .07, .05, 30), dkm, ex, ey, ez, head, {r:[0, 0, PI/2]});                                             // Aussparung
-    P(tor(.074, .01, 30), shell, ex + .02, ey, ez, head, {r:[0, PI/2, 0]});                                          // Wulst am Rand
-    P(cyl(.056, .056, .05, 28), dkm, ex + .03, ey, ez, head, {r:[0, 0, PI/2]});                                      // Tubus
-    for (let k = 0; k < 4; k++) P(tor(.056 - k*.007, .0045, 26), k % 2 ? gold : steel, ex + .056 + k*.002, ey, ez, head, {r:[0, PI/2, 0]});   // Ringe
-    P(cyl(.024, .024, .014, 22), mStd(0x0a1118, .9, .08), ex + .062, ey, ez, head, {r:[0, 0, PI/2]});                // Glas
-    add(new THREE.SphereGeometry(.014, 14, 10), eyeM, ex + .072, ey, ez, head).scale.x = .4;                          // leuchtender Kern
-    P(sph(8, 6), steel, ex + .03, ey + .075, ez - .02, head, {s:[.012, .012, .012]});                               // Mini-Sensor
-    ball(.008, glowM, ex + .02, ey - .08, ez + .02, head); }
-  // linke Seite: kleiner Sensorknopf
-  P(tor(.016, .004, 14), steel, -.124, HY + .04, .0, head, {r:[0, PI/2, 0]}); ball(.008, glowM, -.126, HY + .04, 0, head);
+  R.cx = document.createElement("canvas").getContext("2d"); R.cx.canvas.width = 256; R.cx.canvas.height = 96; R.tex = new THREE.CanvasTexture(R.cx.canvas);
+  const visM = new THREE.MeshBasicMaterial({map:R.tex});
+  L([[.16, .1225, .1285, 0, -.0215], [.2, .1355, .16, 0, -.044], [.25, .1345, .167, 0, -.056], [.28, .126, .164, 0, -.064]], -.95, .95, visM, head, 24, 3);   // Visier mit Anime-Augen (Textur)
+  // symmetrische Kamera-Linsen an beiden Kopfseiten
+  for (const sx of [-1, 1]) { const ex = sx*.122, ey = HY - .005, ez = .0;
+    P(cyl(.05, .05, .04, 26), dkm, ex, ey, ez, head, {r:[0, 0, PI/2]}); P(tor(.052, .008, 26), shell, ex + sx*.018, ey, ez, head, {r:[0, PI/2, 0]});
+    for (let k = 0; k < 3; k++) P(tor(.04 - k*.009, .004, 22), k % 2 ? gold : steel, ex + sx*(.026 + k*.003), ey, ez, head, {r:[0, PI/2, 0]});
+    add(new THREE.SphereGeometry(.012, 12, 8), eyeM, ex + sx*.034, ey, ez, head).scale.x = .4; }
   // Antenne + Kabel am Hinterkopf, die in den Hals laufen
-  P(cyl(.004, .004, .09, 6), steel, -.04, .43, -.09, head, {r:[.2, 0, .1]}); ball(.008, glowM, -.05, .475, -.095, head);
+  P(cyl(.004, .004, .09, 6), steel, 0, .43, -.09, head, {r:[.2, 0, 0]}); ball(.008, glowM, 0, .475, -.098, head);
   for (let k = 0; k < 7; k++) { const x = -.06 + k*.02; cable([[x, HY + .02, -.2], [x*1.3, HY - .1, -.2], [x*1.4, .08, -.13], [x*.7, .0, -.05]], .0045, k % 2 ? rub : copper, head); }
   P(cyl(.07, .075, .04, 16), inner, 0, .0, 0, head);
 
@@ -181,11 +176,24 @@ function makeRobot(o) {
   g.traverse(m => { if (m.isMesh) m.castShadow = true; }); return R;
 }
 function setLevel(R, v) { R.level = v; const h = .066*Math.max(.02, v); R.liq.scale.y = Math.max(.02, v); R.liq.position.y = -.045 + h/2; R.liq.visible = v > .03; }
-function drawFace(R, t) {     // kein Bildschirm: Ausdruck über die Helligkeit der Kamera-Linse
-  const col = R.o.glow, r = (col >> 16 & 255)/255, g2 = (col >> 8 & 255)/255, b = (col & 255)/255;
-  let k = .55 + .1*Math.sin(t*1.7 + R.ph);                                                   // ruhiges Pulsieren
-  if (R.lookT > 0) k = 1.15; if (R.blink < .12) k = .12;                                     // aufmerksam / Blinzeln
-  if (R.talkT > 0) { const e = R.ev.find(q => R.tAt >= q.t0 && R.tAt <= q.t1); k = e ? .85 + .5*(.5 + .5*Math.sin(t*38))*Math.min(1, e.s) : .5; }
-  else if (R.drinkT >= 0) k = .35; else if (R.smile) k = 1.05;
-  R.eyeM.color.setRGB(Math.min(1, r*k + .08*k), Math.min(1, g2*k + .08*k), Math.min(1, b*k + .08*k));
+function drawFace(R, t) {     // Anime-Augen (2-farbig) auf dem Visier + Linsen-Glühen an den Seiten
+  const c = R.cx, W = 256, H = 96, col = R.o.glow, hex = "#" + (col & 0xffffff).toString(16).padStart(6, "0");
+  let open = 1, look = 0, smile = !!R.smile, mouth = 0;
+  if (R.blink < .12) open = .08;
+  if (R.drinkT >= 0) open = .45;
+  if (R.talkT > 0) { const e = R.ev.find(q => R.tAt >= q.t0 && R.tAt <= q.t1); mouth = e ? .5 + .5*Math.sin(t*30) : 0; }
+  look = R.lookT > 0 ? Math.sin(t*2)*.2 : (R.gx || 0)*.2;
+  const key = [open.toFixed(2), look.toFixed(2), smile, mouth.toFixed(1), hex].join();
+  if (R._fk !== key) { R._fk = key;
+    c.fillStyle = "#07090c"; c.fillRect(0, 0, W, H);
+    for (const ex of [W*.3, W*.7]) { const cx = ex + look*30, cy = H*.5, rw = 24, rh = 32*open;
+      c.fillStyle = hex;
+      if (smile && open > .5) { c.lineWidth = 9; c.strokeStyle = hex; c.lineCap = "round"; c.beginPath(); c.arc(cx, cy + 12, 19, Math.PI*1.12, Math.PI*1.88); c.stroke(); }
+      else { c.beginPath(); c.ellipse(cx, cy, rw, Math.max(2, rh), 0, 0, Math.PI*2); c.fill();
+        if (open > .5) { c.fillStyle = "#07090c"; c.beginPath(); c.ellipse(cx + look*10, cy + 3, 6, 10*open, 0, 0, Math.PI*2); c.fill();      // Pupille
+          c.fillStyle = "#f4f6f8"; c.beginPath(); c.arc(cx - 8, cy - 12*open, 5.5, 0, Math.PI*2); c.fill(); c.beginPath(); c.arc(cx + 9, cy + 10*open, 2.6, 0, Math.PI*2); c.fill(); } } }   // Augenlicht
+    if (mouth > 0) { c.fillStyle = hex; c.beginPath(); c.ellipse(W/2, H*.88, 10, 3 + 7*mouth, 0, 0, Math.PI*2); c.fill(); }
+    R.tex.needsUpdate = true; }
+  const k = open < .2 ? .2 : .75 + .15*Math.sin(t*1.7 + R.ph), r = (col >> 16 & 255)/255, g2 = (col >> 8 & 255)/255, b = (col & 255)/255;
+  R.eyeM.color.setRGB(Math.min(1, r*k + .08), Math.min(1, g2*k + .08), Math.min(1, b*k + .08));
 }
