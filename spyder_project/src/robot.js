@@ -112,21 +112,20 @@ function makeRobot(o) {
   P(sph(18, 14), dkm, 0, HY - .01, -.02, head, {s:[.085, .15, .085]});
   P(cyl(.06, .07, .09, 14), dkm, 0, .02, -.01, head);
   // Helm: EIN schlanker, nach hinten gestreckter Eierkopf, Scheitel nach hinten verschoben (cz), leicht nach vorn geneigt
-  const H = (a, b, mat, seg) => L([[.03, .042, .058, 0, .022], [.065, .075, .088, 0, .012], [.1, .097, .102, 0, -.002], [.16, .11, .12, 0, -.0225], [.24, .125, .145, 0, -.04], [.32, .122, .152, 0, -.06], [.38, .095, .125, 0, -.07], [.415, .05, .08, 0, -.075], [.432, .014, .03, 0, -.075]], a, b, mat, head, seg || 30, 3);   // runder Schädel, kräftiger Kiefer, Kinn
+  const H = (a, b, mat, seg) => L([[.02, .06, .05, 0, .056], [.04, .085, .064, 0, .042], [.07, .1, .084, 0, .024], [.1, .106, .1, 0, .003], [.16, .11, .115, 0, -.005], [.24, .122, .13, 0, -.022], [.32, .12, .135, 0, -.035], [.38, .1, .115, 0, -.04], [.415, .06, .08, 0, -.042], [.432, .014, .03, 0, -.042]], a, b, mat, head, seg || 30, 3);   // runder Schädel, kräftiger Kiefer, Kinn
   H(0, FULL, shell);
   // Zierlinien: dunkle Nähte (Torus-Bögen) über den Helm, wie die Fugen auf dem Referenzbild
-  for (const q of [[.262, .127, .149, -.045], [.335, .1105, .141, -.062]]) L([[q[0] - .004, q[1], q[2], 0, q[3]], [q[0], q[1], q[2], 0, q[3]], [q[0] + .004, q[1], q[2], 0, q[3]]], 0, FULL, dkm, head, 30, 1);   // Fugenbänder
+  for (const q of [[.262, .1235, .1335, -.025], [.335, .1153, .13, -.036]]) L([[q[0] - .004, q[1], q[2], 0, q[3]], [q[0], q[1], q[2], 0, q[3]], [q[0] + .004, q[1], q[2], 0, q[3]]], 0, FULL, dkm, head, 30, 1);   // Fugenbänder
   R.cx = document.createElement("canvas").getContext("2d"); R.cx.canvas.width = 256; R.cx.canvas.height = 96; R.tex = new THREE.CanvasTexture(R.cx.canvas);
   const visM = new THREE.MeshBasicMaterial({map:R.tex});
-  L([[.17, .1188, .1285, 0, -.0225], [.21, .1235, .139, 0, -.032], [.25, .1305, .1516, 0, -.042], [.285, .1295, .154, 0, -.052]], -.95, .95, visM, head, 24, 3);   // Visier mit Anime-Augen (Textur)
+  L([[.17, .1185, .124, 0, -.009], [.21, .1225, .1285, 0, -.014], [.25, .128, .1365, 0, -.023], [.285, .127, .139, 0, -.029]], -.8, .8, visM, head, 24, 3);   // Visier mit Anime-Augen (Textur)
   // symmetrische Kamera-Linsen an beiden Kopfseiten
-  for (const sx of [-1, 1]) { const ex = sx*.122, ey = HY - .005, ez = .0;
+  for (const sx of [-1, 1]) { const ex = sx*.122, ey = HY - .005, ez = -.02;
     P(cyl(.05, .05, .04, 26), dkm, ex, ey, ez, head, {r:[0, 0, PI/2]}); P(tor(.052, .008, 26), shell, ex + sx*.018, ey, ez, head, {r:[0, PI/2, 0]});
     for (let k = 0; k < 3; k++) P(tor(.04 - k*.009, .004, 22), k % 2 ? gold : steel, ex + sx*(.026 + k*.003), ey, ez, head, {r:[0, PI/2, 0]});
     add(new THREE.SphereGeometry(.012, 12, 8), eyeM, ex + sx*.034, ey, ez, head).scale.x = .4; }
   // Antenne + Kabel am Hinterkopf, die in den Hals laufen
-  P(cyl(.004, .004, .09, 6), steel, 0, .43, -.09, head, {r:[.2, 0, 0]}); ball(.008, glowM, 0, .475, -.098, head);
-  for (let k = 0; k < 7; k++) { const x = -.06 + k*.02; cable([[x, HY + .02, -.2], [x*1.3, HY - .1, -.2], [x*1.4, .08, -.13], [x*.7, .0, -.05]], .0045, k % 2 ? rub : copper, head); }
+  for (let k = 0; k < 7; k++) { const x = -.06 + k*.02; cable([[x, HY + .02, -.165], [x*1.3, HY - .1, -.175], [x*1.4, .08, -.12], [x*.7, .0, -.05]], .0045, k % 2 ? rub : copper, head); }
   P(cyl(.07, .075, .04, 16), inner, 0, .0, 0, head);
 
   /* ================= ARME: schlank, Schulterpanzer, echte Hände ================= */
