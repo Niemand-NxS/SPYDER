@@ -112,13 +112,13 @@ function makeRobot(o) {
   P(sph(18, 14), dkm, 0, HY - .01, -.02, head, {s:[.085, .15, .085]});
   P(cyl(.06, .07, .09, 14), dkm, 0, .02, -.01, head);
   // Helm: EIN schlanker, nach hinten gestreckter Eierkopf, Scheitel nach hinten verschoben (cz), leicht nach vorn geneigt
-  const H = (a, b, mat, seg) => L([[.02, .03, .042, 0, .032], [.05, .056, .07, 0, .018], [.075, .075, .085, 0, .004], [.1, .092, .09, 0, -.006], [.15, .112, .118, 0, -.02], [.22, .128, .152, 0, -.045], [.3, .122, .162, 0, -.07], [.37, .092, .13, 0, -.085], [.415, .03, .05, 0, -.09]], a, b, mat, head, seg || 30, 3);
+  const H = (a, b, mat, seg) => L([[.03, .042, .058, 0, .022], [.065, .075, .088, 0, .012], [.1, .097, .102, 0, -.002], [.16, .11, .12, 0, -.0225], [.24, .125, .145, 0, -.04], [.32, .122, .152, 0, -.06], [.38, .095, .125, 0, -.07], [.415, .05, .08, 0, -.075], [.432, .014, .03, 0, -.075]], a, b, mat, head, seg || 30, 3);   // runder Schädel, kräftiger Kiefer, Kinn
   H(0, FULL, shell);
   // Zierlinien: dunkle Nähte (Torus-Bögen) über den Helm, wie die Fugen auf dem Referenzbild
-  for (const y of [.262, .335]) L([[y - .004, .1285 - (y - .262)*.4, .1595 - (y - .262)*.3, 0, -.058 - (y - .262)*.35], [y, .1285 - (y - .262)*.4, .1595 - (y - .262)*.3, 0, -.058 - (y - .262)*.35], [y + .004, .1285 - (y - .262)*.4, .1595 - (y - .262)*.3, 0, -.058 - (y - .262)*.35]], 0, FULL, dkm, head, 30, 1);   // Fugenbänder
+  for (const q of [[.262, .127, .149, -.045], [.335, .1105, .141, -.062]]) L([[q[0] - .004, q[1], q[2], 0, q[3]], [q[0], q[1], q[2], 0, q[3]], [q[0] + .004, q[1], q[2], 0, q[3]]], 0, FULL, dkm, head, 30, 1);   // Fugenbänder
   R.cx = document.createElement("canvas").getContext("2d"); R.cx.canvas.width = 256; R.cx.canvas.height = 96; R.tex = new THREE.CanvasTexture(R.cx.canvas);
   const visM = new THREE.MeshBasicMaterial({map:R.tex});
-  L([[.16, .1225, .1285, 0, -.0215], [.2, .1355, .16, 0, -.044], [.25, .1345, .167, 0, -.056], [.28, .126, .164, 0, -.064]], -.95, .95, visM, head, 24, 3);   // Visier mit Anime-Augen (Textur)
+  L([[.17, .1188, .1285, 0, -.0225], [.21, .1235, .139, 0, -.032], [.25, .1305, .1516, 0, -.042], [.285, .1295, .154, 0, -.052]], -.95, .95, visM, head, 24, 3);   // Visier mit Anime-Augen (Textur)
   // symmetrische Kamera-Linsen an beiden Kopfseiten
   for (const sx of [-1, 1]) { const ex = sx*.122, ey = HY - .005, ez = .0;
     P(cyl(.05, .05, .04, 26), dkm, ex, ey, ez, head, {r:[0, 0, PI/2]}); P(tor(.052, .008, 26), shell, ex + sx*.018, ey, ez, head, {r:[0, PI/2, 0]});
@@ -186,12 +186,12 @@ function drawFace(R, t) {     // Anime-Augen (2-farbig) auf dem Visier + Linsen-
   const key = [open.toFixed(2), look.toFixed(2), smile, mouth.toFixed(1), hex].join();
   if (R._fk !== key) { R._fk = key;
     c.fillStyle = "#07090c"; c.fillRect(0, 0, W, H);
-    for (const sx of [-1, 1]) { const cx = W/2 + sx*50 + look*26, cy = H*.5, hw = 34, h = 17*open;     // Schlitzaugen: schmal, außen hochgezogen
+    for (const sx of [-1, 1]) { const cx = W/2 + sx*50 + look*26, cy = H*.5, hw = 34, h = 21*open;     // Schlitzaugen: schmal, außen hochgezogen
       c.fillStyle = hex; c.strokeStyle = hex; c.lineCap = "round";
       if (smile && open > .5) { c.lineWidth = 8; c.beginPath(); c.moveTo(cx - hw*.8, cy + 8); c.quadraticCurveTo(cx, cy - 16, cx + hw*.8, cy + 8); c.stroke(); }
-      else { const ox = cx + sx*hw, oy = cy - 9*Math.max(open, .3), ix = cx - sx*hw, iy = cy + 6;                   // außen oben, innen unten
-        c.beginPath(); c.moveTo(ix, iy); c.quadraticCurveTo(cx, iy - 2 - h*1.9, ox, oy);                          // Oberlid
-        c.quadraticCurveTo(cx + sx*hw*.2, oy + 5 + h*.5, ix, iy); c.closePath(); c.fill(); } }
+      else { const ox = cx + sx*hw, oy = cy - 3*Math.max(open, .3), ix = cx - sx*hw, iy = cy + 4;                   // außen oben, innen unten
+        c.beginPath(); c.moveTo(ix, iy); c.quadraticCurveTo(cx, iy - 1 - h*1.5, ox, oy);                          // Oberlid
+        c.quadraticCurveTo(cx + sx*hw*.2, oy + 7 + h*.7, ix, iy); c.closePath(); c.fill(); } }
     if (mouth > 0) { c.fillStyle = hex; c.beginPath(); c.ellipse(W/2, H*.88, 10, 3 + 7*mouth, 0, 0, Math.PI*2); c.fill(); }
     R.tex.needsUpdate = true; }
   const k = open < .2 ? .2 : .75 + .15*Math.sin(t*1.7 + R.ph), r = (col >> 16 & 255)/255, g2 = (col >> 8 & 255)/255, b = (col & 255)/255;
