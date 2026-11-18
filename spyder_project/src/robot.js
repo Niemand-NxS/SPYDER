@@ -1,29 +1,22 @@
-/* ======================= Roboter-Modell (NPCs) =======================
-   Eigene Datei, damit das Modell einzeln überarbeitet werden kann.
-   Skelett (wird von der Animation in bar.js / ch2.js / job.js benutzt – Maße nicht ändern):
+/* ======================= Roboter-Modell (NPCs) – Version 2, komplett neu =======================
+   Android-Look nach Referenzbildern: glänzende, verwitterte Panzerplatten (elfenbein/gold) über dunkler, sichtbarer Mechanik,
+   Helm mit Kamera-Linse statt Bildschirm, Kabelstränge, echte Hände mit Gliedern, Krallenfüße.
+   Das Skelett (Gelenkpunkte, Maße) bleibt gleich, damit Animationen in bar.js / ch2.js / job.js weiter passen:
      g (Wurzel, Füße bei y=0)
-       ├─ legs[0/1]  Hüftgelenk bei (±.09, .78, 0); erstes Group-Kind = shins[i] (Knie bei y=-.46)
-       ├─ head       Hals bei (0, 1.38, 0); Gesicht = oval gewölbtes Display (R.tex / drawFace)
-       ├─ aL / aR    Schulter bei (±.2, 1.27, 0), Ellbogen fL / fR bei y=-.3, Hand bei y=-.31 (Glas: R.glass)
+       ├─ legs[0/1]  Hüfte bei (±.09, .78, 0); erstes Group-Kind = shins[i] (Knie bei y=-.46)
+       ├─ head       Hals bei (0, 1.38, 0)
+       ├─ aL / aR    Schulter bei (±.2, 1.27, 0); fL / fR = Ellbogen bei y=-.3; Hand bei y≈-.3 … -.42 (Glas: R.glass)
        └─ chest      Leuchtkern (eigenes Basic-Material, Farbe wird vom Job geändert)
+   Ausdruck: statt Display leuchtet die Kamera-Linse (R.eyeM) – drawFace() steuert nur noch deren Helligkeit.
 */
-let _robRing = null;
-function robRingTex() {       // Oval-Maske für die Display-Einfassung (weiß = Rahmen)
-  if (_robRing) return _robRing;
-  const cv = document.createElement("canvas"); cv.width = 160; cv.height = 200; const x = cv.getContext("2d");
-  x.fillStyle = "#000"; x.fillRect(0, 0, 160, 200); x.fillStyle = "#fff"; x.beginPath(); x.ellipse(80, 100, 79, 99, 0, 0, 7); x.fill();
-  x.fillStyle = "#000"; x.beginPath(); x.ellipse(80, 100, 66, 85, 0, 0, 7); x.fill();
-  _robRing = new THREE.CanvasTexture(cv); return _robRing;
-}
-/* ---- Bausteine: statische Teile werden pro Gelenk-Gruppe und Material zu EINEM Mesh verschmolzen (wenig Draw-Calls) ---- */
 let _robArmor = null;
-function robArmorTex() {      // Panel-Fugen, Kratzer, Verschleiß – dient als Farbtextur (weiß × Materialfarbe) und als Bump-Map für die Fugen
+function robArmorTex() {      // verwitterter Lack: Fugen, Rost-/Schmutzflecken (Aquarell-artig), Kratzer – weiß × Materialfarbe
   if (_robArmor) return _robArmor;
-  const cv = document.createElement("canvas"); cv.width = cv.height = 256; const x = cv.getContext("2d"); x.fillStyle = "#f4f4f2"; x.fillRect(0, 0, 256, 256);
-  for (let i = 0; i < 26; i++) { const px = Math.random()*256, py = Math.random()*256, r = 12 + Math.random()*40, g = x.createRadialGradient(px, py, 1, px, py, r); g.addColorStop(0, "rgba(90,84,76," + (.05 + Math.random()*.07) + ")"); g.addColorStop(1, "rgba(90,84,76,0)"); x.fillStyle = g; x.fillRect(0, 0, 256, 256); }
-  x.strokeStyle = "#b4b4b2"; x.lineWidth = 2; for (let i = 0; i < 5; i++) { const p = 30 + Math.random()*196; x.beginPath(); x.moveTo(p, 0); x.lineTo(p + (Math.random() - .5)*30, 256); x.stroke(); x.beginPath(); x.moveTo(0, p); x.lineTo(256, p + (Math.random() - .5)*30); x.stroke(); }
-  x.strokeStyle = "rgba(60,60,60,.3)"; x.lineWidth = 1; for (let i = 0; i < 10; i++) { const px = Math.random()*256, py = Math.random()*256; x.beginPath(); x.moveTo(px, py); x.lineTo(px + (Math.random() - .5)*26, py + (Math.random() - .5)*26); x.stroke(); }
-  x.fillStyle = "rgba(255,255,255,.35)"; for (let i = 0; i < 80; i++) x.fillRect(Math.random()*256, Math.random()*256, 1 + Math.random()*2, 1 + Math.random()*2);
+  const cv = document.createElement("canvas"); cv.width = cv.height = 256; const x = cv.getContext("2d"); x.fillStyle = "#f2f1ee"; x.fillRect(0, 0, 256, 256);
+  for (let i = 0; i < 34; i++) { const px = Math.random()*256, py = Math.random()*256, r = 14 + Math.random()*46, g = x.createRadialGradient(px, py, 1, px, py, r), br = Math.random() < .45; g.addColorStop(0, br ? "rgba(120,86,52," + (.1 + Math.random()*.14) + ")" : "rgba(70,70,72," + (.08 + Math.random()*.12) + ")"); g.addColorStop(1, "rgba(80,70,60,0)"); x.fillStyle = g; x.fillRect(0, 0, 256, 256); }
+  x.strokeStyle = "rgba(30,30,32,.55)"; x.lineWidth = 1.5; for (let i = 0; i < 4; i++) { const p = 30 + Math.random()*196; x.beginPath(); x.moveTo(p, 0); x.lineTo(p + (Math.random() - .5)*34, 256); x.stroke(); x.beginPath(); x.moveTo(0, p); x.lineTo(256, p + (Math.random() - .5)*34); x.stroke(); }
+  x.strokeStyle = "rgba(40,40,40,.28)"; x.lineWidth = 1; for (let i = 0; i < 16; i++) { const px = Math.random()*256, py = Math.random()*256; x.beginPath(); x.moveTo(px, py); x.lineTo(px + (Math.random() - .5)*30, py + (Math.random() - .5)*30); x.stroke(); }
+  x.fillStyle = "rgba(255,255,255,.5)"; for (let i = 0; i < 50; i++) x.fillRect(Math.random()*256, Math.random()*256, 1 + Math.random()*2, 1 + Math.random()*2);
   _robArmor = new THREE.CanvasTexture(cv); _robArmor.wrapS = _robArmor.wrapT = THREE.RepeatWrapping; _robArmor.anisotropy = 4; return _robArmor;
 }
 function mergeGeos(list) {
@@ -32,8 +25,7 @@ function mergeGeos(list) {
   for (const g of list) { pa.set(g.attributes.position.array, o*3); na.set(g.attributes.normal.array, o*3); ua.set(g.attributes.uv.array, o*2); o += g.attributes.position.count; }
   const r = new THREE.BufferGeometry(); r.setAttribute("position", new THREE.BufferAttribute(pa, 3)); r.setAttribute("normal", new THREE.BufferAttribute(na, 3)); r.setAttribute("uv", new THREE.BufferAttribute(ua, 2)); return r;
 }
-/* ---- Loft: gleitender elliptischer Querschnitt entlang y – Grundlage für alle geschwungenen Körper- und Panzerteile ----
-   prof: [[y, rx, rz, cx, cz], …]   a0..a1: Winkelbereich (0 = vorn +z, π/2 = +x, π = hinten); voller Kreis = geschlossener Körper */
+/* Loft: gleitender elliptischer Querschnitt entlang y. prof: [[y, rx, rz, cx, cz], …]; a0..a1: Winkel (0 = vorn +z, π/2 = +x, π = hinten) */
 function loft(prof, a0, a1, seg = 16, sub = 3) {
   const cA = new THREE.CatmullRomCurve3(prof.map(p => new THREE.Vector3(p[1], p[2], p[0]))), cB = new THREE.CatmullRomCurve3(prof.map(p => new THREE.Vector3(p[3] || 0, p[4] || 0, 0)));
   const n = Math.max(2, (prof.length - 1)*sub), pa = [], ua = [], ia = [];
@@ -41,163 +33,146 @@ function loft(prof, a0, a1, seg = 16, sub = 3) {
     for (let j = 0; j <= seg; j++) { const an = a0 + (a1 - a0)*j/seg; pa.push(b.x + a.x*Math.sin(an), a.z, b.y + a.y*Math.cos(an)); ua.push(j/seg, i/n); } }
   for (let i = 0; i < n; i++) for (let j = 0; j < seg; j++) { const a = i*(seg + 1) + j, b = a + 1, c = a + seg + 1, d = c + 1; ia.push(a, c, b, b, c, d); }
   const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(pa, 3)); g.setAttribute("uv", new THREE.Float32BufferAttribute(ua, 2)); g.setIndex(ia); g.computeVertexNormals();
-  // Normalen müssen nach außen zeigen (Windung abhängig von Profilrichtung und Winkelrichtung)
   const mid = Math.floor(n/2)*(seg + 1) + Math.floor(seg/2), P0 = g.attributes.position, N0 = g.attributes.normal, b0 = cB.getPoint(Math.floor(n/2)/n);
-  const rx = P0.getX(mid) - b0.x, rz = P0.getZ(mid) - b0.y;
-  if (N0.getX(mid)*rx + N0.getZ(mid)*rz < 0) { const ix = g.index.array; for (let k = 0; k < ix.length; k += 3) { const t = ix[k + 1]; ix[k + 1] = ix[k + 2]; ix[k + 2] = t; } g.computeVertexNormals(); }
+  if (N0.getX(mid)*(P0.getX(mid) - b0.x) + N0.getZ(mid)*(P0.getZ(mid) - b0.y) < 0) { const ix = g.index.array; for (let k = 0; k < ix.length; k += 3) { const t = ix[k + 1]; ix[k + 1] = ix[k + 2]; ix[k + 2] = t; } g.computeVertexNormals(); }
   return g;
 }
+const _rbY = new THREE.Vector3(0, 1, 0);
 function makeRobot(o) {
+  const cShell = new THREE.Color(o.body).lerp(new THREE.Color(0xe9e6df), .55), cTrim = new THREE.Color(o.acc).lerp(new THREE.Color(0xc9a24e), .4);
   const g = new THREE.Group(),
-    shell = new THREE.MeshStandardMaterial({color:o.body, metalness:.2, roughness:.22, side:THREE.DoubleSide, map:robArmorTex()}),
-    trim = new THREE.MeshStandardMaterial({color:o.acc, metalness:.4, roughness:.26, side:THREE.DoubleSide, map:robArmorTex()}),
-    inner = mStd(0x0b0d10, .85, .28), steel = mStd(0x9aa2ac, .9, .28), gold = mStd(0xb8893a, .9, .3), rub = mStd(0x0e1013, .1, .8), glowM = new THREE.MeshBasicMaterial({color:o.glow}),
-    dk = inner, body = shell, acc = trim,
-    R = {g, o, talkT:0, ev:[], drinkT:-1, lookT:0, blink:2 + Math.random()*3, face:0, gx:0, ph:Math.random()*6, cur:0};
+    shell = new THREE.MeshStandardMaterial({color:cShell, metalness:.25, roughness:.2, side:THREE.DoubleSide, map:robArmorTex()}),
+    gold = new THREE.MeshStandardMaterial({color:cTrim, metalness:.7, roughness:.28, side:THREE.DoubleSide, map:robArmorTex()}),
+    inner = mStd(0x090a0c, .8, .3), steel = mStd(0xa4acb6, .9, .26), copper = mStd(0xb07a3a, .9, .3), rub = mStd(0x0d0f12, .1, .75),
+    eyeM = new THREE.MeshBasicMaterial({color:o.glow}), glowM = new THREE.MeshBasicMaterial({color:o.glow}),
+    R = {g, o, talkT:0, ev:[], drinkT:-1, lookT:0, blink:2 + Math.random()*3, face:0, gx:0, ph:Math.random()*6, cur:0, eyeM};
+  R.cx = null; R.tex = {needsUpdate:false};                                                                       // kein Display mehr
   const add = (geo, mat, x, y, z, p) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); (p || g).add(m); return m; };
-  const rot = (m, x, y, z) => { m.rotation.set(x || 0, y || 0, z || 0); return m; };
   const PI = Math.PI, store = new Map();
-  const P = (geo, mat, x, y, z, parent, opt) => { const t = new THREE.Object3D(); t.position.set(x, y, z); if (opt && opt.r) t.rotation.set(opt.r[0], opt.r[1], opt.r[2]); if (opt && opt.s) t.scale.set(opt.s[0], opt.s[1], opt.s[2]); t.updateMatrix();
+  const P = (geo, mat, x, y, z, parent, opt) => { const t = new THREE.Object3D(); t.position.set(x, y, z); if (opt && opt.r) t.rotation.set(opt.r[0], opt.r[1], opt.r[2]); if (opt && opt.q) t.quaternion.copy(opt.q); if (opt && opt.s) t.scale.set(opt.s[0], opt.s[1], opt.s[2]); t.updateMatrix();
     const gg = geo.index ? geo.toNonIndexed() : geo; gg.applyMatrix4(t.matrix); parent = parent || g; if (!store.has(parent)) store.set(parent, new Map()); const mm = store.get(parent); if (!mm.has(mat)) mm.set(mat, []); mm.get(mat).push(gg); };
   const cyl = (rt, rb, h, seg = 12, open = false, ts = 0, tl = PI*2) => new THREE.CylinderGeometry(rt, rb, h, seg, 1, open, ts, tl), bxg = (w, h, d) => new THREE.BoxGeometry(w, h, d);
-  const sph = (ws = 14, hs = 10, ps = 0, pl = PI*2, ts = 0, tl = PI) => new THREE.SphereGeometry(1, ws, hs, ps, pl, ts, tl), tor = (r, t, seg = 18, a = PI*2) => new THREE.TorusGeometry(r, t, 6, seg, a);
+  const sph = (ws = 14, hs = 10) => new THREE.SphereGeometry(1, ws, hs), tor = (r, t, seg = 18, a = PI*2) => new THREE.TorusGeometry(r, t, 6, seg, a);
   const ball = (r, mat, x, y, z, p) => P(sph(10, 8), mat, x, y, z, p, {s:[r, r, r]});
   const ell = (rx, ry, rz, mat, x, y, z, p, r) => P(sph(14, 10), mat, x, y, z, p, {s:[rx, ry, rz], r});
-  const L = (prof, a0, a1, mat, p, seg, sub, x = 0, y = 0, z = 0) => P(loft(prof, a0, a1, seg || 18, sub || 3), mat, x, y, z, p);     // Loft-Teil
-  const cable = (pts, r, mat, p) => { const c = new THREE.CatmullRomCurve3(pts.map(q => new THREE.Vector3(q[0], q[1], q[2]))); P(new THREE.TubeGeometry(c, 14, r, 5, false), mat, 0, 0, 0, p); };
-  const joint = (s, x, y, z, p, big) => { const k = big ? 1.2 : 1;      // rundes Seitengelenk: Scheibe, Ring, Linse (Achse = x)
-    P(cyl(.05*k, .05*k, .026, 18), inner, x, y, z, p, {r:[0, 0, PI/2]}); P(tor(.038*k, .006*k, 22), steel, x + s*.016*k, y, z, p, {r:[0, PI/2, 0]}); P(tor(.024*k, .005*k, 18), steel, x + s*.016*k, y, z, p, {r:[0, PI/2, 0]}); ball(.016*k, glowM, x + s*.014*k, y, z, p); };
-  const FULL = PI*2, FR = a => [-a, a], BK = a => [PI - a, PI + a];
+  const L = (prof, a0, a1, mat, p, seg, sub, x = 0, y = 0, z = 0) => P(loft(prof, a0, a1, seg || 18, sub || 3), mat, x, y, z, p);
+  const V = (q) => new THREE.Vector3(q[0], q[1], q[2]);
+  const bone = (a, b, r1, r2, mat, p) => { const A = V(a), B = V(b), d = B.clone().sub(A), len = d.length(); if (len < 1e-5) return; P(cyl(r2, r1, len, 8), mat, (A.x + B.x)/2, (A.y + B.y)/2, (A.z + B.z)/2, p, {q:new THREE.Quaternion().setFromUnitVectors(_rbY, d.normalize())}); };   // Stab von a (Radius r1) nach b (r2)
+  const cable = (pts, r, mat, p) => { const c = new THREE.CatmullRomCurve3(pts.map(V)); P(new THREE.TubeGeometry(c, 16, r, 5, false), mat, 0, 0, 0, p); };
+  const FULL = PI*2;
+  const lens = (s, x, y, z, p, k, live) => { P(cyl(.05*k, .05*k, .024, 22), inner, x, y, z, p, {r:[0, 0, PI/2]}); P(tor(.042*k, .006*k, 24), steel, x + s*.014*k, y, z, p, {r:[0, PI/2, 0]}); P(tor(.03*k, .005*k, 22), gold, x + s*.015*k, y, z, p, {r:[0, PI/2, 0]}); P(tor(.018*k, .004*k, 18), steel, x + s*.016*k, y, z, p, {r:[0, PI/2, 0]});
+    if (live) add(new THREE.SphereGeometry(.015*k, 12, 8), eyeM, x + s*.015*k, y, z, p); else ball(.014*k, glowM, x + s*.014*k, y, z, p); };   // Linsen-Gelenk: Scheibe, drei Ringe, Glaslinse
 
-  /* ---- Beine ---- */
+  /* ================= BEINE: lang, schlank, Krallenfüße ================= */
   R.legs = []; R.shins = [];
   for (const s of [-1, 1]) {
     const leg = new THREE.Group(); leg.position.set(s*.09, .78, 0); g.add(leg); R.legs.push(leg);
     const sh = new THREE.Group(); sh.position.set(0, -.46, 0); leg.add(sh); R.shins.push(sh);                // erstes Group-Kind = Unterschenkel
-    ball(.054, inner, 0, 0, 0, leg); joint(s, s*.052, 0, 0, leg, true);                                          // Hüftgelenk mit Linse
-    L([[0, .05, .05], [-.12, .054, .054], [-.28, .043, .042], [-.44, .034, .034], [-.47, .032, .032]], 0, FULL, inner, leg, 18);       // Oberschenkel innen
-    L([[-.02, .06, .06], [-.1, .071, .069], [-.2, .066, .063], [-.3, .054, .051], [-.37, .046, .044]], -1.15, 1.15, shell, leg);           // Oberschenkel-Frontplatte
-    L([[-.03, .062, .06], [-.14, .074, .066], [-.28, .058, .052], [-.36, .05, .046]], s*PI/2 - .75, s*PI/2 + .75, trim, leg);              // Außenplatte
-    L([[-.04, .056, .058], [-.15, .064, .068, 0, -.006], [-.3, .05, .052]], PI - 1.0, PI + 1.0, shell, leg);                              // Hinterplatte
-    P(cyl(.056, .052, .035, 16, true), trim, 0, -.4, 0, leg);                                                                            // Manschette überm Knie
-    P(cyl(.01, .01, .24, 8), steel, -s*.032, -.2, -.056, leg); P(cyl(.018, .018, .12, 8), inner, -s*.032, -.12, -.056, leg);         // Hydraulik
-    cable([[s*.03, -.04, -.044], [s*.05, -.16, -.052], [s*.034, -.3, -.044], [s*.012, -.44, -.032]], .006, gold, leg);
-    cable([[-s*.02, -.05, .05], [-s*.044, -.2, .056], [-s*.022, -.42, .044]], .005, rub, leg);
-    ball(.05, inner, 0, -.46, 0, leg); joint(s, s*.046, -.46, 0, leg, false);                                                       // Knie
-    L([[-.42, .036, .046, 0, .01], [-.46, .05, .062, 0, .014], [-.5, .038, .048, 0, .008]], -.85, .85, trim, leg, 14);                // Kniescheibe
-    L([[0, .034, .034], [-.1, .036, .04, 0, -.008], [-.2, .029, .03], [-.3, .022, .022]], 0, FULL, inner, sh, 16);                    // Unterschenkel innen
-    L([[-.01, .046, .048], [-.1, .046, .05], [-.2, .036, .04], [-.27, .029, .031]], -.95, .95, shell, sh);                           // Schienbeinplatte
-    L([[-.02, .046, .05, 0, -.012], [-.09, .056, .06, 0, -.016], [-.18, .046, .05, 0, -.01], [-.26, .03, .032]], PI - 1.35, PI + 1.35, shell, sh);   // Wade
-    P(cyl(.04, .04, .03, 14, true), trim, 0, -.03, 0, sh);
-    cable([[0, -.02, -.04], [s*.02, -.14, -.065], [0, -.28, -.035]], .005, gold, sh);
-    ball(.036, inner, 0, -.3, 0, sh); P(tor(.04, .006, 16), steel, 0, -.3, 0, sh, {r:[PI/2, 0, 0]});                                // Knöchel
-    P(bxg(.07, .035, .15), inner, 0, -.31, .03, sh); ell(.055, .032, .105, shell, 0, -.305, .035, sh); ell(.05, .022, .045, trim, 0, -.3, .11, sh);   // Fuß
-    P(bxg(.095, .012, .18), rub, 0, -.342, .03, sh); P(bxg(.07, .035, .04), rub, 0, -.32, -.055, sh);
+    ball(.05, inner, 0, 0, 0, leg); lens(s, s*.05, 0, 0, leg, 1.1);                                              // Hüftlinse
+    L([[0, .046, .05], [-.14, .05, .056], [-.3, .04, .04], [-.46, .03, .03]], 0, FULL, inner, leg, 16);          // Oberschenkel-Kern
+    L([[-.02, .052, .056], [-.13, .06, .066, 0, .004], [-.26, .052, .056], [-.37, .042, .046]], -.95, .95, shell, leg);                         // Front (Quadrizeps)
+    L([[-.05, .05, .054], [-.17, .058, .06], [-.33, .044, .046]], s*PI/2 - .55, s*PI/2 + .55, gold, leg);                                          // Seitenplatte
+    L([[-.02, .05, .054, 0, -.004], [-.14, .058, .066, 0, -.01], [-.3, .042, .048]], PI - .8, PI + .8, shell, leg);                                // Beuger hinten
+    bone([-s*.03, -.04, .04], [-s*.036, -.36, .036], .008, .006, steel, leg); bone([s*.032, -.06, -.045], [s*.026, -.4, -.04], .012, .01, inner, leg); bone([s*.032, -.06, -.045], [s*.03, -.26, -.043], .006, .006, steel, leg);   // Kolben
+    ball(.046, inner, 0, -.46, 0, leg); lens(s, s*.044, -.46, 0, leg, .9);                                       // Kniegelenk
+    L([[-.4, .034, .044, 0, .01], [-.46, .048, .058, 0, .014], [-.52, .036, .044, 0, .008]], -.8, .8, gold, leg, 12);                              // Knieschale
+    L([[0, .032, .034], [-.1, .034, .04, 0, -.006], [-.2, .026, .028], [-.3, .02, .02]], 0, FULL, inner, sh, 14);   // Unterschenkel-Kern
+    L([[-.01, .038, .04], [-.08, .042, .048], [-.18, .032, .036], [-.27, .024, .026]], -.9, .9, shell, sh);        // Schienbeinschiene
+    L([[-.02, .04, .044, 0, -.01], [-.09, .05, .056, 0, -.014], [-.18, .04, .046, 0, -.01], [-.26, .024, .026]], PI - 1.2, PI + 1.2, gold, sh);     // Wade
+    cable([[s*.01, -.02, -.04], [s*.03, -.12, -.06], [s*.01, -.26, -.034]], .004, copper, sh);
+    ball(.03, inner, 0, -.3, 0, sh); P(tor(.034, .005, 16), steel, 0, -.3, 0, sh, {r:[PI/2, 0, 0]});            // Knöchel
+    bone([0, -.3, -.02], [0, -.33, -.09], .014, .01, inner, sh); ell(.04, .026, .075, shell, 0, -.315, .03, sh);       // Ferse + Fußrücken
+    for (const tx of [-.028, 0, .028]) { bone([tx, -.325, .08], [tx*1.2, -.345, .15], .013, .006, inner, sh); bone([tx*1.2, -.345, .15], [tx*1.3, -.352, .19], .006, .002, steel, sh); }   // Zehen mit Krallen
+    ell(.034, .018, .05, gold, 0, -.305, .075, sh); P(bxg(.07, .008, .12), rub, 0, -.345, .02, sh);
   }
 
-  /* ---- Becken, Bauch, Rumpf ---- */
-  L([[.69, .11, .085], [.75, .132, .095], [.83, .13, .092], [.89, .1, .076]], 0, FULL, inner, null, 20);       // Becken innen
-  L([[.7, .125, .097], [.77, .148, .108], [.85, .14, .1], [.9, .112, .085]], -.8, .8, shell, null);              // Beckenplatte vorn
-  for (const s of [-1, 1]) L([[.72, .13, .1], [.8, .15, .11], [.88, .125, .09]], s*PI/2 - .55, s*PI/2 + .55, trim, null, 14);   // Hüftschalen
-  L([[.88, .106, .08], [.905, .108, .082], [.925, .1, .076]], 0, FULL, trim);                                       // Gürtel
-  L([[.86, .08, .066], [.95, .082, .068], [1.03, .095, .076], [1.12, .118, .09], [1.22, .126, .094, 0, .004], [1.3, .108, .082], [1.345, .052, .05]], 0, FULL, inner, null, 22);   // Rumpf innen
-  for (let i = 0; i < 4; i++) { const y = .92 + i*.047; P(tor(.088 + i*.004, .008, 22), steel, 0, y, 0, null, {r:[PI/2, 0, 0], s:[1, .86, 1]}); }       // Rippen
-  for (const k of [-1, 0, 1]) cable([[k*.03, .88, .075], [k*.036, .98, .084], [k*.026, 1.09, .09]], .006, k ? gold : rub);
-  for (const [y0, y1, k] of [[.925, .955, 1.1], [.972, 1.004, 1.12], [1.02, 1.056, 1.13]]) L([[y0, .086*k, .07*k], [y1, .092*k, .074*k]], -1.05, 1.05, shell, null, 14, 1);    // Bauchlamellen
-  for (const s of [-1, 1]) {
-    const a0 = s > 0 ? .1 : -1.55, a1 = s > 0 ? 1.55 : -.1;
-    L([[1.09, .124, .096], [1.15, .14, .108], [1.22, .141, .106], [1.29, .12, .09]], a0, a1, shell, null, 14);                      // Brustplatten (Mitte bleibt offen)
-    L([[1.1, .122, .094], [1.2, .13, .098], [1.3, .11, .084]], s > 0 ? PI - 1.45 : PI + .35, s > 0 ? PI - .35 : PI + 1.45, shell, null, 12);   // Schulterblattplatten
-    L([[1.26, .13, .098], [1.3, .122, .09], [1.335, .085, .072]], s*(PI/2) - .6, s*(PI/2) + .6, trim, null, 10);                      // Schulterkappen-Sockel
-    P(bxg(.012, .16, .02), inner, s*.02, 1.15, .112);
-  }
-  L([[1.285, .126, .096], [1.31, .12, .09], [1.34, .09, .074]], -1.3, 1.3, trim, null, 16, 2);                                   // Schlüsselbeinspange
-  L([[.86, .13, .1], [.95, .122, .092], [1.04, .13, .098]], PI - 1.1, PI + 1.1, shell, null, 14, 2);                              // unterer Rückenpanzer
-  P(tor(.03, .008, 18), steel, 0, 1.17, .102); const chest = add(new THREE.SphereGeometry(.017, 10, 8), new THREE.MeshBasicMaterial({color:o.glow}), 0, 1.17, .098); R.chest = chest;   // Leuchtkern
-  P(cyl(.1, .12, .03, 18), inner, 0, 1.34, 0); P(cyl(.043, .05, .12, 12), inner, 0, 1.375, 0);                                  // Kragen, Hals
-  for (let k = 0; k < 6; k++) { const a = k/6*PI*2; cable([[Math.cos(a)*.038, 1.31, Math.sin(a)*.038], [Math.cos(a + .5)*.044, 1.37, Math.sin(a + .5)*.044], [Math.cos(a + 1)*.042, 1.42, Math.sin(a + 1)*.042]], .005, k % 3 ? rub : gold); }
-  for (let i = 0; i < 7; i++) P(bxg(.038 - i*.002, .026, .03), steel, 0, 1.0 + i*.05, -.1);                                      // Wirbelsäule
-  P(bxg(.17, .24, .045), inner, 0, 1.1, -.14); P(bxg(.14, .2, .03), shell, 0, 1.1, -.17); for (let k = 0; k < 3; k++) P(bxg(.12, .01, .008), glowM, 0, 1.05 + k*.06, -.188);   // Akku
-  for (const s of [-1, 1]) cable([[s*.06, 1.0, -.11], [s*.1, 1.12, -.13], [s*.085, 1.3, -.1]], .007, rub);
+  /* ================= RUMPF: schmale Taille, V-Brustpanzer ================= */
+  L([[.68, .095, .075], [.74, .125, .085], [.82, .118, .082], [.88, .085, .066]], 0, FULL, inner, null, 18);        // Becken-Kern
+  L([[.7, .11, .09], [.76, .135, .1], [.84, .125, .092], [.89, .092, .075]], -.7, .7, shell, null, 14);              // Schambeinschale vorn
+  for (const s of [-1, 1]) { L([[.7, .125, .09], [.78, .15, .104], [.87, .12, .085]], s*PI/2 - .5, s*PI/2 + .5, gold, null, 12); P(cyl(.052, .052, .03, 14), gold, s*.09, .64, 0); }   // Hüftflügel
+  L([[.86, .062, .05], [.94, .056, .046], [1.02, .064, .052], [1.1, .095, .07], [1.2, .118, .084], [1.28, .104, .07], [1.345, .05, .045]], 0, FULL, inner, null, 20);   // Rumpf-Kern (taillenschmal)
+  for (let i = 0; i < 5; i++) P(tor(.07 + i*.004, .006, 20), steel, 0, .87 + i*.04, 0, null, {r:[PI/2, 0, 0], s:[1, .85, 1]});           // freiliegende Rippen
+  for (const k of [-1, 0, 1]) cable([[k*.025, .84, .06], [k*.032, .94, .066], [k*.024, 1.06, .074]], .005, k ? copper : rub);
+  bone([-.05, .86, .052], [-.05, 1.0, .056], .009, .009, steel); bone([.05, .86, .052], [.05, 1.0, .056], .009, .009, steel);
+  for (let i = 0; i < 8; i++) P(bxg(.034 - i*.0015, .024, .03), steel, 0, .88 + i*.047, -.062);                         // Wirbelsäule
+  for (const s of [-1, 1]) cable([[s*.04, .86, -.05], [s*.065, 1.0, -.07], [s*.07, 1.2, -.07]], .006, rub);
+  // V-förmiger Brustpanzer (gold) + weiße Seitenplatten
+  L([[1.04, .062, .06], [1.12, .11, .086], [1.2, .134, .096], [1.29, .118, .084], [1.33, .08, .066]], -1.15, 1.15, gold, null, 20, 3);
+  for (const s of [-1, 1]) { L([[1.1, .112, .082], [1.2, .14, .098], [1.28, .124, .088]], s*PI/2 - .35, s*PI/2 + .45, shell, null, 10); L([[1.1, .116, .084], [1.2, .126, .092], [1.3, .11, .08]], s > 0 ? PI - .95 : PI + .05, s > 0 ? PI - .05 : PI + .95, shell, null, 10); }
+  L([[.9, .072, .06], [.96, .078, .066], [1.02, .085, .07]], -.9, .9, shell, null, 12, 2);                              // Bauchplatte
+  P(tor(.03, .007, 18), steel, 0, 1.19, .098); const chest = add(new THREE.SphereGeometry(.016, 10, 8), new THREE.MeshBasicMaterial({color:o.glow}), 0, 1.19, .097); R.chest = chest;   // Leuchtkern
+  P(cyl(.1, .13, .03, 18), inner, 0, 1.345, 0);
+  for (let k = 0; k < 9; k++) { const a = k/9*FULL; cable([[Math.cos(a)*.034, 1.3, Math.sin(a)*.034], [Math.cos(a + .6)*.04, 1.37, Math.sin(a + .6)*.04], [Math.cos(a + 1.2)*.036, 1.43, Math.sin(a + 1.2)*.036]], .0045, k % 3 ? rub : copper); }   // Halskabel
+  for (let i = 0; i < 3; i++) P(tor(.046, .007, 14), steel, 0, 1.33 + i*.035, 0, null, {r:[PI/2, 0, 0]});
 
-  /* ---- Kopf: Helm + ovales, gewölbtes Display ---- */
+  /* ================= KOPF: Helm mit Kamera-Linse (kein Display) ================= */
   const head = new THREE.Group(); head.position.set(0, 1.38, 0); g.add(head); R.head = head;
-  const HY = .17, HX = .158, HYS = .19, HZ = .142, GP = 1.1;
-  P(sph(18, 14), inner, 0, HY, 0, head, {s:[HX, HYS, HZ]});                                                     // Innenschädel
-  L([[.06, .1, .098, 0, -.012], [.15, .172, .16, 0, -.024], [.26, .18, .172, 0, -.038], [.34, .152, .152, 0, -.044], [.395, .085, .095, 0, -.048], [.425, .02, .03, 0, -.048]], GP, PI*2 - GP, shell, head, 28, 3);   // Helmschale (zieht sich nach hinten)
-  L([[.29, .158, .146, 0, -.01], [.34, .15, .144, 0, -.02], [.385, .1, .1, 0, -.034], [.415, .03, .04, 0, -.04]], -GP - .05, GP + .05, shell, head, 24, 2);                            // Stirnschild
-  L([[.015, .09, .086], [.06, .118, .108], [.105, .104, .098]], -1.0, 1.0, trim, head, 16, 2);                    // Kinnschale
-  for (const s of [-1, 1]) {                                                                                  // Kamera-Linsen-Module an den Seiten
-    const x = s*(.176), y = HY;
-    P(cyl(.058, .058, .03, 22), inner, x, y, -.01, head, {r:[0, 0, PI/2]}); P(tor(.052, .008, 24), steel, x + s*.016, y, -.01, head, {r:[0, PI/2, 0]}); P(tor(.036, .006, 22), trim, x + s*.017, y, -.01, head, {r:[0, PI/2, 0]}); P(tor(.022, .005, 18), steel, x + s*.018, y, -.01, head, {r:[0, PI/2, 0]}); ball(.018, glowM, x + s*.016, y, -.01, head);
-    cable([[s*.15, HY - .06, -.06], [s*.17, HY - .15, -.03], [s*.07, .03, .02]], .004, rub, head);
-  }
-  cable([[0, HY + .1, -.17], [.04, HY + .22, -.13], [.1, HY + .3, -.06], [.1, .46, -.03]], .004, rub, head); P(cyl(.016, .016, .03, 8), steel, .1, .375, -.03, head); ball(.016, glowM, .1, .47, -.03, head);   // Antennenkabel
-  P(cyl(.07, .07, .045, 16), inner, 0, .015, 0, head); P(tor(.07, .008, 18), steel, 0, .035, 0, head, {r:[PI/2, 0, 0]});
-  const cv = document.createElement("canvas"); cv.width = 160; cv.height = 200; R.cx = cv.getContext("2d"); R.tex = new THREE.CanvasTexture(cv); R.tex.anisotropy = 4;
-  const patch = (a, b, mat, k) => { const m = add(new THREE.SphereGeometry(1, 28, 20, PI/2 - a, 2*a, PI/2 - b, 2*b), mat, 0, HY, 0, head); m.scale.set(HX*k, HYS*k, HZ*k); return m; };
-  patch(1.06, .93, new THREE.MeshStandardMaterial({color:o.acc, metalness:.6, roughness:.4, alphaMap:robRingTex(), alphaTest:.5, side:THREE.DoubleSide}), 1.012);   // ovale Einfassung
-  patch(.97, .83, new THREE.MeshBasicMaterial({map:R.tex, transparent:true}), 1.02);                                                                                 // Display (gewölbt)
-  patch(1.0, .86, new THREE.MeshStandardMaterial({color:0x9fb2c6, metalness:.7, roughness:.05, transparent:true, opacity:.12, depthWrite:false}), 1.034);               // Glasscheibe
+  const HY = .2;
+  P(sph(18, 14), inner, 0, HY, -.01, head, {s:[.125, .19, .14]});                                                // dunkler Innenkopf (Visieröffnung)
+  L([[.05, .1, .098, 0, -.012], [.13, .146, .15, 0, -.028], [.24, .158, .168, 0, -.046], [.33, .136, .152, 0, -.056], [.39, .086, .098, 0, -.058], [.42, .02, .03, 0, -.058]], .95, FULL - .95, shell, head, 26, 3);   // Helm (zieht nach hinten)
+  L([[.3, .14, .13, 0, -.012], [.35, .13, .126, 0, -.026], [.4, .084, .09, 0, -.05], [.42, .02, .03, 0, -.058]], -1.0, 1.0, shell, head, 22, 2);   // Stirn-Dach
+  L([[.012, .075, .07], [.05, .098, .092], [.095, .092, .09]], -.9, .9, gold, head, 14, 2);                         // Kinnplatte
+  for (let i = 0; i < 4; i++) P(tor(.082 - i*.004, .004, 14, 1.8), steel, 0, .075 + i*.021, .002, head, {r:[PI/2, 0, -.9]});   // Mundgitter
+  // große Kamera-Linse rechts, kleiner Sensor links (asymmetrisch wie auf den Bildern)
+  { const ex = .05, ey = HY + .03, ez = .118, k = 1.9; P(cyl(.05*k, .05*k, .024, 24), steel, ex, ey, ez, head, {r:[PI/2, 0, 0]}); P(tor(.042*k, .006*k, 26), gold, ex, ey, ez + .014, head); P(tor(.03*k, .005*k, 24), steel, ex, ey, ez + .016, head); P(tor(.018*k, .004*k, 20), gold, ex, ey, ez + .018, head);
+    add(new THREE.SphereGeometry(.02*k, 14, 10), eyeM, ex, ey, ez + .014, head).scale.z = .5; lens(-1, -.075, HY + .1, .1, head, .5, false); }
+  lens(1, .156, HY + .02, .02, head, 1.2, false); lens(-1, -.155, HY + .0, .0, head, .8, false);
+  P(cyl(.006, .006, .1, 6), steel, .1, .46, -.06, head); ball(.012, glowM, .1, .515, -.06, head); P(cyl(.014, .014, .03, 8), steel, .1, .41, -.06, head);   // Antenne
+  for (let k = 0; k < 6; k++) { const x = -.05 + k*.02; cable([[x, HY + .12, -.2], [x*1.3, HY - .02, -.24], [x*1.6, HY - .2, -.18], [x*1.3, .0, -.1]], .0045, k % 2 ? rub : copper, head); }   // Kabelschweif
+  P(cyl(.07, .075, .04, 16), inner, 0, .01, 0, head);
 
-  /* ---- Arme ---- */
+  /* ================= ARME: schlank, Schulterpanzer, echte Hände ================= */
   const arm = s => { const A = new THREE.Group(); A.position.set(s*.2, 1.27, 0); g.add(A);
-    ball(.048, inner, 0, 0, 0, A); joint(s, s*.05, -.005, 0, A, true);                                           // Schultergelenk mit Linse
-    L([[.07, .05, .056], [.045, .074, .08], [0, .084, .088], [-.05, .074, .076], [-.1, .05, .052]], s*PI/2 - 2.3, s*PI/2 + 2.3, shell, A, 22, 3, s*.012, .02, 0);   // Schulterpanzer
-    L([[.03, .06, .06], [-.01, .078, .084], [-.06, .056, .06]], s*PI/2 - .8, s*PI/2 + .8, trim, A, 12, 2, s*.03, .035, 0);
-    L([[0, .034, .034], [-.15, .03, .03], [-.3, .027, .027]], 0, FULL, inner, A, 14);                           // Oberarm innen
-    L([[-.07, .042, .044], [-.13, .05, .054, 0, .004], [-.21, .038, .04], [-.25, .034, .035]], -1.15, 1.15, shell, A);   // Bizepsplatte
-    L([[-.07, .04, .042], [-.14, .045, .048, 0, -.004], [-.22, .035, .036]], PI - .9, PI + .9, shell, A);        // Trizepsplatte
-    cable([[-s*.015, -.03, -.03], [-s*.03, -.14, -.036], [-s*.012, -.28, -.02]], .005, gold, A); cable([[s*.02, -.03, .02], [s*.034, -.15, .026], [s*.015, -.28, .02]], .004, rub, A);
-    for (const y of [-.04, -.24]) P(cyl(.037, .037, .014, 14), steel, 0, y, 0, A);
+    ball(.046, inner, 0, 0, 0, A); lens(s, s*.052, -.01, 0, A, 1.1);                                              // Schulterlinse
+    L([[.08, .05, .06], [.05, .08, .09], [0, .088, .094], [-.05, .074, .078], [-.11, .05, .055]], s*PI/2 - 2.1, s*PI/2 + 2.1, shell, A, 20, 3, s*.014, .02, 0);   // oberer Schulterpanzer
+    L([[.02, .074, .08], [-.06, .086, .09], [-.14, .06, .066]], s*PI/2 - 1.4, s*PI/2 + 1.4, gold, A, 14, 2, s*.02, .0, 0);                              // zweite Lamelle
+    L([[0, .03, .03], [-.15, .026, .027], [-.3, .024, .024]], 0, FULL, inner, A, 12);
+    L([[-.11, .034, .036], [-.17, .04, .044, 0, .004], [-.25, .032, .034]], -1.0, 1.0, shell, A);                      // Bizeps
+    cable([[-s*.012, -.03, -.026], [-s*.028, -.14, -.03], [-s*.01, -.29, -.02]], .005, copper, A); cable([[s*.016, -.03, .022], [s*.03, -.15, .026], [s*.012, -.29, .02]], .004, rub, A);
     const F = new THREE.Group(); F.position.set(0, -.3, 0); A.add(F);
-    ball(.038, inner, 0, 0, 0, F); joint(s, s*.04, 0, 0, F, false);                                              // Ellbogen
-    L([[0, .03, .03], [-.14, .026, .026], [-.28, .02, .02]], 0, FULL, inner, F, 14);                             // Unterarm innen
-    L([[-.04, .046, .05], [-.1, .048, .05], [-.19, .036, .037], [-.25, .028, .029]], s*PI/2 - 1.5, s*PI/2 + 1.5, shell, F);   // Unterarmpanzer (Außenseite)
-    P(cyl(.036, .036, .03, 14, true), trim, 0, -.035, 0, F); P(cyl(.03, .03, .022, 14, true), trim, 0, -.26, 0, F);
-    P(cyl(.01, .01, .2, 8), steel, 0, -.14, -.036, F); cable([[s*.02, -.04, .03], [s*.032, -.15, .034], [s*.012, -.27, .022]], .005, gold, F);
-    P(cyl(.028, .028, .026, 14), steel, 0, -.285, 0, F);                                                         // Handgelenk
-    P(bxg(.062, .05, .036), inner, 0, -.325, 0, F); ell(.032, .038, .012, shell, 0, -.325, -.02, F);             // Handfläche + Handrücken
-    for (const fx of [-.024, -.008, .008, .024]) { P(bxg(.012, .04, .013), rub, fx, -.37, .008, F); P(bxg(.011, .03, .012), rub, fx, -.403, .014, F, {r:[-.4, 0, 0]}); }
-    P(bxg(.014, .045, .014), rub, -s*.04, -.335, .012, F, {r:[0, 0, s*.5]}); P(bxg(.012, .03, .012), rub, -s*.058, -.365, .018, F, {r:[0, 0, s*.8]});
+    ball(.034, inner, 0, 0, 0, F); lens(s, s*.036, 0, 0, F, .8);                                                     // Ellbogen
+    bone([0, -.02, -.034], [0, -.2, -.04], .008, .007, steel, F); bone([-s*.02, -.02, .03], [-s*.014, -.12, .036], .01, .01, inner, F);   // Hydraulik
+    L([[0, .028, .028], [-.14, .024, .024], [-.28, .018, .018]], 0, FULL, inner, F, 12);
+    L([[-.03, .042, .044], [-.1, .042, .044], [-.18, .032, .034], [-.25, .024, .026]], s*PI/2 - 1.45, s*PI/2 + 1.45, gold, F);   // Unterarm-Panzer
+    P(cyl(.03, .03, .02, 14, true), shell, 0, -.255, 0, F);
+    // --- echte Hand: Handwurzel, Handteller, 4 Finger à 3 Glieder, Daumen, Sehnen ---
+    P(cyl(.026, .026, .022, 14), steel, 0, -.285, 0, F);
+    ell(.034, .036, .016, inner, 0, -.33, 0, F); ell(.036, .03, .01, shell, 0, -.328, -.014, F);                      // Handteller + Handrücken-Platte
+    for (const k of [[-.026, .034, .03, .026], [-.009, .04, .034, .028], [.009, .038, .032, .026], [.026, .03, .026, .02]]) {          // [x, Länge1, Länge2, Länge3]
+      let cur = [k[0], -.352, .006], ang = .15;
+      for (let j = 1; j <= 3; j++) { const len = k[j], nx = [cur[0], cur[1] - Math.cos(ang)*len, cur[2] + Math.sin(ang)*len]; bone(cur, nx, .0072 - j*.0008, .0062 - j*.0008, rub, F); ball(.0072 - j*.0006, steel, nx[0], nx[1], nx[2], F); cur = nx; ang += .42; }
+      cable([[k[0], -.3, -.012], [k[0], -.345, -.012], [k[0], -.36, -.008]], .0025, copper, F);
+    }
+    { let cur = [-s*.03, -.322, .008], ang = .5; for (let j = 1; j <= 2; j++) { const len = j === 1 ? .03 : .026, nx = [cur[0] - s*Math.sin(.6)*len*.8, cur[1] - Math.cos(ang)*len, cur[2] + Math.sin(ang)*len]; bone(cur, nx, .0085 - j*.001, .0075 - j*.001, rub, F); ball(.0078 - j*.0008, steel, nx[0], nx[1], nx[2], F); cur = nx; ang += .35; } }   // Daumen
     return {A, F}; };
   const La = arm(-1), Rr = arm(1); R.aL = La.A; R.fL = La.F; R.aR = Rr.A; R.fR = Rr.F;
-  const glass = new THREE.Group(); glass.position.set(0, -.33, .02); R.fR.add(glass); R.glass = glass;
+  const glass = new THREE.Group(); glass.position.set(0, -.36, .03); R.fR.add(glass); R.glass = glass;             // Glas liegt in der Hand
   add(new THREE.CylinderGeometry(.036, .03, .1, 10), new THREE.MeshStandardMaterial({color:0xcad4de, transparent:true, opacity:.35, roughness:.1}), 0, 0, 0, glass);
   R.liq = add(new THREE.CylinderGeometry(.031, .027, .066, 10), new THREE.MeshStandardMaterial({color:0x8a2018, emissive:0x50140e, roughness:.3}), 0, -.012, 0, glass); R.level = .85; setLevel(R, .85);
 
-  /* ---- Varianten ---- */
-  if (o.cool) { const jm = mStd(0x23252b, .45, .4), ora = new THREE.MeshBasicMaterial({color:0x3c8680});            // Türsteher: schwere Panzerung
-    L([[1.07, .14, .108], [1.18, .15, .114], [1.3, .13, .1]], -1.35, 1.35, jm, null, 20); P(bxg(.012, .24, .01), ora, -.05, 1.17, .14); P(bxg(.012, .24, .01), ora, .05, 1.17, .14);
-    L([[.7, .15, .11], [.78, .16, .115], [.84, .14, .1]], -1.4, 1.4, jm, null, 14);
-    for (const s of [-1, 1]) { ell(.1, .075, .11, jm, s*.225, 1.35, 0, null, [0, 0, -s*.2]); P(tor(.082, .008, 20), ora, s*.225, 1.35, 0, null, {r:[PI/2, 0, 0]}); P(new THREE.ConeGeometry(.026, .1, 6), jm, s*.27, 1.41, 0, null, {r:[0, 0, -s*1.1]}); }
-    for (let k = 0; k < 4; k++) P(bxg(.022, .16, .06), k % 2 ? trim : inner, 0, .33 + (k === 1 || k === 2 ? .03 : 0), -.07 + k*.06, head, {r:[-.35 - k*.08, 0, 0]});
-    P(bxg(.28, .02, .04), ora, 0, HY + .13, .12, head); }
+  /* ================= Varianten ================= */
+  const dk = inner;
+  if (o.cool) { const jm = mStd(0x1c1e22, .5, .35), ora = new THREE.MeshBasicMaterial({color:0x3c8680});            // Türsteher: schwarze Schwerpanzerung, Hörner
+    L([[1.06, .14, .106], [1.18, .15, .112], [1.3, .13, .098]], -1.3, 1.3, jm, null, 20); P(bxg(.012, .24, .01), ora, -.05, 1.17, .14); P(bxg(.012, .24, .01), ora, .05, 1.17, .14);
+    for (const s of [-1, 1]) { ell(.1, .07, .11, jm, s*.225, 1.35, 0, null, [0, 0, -s*.2]); P(new THREE.ConeGeometry(.026, .12, 6), jm, s*.272, 1.42, 0, null, {r:[0, 0, -s*1.1]}); P(new THREE.ConeGeometry(.022, .16, 6), jm, s*.07, .44, -.02, head, {r:[0, 0, -s*.5]}); }
+    P(bxg(.2, .02, .05), ora, 0, HY + .2, .08, head); }
   if (o.pouch) { add(bxg(.1, .09, .06), mStd(0x4a3a2a, .1, .9), .15, .86, .08); add(bxg(.1, .02, .065), mStd(0x32261c, .1, .9), .15, .91, .08); }
-  if (o.scarf) { add(cyl(.088, .094, .06, 12), mStd(o.scarf, 0, .95), 0, 1.33, 0); const tl = add(bxg(.06, .3, .015), mStd(o.scarf, 0, .95), .05, 1.18, .13); tl.rotation.z = .05; R.tail = tl; }
-  if (o.tape) add(cyl(.037, .037, .06, 8), mStd(0xd8d2c0, 0, .9), 0, -.1, 0, R.aL);
-  if (o.apron) { add(bxg(.26, .34, .02), mStd(o.apron, 0, .95), 0, .98, .152); add(bxg(.03, .03, .02), dk, .09, 1.15, .166); }
+  if (o.scarf) { add(cyl(.07, .076, .06, 12), mStd(o.scarf, 0, .95), 0, 1.335, 0); const tl = add(bxg(.06, .3, .015), mStd(o.scarf, 0, .95), .05, 1.18, .11); tl.rotation.z = .05; R.tail = tl; }
+  if (o.tape) add(cyl(.032, .032, .06, 8), mStd(0xd8d2c0, 0, .9), 0, -.1, 0, R.aL);
+  if (o.apron) { add(bxg(.24, .34, .02), mStd(o.apron, 0, .95), 0, .96, .13); add(bxg(.03, .03, .02), dk, .09, 1.12, .144); }
   if (o.cracks) R.crack = true;
 
-  /* ---- Verschmelzen ---- */
+  /* ================= Verschmelzen ================= */
   for (const [parent, mm] of store) for (const [mat, list] of mm) { const m = new THREE.Mesh(mergeGeos(list), mat); parent.add(m); list.forEach(q => q.dispose()); }
   R.g.userData.d = 1;
   g.traverse(m => { if (m.isMesh) m.castShadow = true; }); return R;
 }
-const slotM = () => new THREE.MeshBasicMaterial({color:0x020304});
 function setLevel(R, v) { R.level = v; const h = .066*Math.max(.02, v); R.liq.scale.y = Math.max(.02, v); R.liq.position.y = -.045 + h/2; R.liq.visible = v > .03; }
-function drawFace(R, t) {     // Display (160×200, wird auf die ovale Wölbung gelegt)
-  const x = R.cx, o = R.o, w = 160, h = 200, col = "#" + o.glow.toString(16).padStart(6, "0");
-  x.clearRect(0, 0, w, h); x.save(); x.beginPath(); x.ellipse(w/2, h/2, w/2 - 1, h/2 - 1, 0, 0, 7); x.clip();
-  const bg = x.createRadialGradient(w/2, h*.42, 10, w/2, h/2, h*.62); bg.addColorStop(0, "#0a1016"); bg.addColorStop(1, "#020406"); x.fillStyle = bg; x.fillRect(0, 0, w, h);
-  const look = R.lookT > 0, bl = R.blink < .12 ? .12 : 1, ey = look ? 40 : 32, ew = look ? 28 : 24, cy = 82; x.fillStyle = col; x.globalAlpha = .92; x.shadowColor = col; x.shadowBlur = 8;
-  for (const s of [-1, 1]) { const cx = w/2 + s*32 + R.gx*8; x.beginPath(); x.roundRect ? x.roundRect(cx - ew/2, cy - ey*bl/2, ew, ey*bl, 8) : x.rect(cx - ew/2, cy - ey*bl/2, ew, ey*bl); x.fill(); }
-  const my = 142;
-  if (R.talkT > 0) { const k = R.ev.find(e => R.tAt >= e.t0 && R.tAt <= e.t1); for (let i = 0; i < 5; i++) { const hh = k ? 6 + (.5 + .5*Math.sin(t*38 + i*1.7))*20*(.5 + .5*Math.min(1, k.s)) : 3; x.fillRect(w/2 - 30 + i*13, my - hh/2, 8, hh); } }
-  else if (R.drinkT >= 0) { x.fillRect(w/2 - 12, my, 24, 4); } else if (R.smile) { x.strokeStyle = col; x.lineWidth = 5; x.lineCap = "round"; x.beginPath(); x.arc(w/2, my - 24, 32, .22*Math.PI, .78*Math.PI); x.stroke(); } else { x.fillRect(w/2 - 16, my, 32, 4); }
-  x.shadowBlur = 0; if (look) { x.font = "bold 28px monospace"; x.fillText("?", w - 38, 40); }
-  x.globalAlpha = .13; x.fillStyle = "#000"; for (let y = 0; y < h; y += 4) x.fillRect(0, y, w, 2); x.globalAlpha = 1;
-  if (Math.random() < .03) { x.fillStyle = "rgba(255,255,255,.07)"; x.fillRect(0, Math.random()*h, w, 4); }
-  const gl = x.createLinearGradient(0, 0, w*.7, h*.5); gl.addColorStop(0, "rgba(255,255,255,.1)"); gl.addColorStop(.5, "rgba(255,255,255,0)"); x.fillStyle = gl; x.fillRect(0, 0, w, h);   // Glanz der Wölbung
-  x.restore(); R.tex.needsUpdate = true;
+function drawFace(R, t) {     // kein Bildschirm: Ausdruck über die Helligkeit der Kamera-Linse
+  const col = R.o.glow, r = (col >> 16 & 255)/255, g2 = (col >> 8 & 255)/255, b = (col & 255)/255;
+  let k = .55 + .1*Math.sin(t*1.7 + R.ph);                                                   // ruhiges Pulsieren
+  if (R.lookT > 0) k = 1.15; if (R.blink < .12) k = .12;                                     // aufmerksam / Blinzeln
+  if (R.talkT > 0) { const e = R.ev.find(q => R.tAt >= q.t0 && R.tAt <= q.t1); k = e ? .85 + .5*(.5 + .5*Math.sin(t*38))*Math.min(1, e.s) : .5; }
+  else if (R.drinkT >= 0) k = .35; else if (R.smile) k = 1.05;
+  R.eyeM.color.setRGB(Math.min(1, r*k + .08*k), Math.min(1, g2*k + .08*k), Math.min(1, b*k + .08*k));
 }
