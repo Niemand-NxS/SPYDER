@@ -149,17 +149,18 @@ function makeRobot(o) {
     L([[0, .028, .028], [-.14, .024, .024], [-.28, .018, .018]], 0, FULL, inner, F, 12);
     L([[-.03, .042, .044], [-.1, .042, .044], [-.18, .032, .034], [-.25, .024, .026]], s*PI/2 - 1.45, s*PI/2 + 1.45, gold, F);   // Unterarm-Panzer
     P(cyl(.03, .03, .02, 14, true), shell, 0, -.255, 0, F);
+    const Hd = new THREE.Group(); F.add(Hd);
     // --- echte Hand: Handwurzel, Handteller, 4 Finger à 3 Glieder, Daumen, Sehnen ---
-    P(cyl(.026, .026, .022, 14), steel, 0, -.285, 0, F);
-    ell(.034, .036, .016, inner, 0, -.33, 0, F); ell(.036, .03, .01, shell, 0, -.328, -.014, F);                      // Handteller + Handrücken-Platte
-    const hd = {f:[], t:[]};
+    P(cyl(.026, .026, .022, 14), steel, 0, -.285, 0, Hd);
+    ell(.034, .036, .016, inner, 0, -.33, 0, Hd); ell(.036, .03, .01, shell, 0, -.328, -.014, Hd);                      // Handteller + Handrücken-Platte
+    const hd = {f:[], t:[], root:Hd};
     for (const k of [[-.026, .034, .03, .026], [-.009, .04, .034, .028], [.009, .038, .032, .026], [.026, .03, .026, .02]]) {          // [x, Länge1, Länge2, Länge3]
-      let par = F, pos = [k[0], -.352, .006]; const ch = [];
+      let par = Hd, pos = [k[0], -.352, .006]; const ch = [];
       for (let j = 1; j <= 3; j++) { const gj = new THREE.Group(); gj.position.set(pos[0], pos[1], pos[2]); par.add(gj); ch.push(gj); const len = k[j];
         bone([0, 0, 0], [0, -len, 0], .0072 - j*.0008, .0062 - j*.0008, rub, gj); ball(.0072 - j*.0006, steel, 0, -len, 0, gj); par = gj; pos = [0, -len, 0]; }
-      cable([[k[0], -.3, -.012], [k[0], -.345, -.012], [k[0], -.36, -.008]], .0025, copper, F); hd.f.push(ch);
+      cable([[k[0], -.3, -.012], [k[0], -.345, -.012], [k[0], -.36, -.008]], .0025, copper, Hd); hd.f.push(ch);
     }
-    { let par = F, pos = [-s*.03, -.322, .008]; for (let j = 1; j <= 2; j++) { const gj = new THREE.Group(); gj.position.set(pos[0], pos[1], pos[2]); par.add(gj); hd.t.push(gj); const len = j === 1 ? .03 : .026;
+    { let par = Hd, pos = [-s*.03, -.322, .008]; for (let j = 1; j <= 2; j++) { const gj = new THREE.Group(); gj.position.set(pos[0], pos[1], pos[2]); par.add(gj); hd.t.push(gj); const len = j === 1 ? .03 : .026;
         bone([0, 0, 0], [0, -len, 0], .0085 - j*.001, .0075 - j*.001, rub, gj); ball(.0078 - j*.0008, steel, 0, -len, 0, gj); par = gj; pos = [0, -len, 0]; } }                    // Daumen
     hd.s = s; hd.cur = null; (R.hands = R.hands || [])[s < 0 ? 0 : 1] = hd;
     return {A, F}; };
@@ -210,6 +211,7 @@ function drawFace(R, t) {     // Anime-Augen (2-farbig) auf dem Visier + Linsen-
 
 /* Handposen: relaxed / open / fist / glass (Glas halten) / point – Finger glatt überblenden; gestikuliert beim Sprechen, Faust bei harten Typen */
 const HPOSE = {open:[.08, .12, .08, .3, .2, .6], relaxed:[.25, .42, .3, .45, .35, .5], fist:[1.35, 1.7, 1.2, .95, .85, .05], glass:[.45, .75, .55, .55, .5, .3], point:[.05, .05, .05, .5, .4, .2], pinch:[.6, .8, .5, .9, .7, .1]};
+const PI2 = Math.PI/2, _hdE = new THREE.Euler(), _hdV = new THREE.Vector3(), _hdV2 = new THREE.Vector3();
 function handTick(R, dt, t) {
   if (!R.hands) return; const k = Math.min(1, dt*9);
   for (let side = 0; side < 2; side++) { const hd = R.hands[side]; if (!hd) continue; let pose = "relaxed", fing = null;
@@ -223,5 +225,7 @@ function handTick(R, dt, t) {
     const c = hd.cur;
     hd.f.forEach((ch, fi) => { let kk = 1; if (pose === "point" && fi === 0) kk = 1; else if (pose === "point") kk = 1.7; else if (pose === "pinch") kk = fi === 0 ? 1.15 : (fi === 1 ? .9 : .5 + fi*.2);
       const w = fing && fi > 0 ? fing*(fi%2 ? 1 : -1) : 0; ch[0].rotation.x = -(c[0]*kk + w); ch[1].rotation.x = -(c[1]*kk + w*.8); ch[2].rotation.x = -(c[2]*kk + w*.6); });
+    { const bt = pose === "glass" ? 1 : 0; hd.bend = (hd.bend || 0) + (bt - (hd.bend || 0))*k; const bd = hd.bend, e = _hdE.set(-bd*PI2, -hd.s*bd*PI2, 0); hd.root.rotation.copy(e); _hdV.set(0, -.285, 0); hd.root.position.copy(_hdV).sub(_hdV2.copy(_hdV).applyEuler(e));
+      if (side === 1 && R.glass) R.glass.position.set(-bd*.045, -.385 + bd*.08, .05 + bd*.03); }
     hd.t[0].rotation.x = -c[3]; hd.t[1].rotation.x = -c[4]; hd.t[0].rotation.z = hd.s*c[5]; }
 }
