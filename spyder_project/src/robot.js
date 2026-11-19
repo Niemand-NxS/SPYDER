@@ -107,10 +107,10 @@ function makeRobot(o) {
 
   /* ================= KOPF: Helm mit Kamera-Linse (kein Display) ================= */
   const head = new THREE.Group(); head.position.set(0, 1.38, 0); g.add(head); R.head = head;
-  const HY = .2, dkm = mStd(0x050608, .6, .35);
+  const YS = .72, HY = .2*YS, dkm = mStd(0x050608, .6, .35);
   /* ===== Helm mit Visier: Außenschale (Weiß/Gold) mit Glasvisier vorn; dahinter ein dunkler Kopf, auf dem die Augen leuchten ===== */
   const SPR = [[.0, .06, .05, .056], [.04, .085, .064, .042], [.07, .1, .084, .024], [.1, .106, .1, .003], [.16, .112, .118, -.006], [.24, .123, .132, -.022], [.32, .122, .138, -.036], [.38, .1, .118, -.041], [.42, .062, .084, -.043], [.44, .02, .04, -.043]];
-  const spf = (y, ex, sc) => { let k = 0; while (k < SPR.length - 2 && y > SPR[k + 1][0]) k++; const a = SPR[k], b = SPR[k + 1], u = Math.max(0, Math.min(1, (y - a[0])/(b[0] - a[0]))), L2 = (p, q) => p + (q - p)*u; return [y, L2(a[1], b[1])*sc + ex, L2(a[2], b[2])*sc + ex, 0, L2(a[3], b[3])]; };
+  const spf = (y, ex, sc) => { let k = 0; while (k < SPR.length - 2 && y > SPR[k + 1][0]) k++; const a = SPR[k], b = SPR[k + 1], u = Math.max(0, Math.min(1, (y - a[0])/(b[0] - a[0]))), L2 = (p, q) => p + (q - p)*u; return [y*YS, (L2(a[1], b[1])*sc + ex)*1.04, L2(a[2], b[2])*sc + ex, 0, L2(a[3], b[3])]; };
   const pr = (y0, y1, n, ex, sc = 1) => Array.from({length:n + 1}, (_, i) => spf(y0 + (y1 - y0)*i/n, ex, sc));
   const TH = .013, VY0 = .115, VY1 = .285, OA = .8;
   const glassM = new THREE.MeshStandardMaterial({color:0x0f1d27, metalness:.85, roughness:.05, transparent:true, opacity:.3, depthWrite:false});
@@ -119,7 +119,7 @@ function makeRobot(o) {
   P(cyl(.06, .068, .09, 16), dkm, 0, .015, -.01, head);                                                            // Hals
   L(pr(.02, .43, 10, 0, .93), 0, FULL, dkm, head, 24, 2);                                                         // dunkler Innenkopf
   L(pr(.13, .27, 5, .002, .93), -.74, .74, visM, head, 22, 1);                                                    // Gesicht mit Augen (Textur)
-  L(pr(VY1, .44, 5, TH).concat([[.447, .01, .01, 0, -.043]]), 0, FULL, shell, head, 30, 2);                        // Helmkuppel (geschlossen)
+  L(pr(VY1, .44, 5, TH).concat([[.447*YS, .01, .01, 0, -.043]]), 0, FULL, shell, head, 30, 2);                        // Helmkuppel (geschlossen)
   L(pr(.0, VY1, 8, TH), OA, FULL - OA, shell, head, 30, 2);                                                       // Helm unten/hinten (vorn offen)
   L(pr(.0, VY0, 3, TH), -OA, OA, gold, head, 18, 1);                                                              // Kinnschutz
   L(pr(VY0, VY1, 5, TH + .002), -OA, OA, glassM, head, 24, 2);                                                    // Glasvisier
@@ -164,9 +164,9 @@ function makeRobot(o) {
     hd.s = s; hd.cur = null; (R.hands = R.hands || [])[s < 0 ? 0 : 1] = hd;
     return {A, F}; };
   const La = arm(-1), Rr = arm(1); R.aL = La.A; R.fL = La.F; R.aR = Rr.A; R.fR = Rr.F;
-  const glass = new THREE.Group(); glass.position.set(0, -.36, .03); R.fR.add(glass); R.glass = glass;             // Glas liegt in der Hand
-  add(new THREE.CylinderGeometry(.036, .03, .1, 10), new THREE.MeshStandardMaterial({color:0xcad4de, transparent:true, opacity:.35, roughness:.1}), 0, 0, 0, glass);
-  R.liq = add(new THREE.CylinderGeometry(.031, .027, .066, 10), new THREE.MeshStandardMaterial({color:0x8a2018, emissive:0x50140e, roughness:.3}), 0, -.012, 0, glass); R.level = .85; setLevel(R, .85);
+  const glass = new THREE.Group(); glass.position.set(0, -.385, .05); R.fR.add(glass); R.glass = glass;             // Glas liegt in der Hand
+  add(new THREE.CylinderGeometry(.03, .026, .1, 12), new THREE.MeshStandardMaterial({color:0xcad4de, transparent:true, opacity:.35, roughness:.1}), 0, 0, 0, glass);
+  R.liq = add(new THREE.CylinderGeometry(.027, .023, .066, 12), new THREE.MeshStandardMaterial({color:0x8a2018, emissive:0x50140e, roughness:.3}), 0, -.012, 0, glass); R.level = .85; setLevel(R, .85);
 
   /* ================= Varianten ================= */
   const dk = inner;
@@ -209,7 +209,7 @@ function drawFace(R, t) {     // Anime-Augen (2-farbig) auf dem Visier + Linsen-
 }
 
 /* Handposen: relaxed / open / fist / glass (Glas halten) / point – Finger glatt überblenden; gestikuliert beim Sprechen, Faust bei harten Typen */
-const HPOSE = {open:[.08, .12, .08, .3, .2, .6], relaxed:[.25, .42, .3, .45, .35, .5], fist:[1.35, 1.7, 1.2, .95, .85, .05], glass:[.8, 1.05, .75, .55, .5, .3], point:[.05, .05, .05, .5, .4, .2], pinch:[.6, .8, .5, .9, .7, .1]};
+const HPOSE = {open:[.08, .12, .08, .3, .2, .6], relaxed:[.25, .42, .3, .45, .35, .5], fist:[1.35, 1.7, 1.2, .95, .85, .05], glass:[.45, .75, .55, .55, .5, .3], point:[.05, .05, .05, .5, .4, .2], pinch:[.6, .8, .5, .9, .7, .1]};
 function handTick(R, dt, t) {
   if (!R.hands) return; const k = Math.min(1, dt*9);
   for (let side = 0; side < 2; side++) { const hd = R.hands[side]; if (!hd) continue; let pose = "relaxed", fing = null;
