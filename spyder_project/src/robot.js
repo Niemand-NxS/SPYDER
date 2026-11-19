@@ -160,7 +160,7 @@ function makeRobot(o) {
         bone([0, 0, 0], [0, -len, 0], .0072 - j*.0008, .0062 - j*.0008, rub, gj); ball(.0072 - j*.0006, steel, 0, -len, 0, gj); par = gj; pos = [0, -len, 0]; }
       cable([[k[0], -.3, -.012], [k[0], -.345, -.012], [k[0], -.36, -.008]], .0025, copper, Hd); hd.f.push(ch);
     }
-    { let par = Hd, pos = [-s*.03, -.322, .008]; for (let j = 1; j <= 2; j++) { const gj = new THREE.Group(); gj.position.set(pos[0], pos[1], pos[2]); par.add(gj); hd.t.push(gj); const len = j === 1 ? .03 : .026;
+    { let par = Hd, pos = [s*.03, -.322, .008]; for (let j = 1; j <= 2; j++) { const gj = new THREE.Group(); gj.position.set(pos[0], pos[1], pos[2]); par.add(gj); hd.t.push(gj); const len = j === 1 ? .03 : .026;
         bone([0, 0, 0], [0, -len, 0], .0085 - j*.001, .0075 - j*.001, rub, gj); ball(.0078 - j*.0008, steel, 0, -len, 0, gj); par = gj; pos = [0, -len, 0]; } }                    // Daumen
     hd.s = s; hd.cur = null; (R.hands = R.hands || [])[s < 0 ? 0 : 1] = hd;
     return {A, F}; };
@@ -225,7 +225,7 @@ function handTick(R, dt, t) {
     const c = hd.cur;
     hd.f.forEach((ch, fi) => { let kk = 1; if (pose === "point" && fi === 0) kk = 1; else if (pose === "point") kk = 1.7; else if (pose === "pinch") kk = fi === 0 ? 1.15 : (fi === 1 ? .9 : .5 + fi*.2);
       const w = fing && fi > 0 ? fing*(fi%2 ? 1 : -1) : 0; ch[0].rotation.x = -(c[0]*kk + w); ch[1].rotation.x = -(c[1]*kk + w*.8); ch[2].rotation.x = -(c[2]*kk + w*.6); });
-    { const bt = pose === "glass" ? 1 : 0; hd.bend = (hd.bend || 0) + (bt - (hd.bend || 0))*k; const bd = hd.bend, e = _hdE.set(-bd*PI2, -hd.s*bd*PI2, 0); hd.root.rotation.copy(e); _hdV.set(0, -.285, 0); hd.root.position.copy(_hdV).sub(_hdV2.copy(_hdV).applyEuler(e));
+    { const bt = pose === "glass" ? 1 : 0; hd.bend = (hd.bend || 0) + (bt - (hd.bend || 0))*k; const bd = hd.bend, e = _hdE.set(-bd*PI2, -hd.s*PI2, 0); hd.root.rotation.copy(e); _hdV.set(0, -.285, 0); hd.root.position.copy(_hdV).sub(_hdV2.copy(_hdV).applyEuler(e));
       if (side === 1 && R.glass) R.glass.position.set(-bd*.045, -.385 + bd*.08, .05 + bd*.03); }
     hd.t[0].rotation.x = -c[3]; hd.t[1].rotation.x = -c[4]; hd.t[0].rotation.z = hd.s*c[5]; }
 }
