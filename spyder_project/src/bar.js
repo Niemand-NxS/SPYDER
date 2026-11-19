@@ -129,7 +129,7 @@ function robotLife(R, P, t, dt, tgtPos, lookAtSpider) {
   if (R.mode === "sleep") { R.head.rotation.x += (.95 - R.head.rotation.x)*Math.min(1, dt*3); R.head.rotation.y += (Math.sin(t*.3)*.1 - R.head.rotation.y)*Math.min(1, dt*2); g.position.y = Math.sin(t*1.1)*.004; }
   else { const sp = R.talkT > 0 ? Math.sin(t*5 + R.ph)*.05 : 0; R.head.rotation.y += (yaw*(R.lookT > 0 ? 1 : .7) + sp - R.head.rotation.y)*Math.min(1, dt*(R.lookT > 0 ? 9 : 4)); R.head.rotation.x += ((R.talkT > 0 ? Math.sin(t*7 + R.ph)*.05 : 0) + (R.lookT > 0 ? .1 : 0) + pitch + (R.hdTilt || 0) - R.head.rotation.x)*Math.min(1, dt*6); g.rotation.z = Math.sin(t*.9 + R.ph)*.012; }
   if (R.tail) R.tail.rotation.z = .05 + Math.sin(t*1.6 + R.ph)*.08;
-  robotArms(R, t, dt, P); R.face -= dt; if (R.face <= 0) { R.face = .08; drawFace(R, t); }
+  robotArms(R, t, dt, P); handTick(R, dt, t); R.face -= dt; if (R.face <= 0) { R.face = .08; drawFace(R, t); }
 }
 
 const PA = {r:[.1, 1.09, .4], l:[-.12, 1.06, .3], gest:true}, PC = {r:[.14, 1.2, .3], l:[-.05, 1.16, .32], gest:true, polish:true}, PZ = {r:[.2, 1.1, .36], l:[-.2, 1.1, .36]};

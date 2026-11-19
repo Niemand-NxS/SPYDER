@@ -108,24 +108,31 @@ function makeRobot(o) {
   /* ================= KOPF: Helm mit Kamera-Linse (kein Display) ================= */
   const head = new THREE.Group(); head.position.set(0, 1.38, 0); g.add(head); R.head = head;
   const HY = .2, dkm = mStd(0x050608, .6, .35);
-  // Schädel/Mechanik (dunkel, sichtbar in den Spalten) + Hals
-  P(sph(18, 14), dkm, 0, HY - .01, -.02, head, {s:[.085, .15, .085]});
-  P(cyl(.06, .07, .09, 14), dkm, 0, .02, -.01, head);
-  // Helm: EIN schlanker, nach hinten gestreckter Eierkopf, Scheitel nach hinten verschoben (cz), leicht nach vorn geneigt
-  const H = (a, b, mat, seg) => L([[.02, .06, .05, 0, .056], [.04, .085, .064, 0, .042], [.07, .1, .084, 0, .024], [.1, .106, .1, 0, .003], [.16, .11, .115, 0, -.005], [.24, .122, .13, 0, -.022], [.32, .12, .135, 0, -.035], [.38, .1, .115, 0, -.04], [.415, .06, .08, 0, -.042], [.432, .014, .03, 0, -.042]], a, b, mat, head, seg || 30, 3);   // runder Schädel, kräftiger Kiefer, Kinn
-  H(0, FULL, shell);
-  // Zierlinien: dunkle Nähte (Torus-Bögen) über den Helm, wie die Fugen auf dem Referenzbild
-  for (const q of [[.262, .1235, .1335, -.025], [.335, .1153, .13, -.036]]) L([[q[0] - .004, q[1], q[2], 0, q[3]], [q[0], q[1], q[2], 0, q[3]], [q[0] + .004, q[1], q[2], 0, q[3]]], 0, FULL, dkm, head, 30, 1);   // Fugenbänder
+  /* ===== Helm mit Visier: Außenschale (Weiß/Gold) mit Glasvisier vorn; dahinter ein dunkler Kopf, auf dem die Augen leuchten ===== */
+  const SPR = [[.0, .06, .05, .056], [.04, .085, .064, .042], [.07, .1, .084, .024], [.1, .106, .1, .003], [.16, .112, .118, -.006], [.24, .123, .132, -.022], [.32, .122, .138, -.036], [.38, .1, .118, -.041], [.42, .062, .084, -.043], [.44, .02, .04, -.043]];
+  const spf = (y, ex, sc) => { let k = 0; while (k < SPR.length - 2 && y > SPR[k + 1][0]) k++; const a = SPR[k], b = SPR[k + 1], u = Math.max(0, Math.min(1, (y - a[0])/(b[0] - a[0]))), L2 = (p, q) => p + (q - p)*u; return [y, L2(a[1], b[1])*sc + ex, L2(a[2], b[2])*sc + ex, 0, L2(a[3], b[3])]; };
+  const pr = (y0, y1, n, ex, sc = 1) => Array.from({length:n + 1}, (_, i) => spf(y0 + (y1 - y0)*i/n, ex, sc));
+  const TH = .013, VY0 = .115, VY1 = .285, OA = .8;
+  const glassM = new THREE.MeshStandardMaterial({color:0x0f1d27, metalness:.85, roughness:.05, transparent:true, opacity:.3, depthWrite:false});
   R.cx = document.createElement("canvas").getContext("2d"); R.cx.canvas.width = 256; R.cx.canvas.height = 96; R.tex = new THREE.CanvasTexture(R.cx.canvas);
   const visM = new THREE.MeshBasicMaterial({map:R.tex});
-  L([[.17, .1185, .124, 0, -.009], [.21, .1225, .1285, 0, -.014], [.25, .128, .1365, 0, -.023], [.285, .127, .139, 0, -.029]], -.8, .8, visM, head, 24, 3);   // Visier mit Anime-Augen (Textur)
+  P(cyl(.06, .068, .09, 16), dkm, 0, .015, -.01, head);                                                            // Hals
+  L(pr(.02, .43, 10, 0, .93), 0, FULL, dkm, head, 24, 2);                                                         // dunkler Innenkopf
+  L(pr(.13, .27, 5, .002, .93), -.74, .74, visM, head, 22, 1);                                                    // Gesicht mit Augen (Textur)
+  L(pr(VY1, .44, 5, TH).concat([[.447, .01, .01, 0, -.043]]), 0, FULL, shell, head, 30, 2);                        // Helmkuppel (geschlossen)
+  L(pr(.0, VY1, 8, TH), OA, FULL - OA, shell, head, 30, 2);                                                       // Helm unten/hinten (vorn offen)
+  L(pr(.0, VY0, 3, TH), -OA, OA, gold, head, 18, 1);                                                              // Kinnschutz
+  L(pr(VY0, VY1, 5, TH + .002), -OA, OA, glassM, head, 24, 2);                                                    // Glasvisier
+  for (const y of [VY0, VY1]) L([spf(y - .005, TH + .004, 1), spf(y, TH + .004, 1), spf(y + .005, TH + .004, 1)], -OA - .04, OA + .04, gold, head, 22, 1);   // Visierrahmen oben/unten
+  for (const sx of [-1, 1]) L(pr(VY0, VY1, 4, TH + .004), sx*OA - .035, sx*OA + .035, gold, head, 6, 2);        // Visier-Seitenrahmen
+  // Schmuck: Mittelnaht auf der Kuppel, Nackenplatte
+  L(pr(.3, .435, 4, TH + .003), -.05, .05, gold, head, 4, 2); L(pr(.3, .435, 4, TH + .003), PI - .05, PI + .05, gold, head, 4, 2);
   // symmetrische Kamera-Linsen an beiden Kopfseiten
-  for (const sx of [-1, 1]) { const ex = sx*.122, ey = HY - .005, ez = -.02;
-    P(cyl(.05, .05, .04, 26), dkm, ex, ey, ez, head, {r:[0, 0, PI/2]}); P(tor(.052, .008, 26), shell, ex + sx*.018, ey, ez, head, {r:[0, PI/2, 0]});
+  for (const sx of [-1, 1]) { const ex = sx*(.123 + TH), ey = HY - .005, ez = -.02;
+    P(cyl(.05, .05, .04, 26), dkm, ex, ey, ez, head, {r:[0, 0, PI/2]}); P(tor(.052, .008, 26), gold, ex + sx*.018, ey, ez, head, {r:[0, PI/2, 0]});
     for (let k = 0; k < 3; k++) P(tor(.04 - k*.009, .004, 22), k % 2 ? gold : steel, ex + sx*(.026 + k*.003), ey, ez, head, {r:[0, PI/2, 0]});
     add(new THREE.SphereGeometry(.012, 12, 8), eyeM, ex + sx*.034, ey, ez, head).scale.x = .4; }
-  // Antenne + Kabel am Hinterkopf, die in den Hals laufen
-  for (let k = 0; k < 7; k++) { const x = -.06 + k*.02; cable([[x, HY + .02, -.165], [x*1.3, HY - .1, -.175], [x*1.4, .08, -.12], [x*.7, .0, -.05]], .0045, k % 2 ? rub : copper, head); }
+  for (let k = 0; k < 7; k++) { const x = -.06 + k*.02; cable([[x, HY + .02, -.17], [x*1.3, HY - .1, -.19], [x*1.4, .08, -.13], [x*.7, .0, -.05]], .0045, k % 2 ? rub : copper, head); }
   P(cyl(.07, .075, .04, 16), inner, 0, .0, 0, head);
 
   /* ================= ARME: schlank, Schulterpanzer, echte Hände ================= */
@@ -145,12 +152,16 @@ function makeRobot(o) {
     // --- echte Hand: Handwurzel, Handteller, 4 Finger à 3 Glieder, Daumen, Sehnen ---
     P(cyl(.026, .026, .022, 14), steel, 0, -.285, 0, F);
     ell(.034, .036, .016, inner, 0, -.33, 0, F); ell(.036, .03, .01, shell, 0, -.328, -.014, F);                      // Handteller + Handrücken-Platte
+    const hd = {f:[], t:[]};
     for (const k of [[-.026, .034, .03, .026], [-.009, .04, .034, .028], [.009, .038, .032, .026], [.026, .03, .026, .02]]) {          // [x, Länge1, Länge2, Länge3]
-      let cur = [k[0], -.352, .006], ang = .15;
-      for (let j = 1; j <= 3; j++) { const len = k[j], nx = [cur[0], cur[1] - Math.cos(ang)*len, cur[2] + Math.sin(ang)*len]; bone(cur, nx, .0072 - j*.0008, .0062 - j*.0008, rub, F); ball(.0072 - j*.0006, steel, nx[0], nx[1], nx[2], F); cur = nx; ang += .42; }
-      cable([[k[0], -.3, -.012], [k[0], -.345, -.012], [k[0], -.36, -.008]], .0025, copper, F);
+      let par = F, pos = [k[0], -.352, .006]; const ch = [];
+      for (let j = 1; j <= 3; j++) { const gj = new THREE.Group(); gj.position.set(pos[0], pos[1], pos[2]); par.add(gj); ch.push(gj); const len = k[j];
+        bone([0, 0, 0], [0, -len, 0], .0072 - j*.0008, .0062 - j*.0008, rub, gj); ball(.0072 - j*.0006, steel, 0, -len, 0, gj); par = gj; pos = [0, -len, 0]; }
+      cable([[k[0], -.3, -.012], [k[0], -.345, -.012], [k[0], -.36, -.008]], .0025, copper, F); hd.f.push(ch);
     }
-    { let cur = [-s*.03, -.322, .008], ang = .5; for (let j = 1; j <= 2; j++) { const len = j === 1 ? .03 : .026, nx = [cur[0] - s*Math.sin(.6)*len*.8, cur[1] - Math.cos(ang)*len, cur[2] + Math.sin(ang)*len]; bone(cur, nx, .0085 - j*.001, .0075 - j*.001, rub, F); ball(.0078 - j*.0008, steel, nx[0], nx[1], nx[2], F); cur = nx; ang += .35; } }   // Daumen
+    { let par = F, pos = [-s*.03, -.322, .008]; for (let j = 1; j <= 2; j++) { const gj = new THREE.Group(); gj.position.set(pos[0], pos[1], pos[2]); par.add(gj); hd.t.push(gj); const len = j === 1 ? .03 : .026;
+        bone([0, 0, 0], [0, -len, 0], .0085 - j*.001, .0075 - j*.001, rub, gj); ball(.0078 - j*.0008, steel, 0, -len, 0, gj); par = gj; pos = [0, -len, 0]; } }                    // Daumen
+    hd.s = s; hd.cur = null; (R.hands = R.hands || [])[s < 0 ? 0 : 1] = hd;
     return {A, F}; };
   const La = arm(-1), Rr = arm(1); R.aL = La.A; R.fL = La.F; R.aR = Rr.A; R.fR = Rr.F;
   const glass = new THREE.Group(); glass.position.set(0, -.36, .03); R.fR.add(glass); R.glass = glass;             // Glas liegt in der Hand
@@ -185,7 +196,7 @@ function drawFace(R, t) {     // Anime-Augen (2-farbig) auf dem Visier + Linsen-
   const key = [open.toFixed(2), look.toFixed(2), smile, mouth.toFixed(1), hex].join();
   if (R._fk !== key) { R._fk = key;
     c.fillStyle = "#07090c"; c.fillRect(0, 0, W, H);
-    for (const sx of [-1, 1]) { const cx = W/2 + sx*50 + look*26, cy = H*.5, hw = 34, h = 21*open;     // Schlitzaugen: schmal, außen hochgezogen
+    for (const sx of [-1, 1]) { const cx = W/2 + sx*62 + look*26, cy = H*.5, hw = 46, h = 28*open;     // Schlitzaugen: schmal, außen hochgezogen
       c.fillStyle = hex; c.strokeStyle = hex; c.lineCap = "round";
       if (smile && open > .5) { c.lineWidth = 8; c.beginPath(); c.moveTo(cx - hw*.8, cy + 8); c.quadraticCurveTo(cx, cy - 16, cx + hw*.8, cy + 8); c.stroke(); }
       else { const ox = cx + sx*hw, oy = cy - 3*Math.max(open, .3), ix = cx - sx*hw, iy = cy + 4;                   // außen oben, innen unten
@@ -195,4 +206,22 @@ function drawFace(R, t) {     // Anime-Augen (2-farbig) auf dem Visier + Linsen-
     R.tex.needsUpdate = true; }
   const k = open < .2 ? .2 : .75 + .15*Math.sin(t*1.7 + R.ph), r = (col >> 16 & 255)/255, g2 = (col >> 8 & 255)/255, b = (col & 255)/255;
   R.eyeM.color.setRGB(Math.min(1, r*k + .08), Math.min(1, g2*k + .08), Math.min(1, b*k + .08));
+}
+
+/* Handposen: relaxed / open / fist / glass (Glas halten) / point – Finger glatt überblenden; gestikuliert beim Sprechen, Faust bei harten Typen */
+const HPOSE = {open:[.08, .12, .08, .3, .2, .6], relaxed:[.25, .42, .3, .45, .35, .5], fist:[1.35, 1.7, 1.2, .95, .85, .05], glass:[.8, 1.05, .75, .55, .5, .3], point:[.05, .05, .05, .5, .4, .2], pinch:[.6, .8, .5, .9, .7, .1]};
+function handTick(R, dt, t) {
+  if (!R.hands) return; const k = Math.min(1, dt*9);
+  for (let side = 0; side < 2; side++) { const hd = R.hands[side]; if (!hd) continue; let pose = "relaxed", fing = null;
+    if (R.handPose && R.handPose[side]) pose = R.handPose[side];
+    else if (side === 1) { pose = R.glass && R.glass.visible !== false ? "glass" : "relaxed"; if (R.talkT > 0 && R.o.cool) pose = "point"; }
+    else if (R.drinkT >= 0) pose = "relaxed";
+    else if (R.talkT > 0) { const ph = Math.floor(t*.55 + R.ph)%4; pose = ["open", "point", "open", "pinch"][ph]; fing = .12*Math.sin(t*9 + R.ph); }
+    else if (R.o.cool) pose = "fist";
+    const tg = HPOSE[pose] || HPOSE.relaxed; if (!hd.cur) hd.cur = tg.slice();
+    for (let i = 0; i < 6; i++) hd.cur[i] += (tg[i] - hd.cur[i])*k;
+    const c = hd.cur;
+    hd.f.forEach((ch, fi) => { let kk = 1; if (pose === "point" && fi === 0) kk = 1; else if (pose === "point") kk = 1.7; else if (pose === "pinch") kk = fi === 0 ? 1.15 : (fi === 1 ? .9 : .5 + fi*.2);
+      const w = fing && fi > 0 ? fing*(fi%2 ? 1 : -1) : 0; ch[0].rotation.x = -(c[0]*kk + w); ch[1].rotation.x = -(c[1]*kk + w*.8); ch[2].rotation.x = -(c[2]*kk + w*.6); });
+    hd.t[0].rotation.x = -c[3]; hd.t[1].rotation.x = -c[4]; hd.t[0].rotation.z = hd.s*c[5]; }
 }
