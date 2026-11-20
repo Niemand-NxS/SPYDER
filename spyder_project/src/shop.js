@@ -142,6 +142,7 @@ function shieldSnd(on) {
 }
 function shieldHumTick(u) { if (!shS.hum || !ac) return; shS.hum.g.gain.setTargetAtTime(u > .6 ? .045*u : 0, ac.currentTime, .06); shS.hum.lp.frequency.setTargetAtTime(420 + 260*u + 80*Math.sin(clockT*3) + shd.flash*500, ac.currentTime, .05); }
 function takeHit(n) {      // für kommende Gegner: Holo-Schild blockt Treffer
+  if (dev.god) { shd.flash = 1; return false; }
   if (shd.on) { shd.flash = 1; clang(.3); beep(900, .1, 0, .04); return false; }
   const ks = Object.keys(PARTS), k = ks[(Math.random()*ks.length)|0]; PARTS[k] = Math.max(.02, PARTS[k] - (n || .22)); dmgHit = 1; clang(.4); return true;
 }
@@ -223,6 +224,14 @@ function buildDev(box) {
   mk("OPTIONEN"); tg("Hitboxen zeigen", () => hitOn, () => toggleHit()); tg("FPS-Anzeige", () => !!opt.fps, v => { opt.fps = v; saveOpt(); applyOpt(); });
   tg("Laser-Messer", () => gear.knife, v => { gear.knife = v; gear.black = v; }); tg("Holo-Schild", () => gear.shield, v => { gear.shield = v; }); tg("Unendlich Energie", () => dev.inf, v => { dev.inf = v; }); tg("Überspringen-Knopf immer sichtbar", () => dev.skip, v => { dev.skip = v; });
   const r = document.createElement("div"); r.className = "devg"; const tb = document.createElement("button"); tb.className = "devb"; tb.textContent = T("Test-Treffer (Schild prüfen)"); tb.onclick = () => { const ok = takeHit(.1); toast(ok ? "Treffer! Integrität sinkt" : "Treffer geblockt"); }; r.appendChild(tb); box.appendChild(r);
+  mk("SPIELER & WERTE"); tg("Unverwundbar (Treffer ignorieren)", () => !!dev.god, v => { dev.god = v; }); tg("Koordinaten-Anzeige", () => !!dev.pos, v => { dev.pos = v; devPosTick(); }); tg("Alle Figuren gelten als bekannt", () => !!dev.known, v => { dev.known = v; if (v) for (const k in SPK) if (k !== "A") arKnow(k); });
+  tg("Karte von CJ-City", () => gear.map, v => { gear.map = v; }); tg("Virtual Backpack", () => gear.pack, v => { if (v) givePack(); else gear.pack = false; });
+  const act = (h, list) => { mk(h); const g = document.createElement("div"); g.className = "devg"; for (const [lbl, fn] of list) { const b = document.createElement("button"); b.className = "devb"; b.textContent = T(lbl); b.onclick = () => { try { fn(b); } catch (e) { console.error(e); toast("Fehler: " + e.message); } }; g.appendChild(b); } box.appendChild(g); };
+  act("AKTIONEN", [["+1000 SuperEuro", () => { gear.se = (gear.se || 0) + 1000; toast("+1000 SE"); }], ["Alle Teile reparieren", () => { for (const k in PARTS) PARTS[k] = 1; toast("Alle Teile repariert"); }], ["Energie auffüllen", () => { energy = 1; toast("Energie voll"); }], ["Alle Upgrades max", () => { fixUpg(); for (const U of UPG) gear.upg[U.k] = 3; upgBuild(); toast("Alle Upgrades auf Stufe 3"); }], ["Upgrades zurücksetzen", () => { for (const U of UPG) gear.upg[U.k] = 0; upgBuild(); toast("Upgrades zurückgesetzt"); }],
+    ["Position kopieren", () => { const t = "x " + pos.x.toFixed(2) + "  y " + pos.y.toFixed(2) + "  z " + pos.z.toFixed(2); try { navigator.clipboard.writeText(t).catch(() => {}); } catch (e) {} toast(t); }], ["Zustand in Konsole", () => { console.log("gear", JSON.parse(JSON.stringify(gear)), "PARTS", {...PARTS}, "pos", pos.toArray()); toast("Zustand in der Konsole ausgegeben"); }]]);
+  mk("ZEIT"); { const g = document.createElement("div"); g.className = "devg"; for (const v of [.25, .5, 1, 2]) { const b = document.createElement("button"); b.className = "devb"; b.textContent = "×" + v; b.onclick = () => { dev.ts = v; toast("Zeitskala ×" + v); g.querySelectorAll("button").forEach(x => x.style.borderColor = ""); b.style.borderColor = "#4FA9A3"; }; if ((dev.ts || 1) === v) b.style.borderColor = "#4FA9A3"; g.appendChild(b); } box.appendChild(g); }
+  act("SPEICHERSTÄNDE", [["Speicherstand in Zwischenablage", () => { const o = localStorage.getItem(slotKey(slot)) || ""; try { navigator.clipboard.writeText(o).catch(() => {}); } catch (e) {} toast(o ? "Slot " + slot + " kopiert (" + o.length + " Zeichen)" : "Slot leer"); }], ["Spielstand aus Zwischenablage laden", () => { navigator.clipboard.readText().then(t => { const o = JSON.parse(t); if (!o || !o.cp) throw 0; localStorage.setItem(slotKey(slot), t); toast("Importiert – Seite lädt neu"); setTimeout(() => location.reload(), 700); }).catch(() => toast("Zwischenablage enthält keinen gültigen Spielstand")); }],
+    ["Aktuellen Slot löschen", b => { if (!b.dataset.a) { b.dataset.a = 1; b.textContent = T("SICHER?"); setTimeout(() => { delete b.dataset.a; b.textContent = T("Aktuellen Slot löschen"); }, 2500); return; } localStorage.removeItem(slotKey(slot)); toast("Slot gelöscht"); refreshStartBtns(); }], ["Seite neu laden", () => location.reload()]]);
   for (const [h, list] of DEVJ) { mk(h); const g = document.createElement("div"); g.className = "devg"; for (const [lbl, id] of list) { const b = document.createElement("button"); b.className = "devb"; b.textContent = T(lbl); b.onclick = () => devGo(id); g.appendChild(b); } box.appendChild(g); }
 }
 
@@ -329,3 +338,8 @@ function arTick(dt) {
 #arLayer .arN i{position:absolute;left:0;top:0;width:24px;height:1px;background:linear-gradient(90deg,rgba(79,169,163,.0),rgba(79,169,163,.85))}
 #arLayer .arN i::after{content:"";position:absolute;left:-2px;top:-2px;width:5px;height:5px;background:#4FA9A3;transform:rotate(45deg)}
 body.menu #arLayer,body.ivOpen #arLayer{display:none !important}`; document.head.appendChild(st); }
+
+/* Dev: Koordinaten-Anzeige */
+let _devPosT = 0;
+function devPosTick() { let e = document.getElementById("devPos"); if (!e) { e = document.createElement("div"); e.id = "devPos"; e.style.cssText = "position:fixed;left:10px;bottom:10px;z-index:70;font:11px/1.4 ui-monospace,monospace;color:#E2E8F0;background:rgba(11,14,20,.7);padding:5px 9px;border-left:2px solid #4FA9A3;pointer-events:none;display:none;white-space:pre"; document.body.appendChild(e); }
+  e.style.display = dev.pos ? "block" : "none"; clearInterval(_devPosT); if (dev.pos) _devPosT = setInterval(() => { e.textContent = "x " + pos.x.toFixed(2) + "\ny " + pos.y.toFixed(2) + "\nz " + pos.z.toFixed(2) + "\nmode " + mode + "  cp " + (typeof cp !== "undefined" ? cp : "-"); }, 150); }

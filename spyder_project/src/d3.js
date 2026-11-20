@@ -199,7 +199,7 @@ function loop() {
   if (gameStarted && !paused && !settingsOpen && !pauseOpen) playT += Math.min(.1, (performance.now() - (loop.ps || performance.now()))/1000); loop.ps = performance.now();
   padTick(Math.min(.05, (performance.now() - (loop.pt || performance.now()))/1000)); loop.pt = performance.now();
   if (paused) { clock.getDelta(); if (invOpen) { try { ivCam(Math.min(.1, (performance.now() - (loop.ic || performance.now()))/1000)); loop.ic = performance.now(); } catch (e) {} renderer.render(scene, camera); return; } renderFinal(.016); return; }
-  const raw = Math.min(clock.getDelta(), .25), nSub = Math.max(1, Math.ceil(raw/(1/30) - 1e-6)), dt = raw/nSub*(nSub > 1 ? 1 : 1); clockT += raw;
+  const raw = Math.min(clock.getDelta(), .25)*(dev.ts || 1), nSub = Math.max(1, Math.ceil(raw/(1/30) - 1e-6)), dt = raw/nSub*(nSub > 1 ? 1 : 1); clockT += raw;
   const ix = clamp((keys.KeyD?1:0) - (keys.KeyA?1:0) + joy.x + padv.x, -1, 1);
   const iz = clamp(((keys.KeyW||keys.ArrowUp)?1:0) - (keys.KeyS?1:0) + joy.y + padv.y, -1, 1);
   const mag = Math.min(1, Math.hypot(ix, iz));
