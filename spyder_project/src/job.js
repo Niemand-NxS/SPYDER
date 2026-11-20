@@ -139,6 +139,7 @@ function ivEnter() {
   try { renderFinal(.016); const url = cvs.toDataURL("image/jpeg", .7); if (!ivBg) { ivBg = document.createElement("div"); ivBg.id = "ivBg"; document.body.appendChild(ivBg); } ivBg.style.backgroundImage = "url(" + url + ")"; ivBg.style.display = "block"; } catch (e) {}
   cvs.style.position = "fixed"; cvs.style.inset = "0"; cvs.style.zIndex = "1";
   ivFk = "all"; ivT.set(0, -.2, -.1); loop.ic = 0; ivYaw = .7;
+  try { ivPoseSet(); } catch (e) { console.error("ivPose", e); }
   try { if (ivRing) ivRing.visible = false; spider.updateMatrixWorld(true); const bx = new THREE.Box3().setFromObject(spider), sz = bx.getSize(new THREE.Vector3()), asp = camera.aspect, fill = asp > 1.15 ? .4 : .8; ivK = clamp((Math.max(sz.x, sz.z, sz.y*1.3)/spider.scale.x)/(fill*2*Math.tan(19*Math.PI/180)*Math.max(asp, 1))/8.6, .6, 4); } catch (e) { ivK = 1.4; } ivD = 8.6*ivK;
   ivHid = scene.children.filter(c => c.visible && !c.isLight && c !== spider); ivHid.forEach(c => c.visible = false);
   ivSave = {bg:scene.background, fog:scene.fog, hi:hemi.intensity, hc:hemi.color.getHex(), li:lamp.intensity, fov:camera.fov}; scene.background = null; renderer.setClearAlpha(0); scene.fog = null; hemi.intensity = .55; hemi.color.setHex(0xaab8d8); lamp.intensity = Math.max(lamp.intensity, 1.1);
@@ -164,7 +165,14 @@ function ivBuildMk() {
 function ivMkTick() {
   const w = innerWidth, h = innerHeight; for (const m of ivMk) { const wp = spider.localToWorld(m.p()).project(camera), vis = wp.z < 1 && Math.abs(wp.x) < 1.05; m.e.style.display = vis ? "" : "none"; if (vis) m.e.style.transform = "translate(" + ((wp.x*.5 + .5)*w).toFixed(1) + "px," + ((-wp.y*.5 + .5)*h).toFixed(1) + "px)"; m.e.classList.toggle("big", m.gad || m.v < .9); m.e.classList.toggle("l", wp.x > .42); }
 }
+let ivPose = null; const _ivP = new THREE.Vector3();
+/* Inventar: Spinne steht in fester Ruhepose, unabhängig von Haltung/Bewegung der echten Spinne */
+function ivPoseSet() { ivPose = {q:spider.quaternion.clone(), f:legs.map(l => l.foot.clone())}; spider.quaternion.set(0, 0, 0, 1); spider.updateMatrixWorld(true);
+  for (const l of legs) { _ivP.set(l.restLocal.x, -HIP_H, l.restLocal.z); l.foot.copy(_ivP); spider.localToWorld(l.foot); solveLeg(l, _ivP); }
+  try { gadTick(); } catch (e) {} spider.updateMatrixWorld(true); }
+function ivPoseBack() { if (!ivPose) return; spider.quaternion.copy(ivPose.q); legs.forEach((l, i) => l.foot.copy(ivPose.f[i])); spider.updateMatrixWorld(true); for (const l of legs) { _ivP.copy(l.foot); spider.worldToLocal(_ivP); solveLeg(l, _ivP); } ivPose = null; }
 function ivLeave() {
+  try { ivPoseBack(); } catch (e) {}
   ivHid.forEach(c => c.visible = true); ivHid = []; ivUntint(); renderer.setClearAlpha(1); cvs.style.position = cvs.style.inset = cvs.style.zIndex = ""; if (ivBg) ivBg.style.display = "none"; const mk = $("ivMk"); if (mk) mk.innerHTML = ""; if (ivSave) { scene.background = ivSave.bg; scene.fog = ivSave.fog; hemi.intensity = ivSave.hi; hemi.color.setHex(ivSave.hc); lamp.intensity = ivSave.li; camera.fov = ivSave.fov; camera.updateProjectionMatrix(); ivSave = null; }
   if (ivRing) ivRing.visible = false; if (ivKey) ivKey.visible = ivRim.visible = false; document.body.classList.remove("ivOpen");
 }

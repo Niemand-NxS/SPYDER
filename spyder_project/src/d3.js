@@ -40,8 +40,8 @@ addEventListener("blur", () => { for (const k in keys) keys[k] = false; });
 const cvs = renderer.domElement, startEl = $("start");
 $("camBtn").addEventListener("click", () => press("KeyV")); $("mapBtn").addEventListener("click", () => press("KeyM"));
 function lock() { if (!opt.lockP) return; try { pq(cvs.requestPointerLock()); } catch (e) {} try { const de = document.documentElement; if (!document.fullscreenElement && de.requestFullscreen) pq(de.requestFullscreen()); } catch (e) {} }
-$("startBtn").addEventListener("click", () => openSlots()); $("slots").addEventListener("click", e => { if (e.target === $("slots")) closeSlots(); }); $("slotX").addEventListener("click", closeSlots);
-$("startNew").addEventListener("click", () => startGame(true));
+$("startBtn").addEventListener("click", () => { if ([1, 2, 3].some(n => readSave(n))) openSlots("load"); else { slot = 1; try { localStorage.setItem("spyderSlot", 1); } catch (e) {} startGame(true); } }); $("slots").addEventListener("click", e => { if (e.target === $("slots")) closeSlots(); }); $("slotX").addEventListener("click", closeSlots);
+$("startNew").addEventListener("click", () => openSlots("new"));
 $("skip").addEventListener("click", () => skipCut()); $("endBtn").addEventListener("click", () => location.reload());
 $("startSet").addEventListener("click", () => openSettings());
 applyLang();

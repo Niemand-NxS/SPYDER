@@ -102,7 +102,7 @@ const EN = {
   "Kapitel 2 · Werkstatt":"Chapter 2 · Workshop",
   "Kapitel 2 · Haus Nr. 14":"Chapter 2 · House No. 14",
   "NEU":"NEW",
-  "SICHER?":"SURE?",
+  "SICHER?":"SURE?","SPIEL LADEN":"LOAD GAME","NEUES SPIEL":"NEW GAME","ÜBERSCHREIBEN":"OVERWRITE",
   "Kapitel 1 · Labor":"Chapter 1 · Lab",
   "Kapitel 2 · Kreditkontor":"Chapter 2 · Credit Office",
   "KERN-START":"CORE START",
