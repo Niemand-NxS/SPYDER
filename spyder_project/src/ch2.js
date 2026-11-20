@@ -13,7 +13,7 @@ const hwS = () => HIP_H*S;
 function dryDur(text, vi, mood) { const sv = ac; ac = null; let d = 1.5; try { const v = Object.assign({}, VOICES[vi]), m = MOOD[mood]; if (m) v.speed *= m.speed; d = speakVowels(T(text), v).dur; } catch (e) {} ac = sv; return d; }
 function speakCut(k, text, mood) {
   if (k === "A") return;                      // ARACHNE ist nicht zu hören, nur Untertitel
-  const S = SPK[k]; if (S.R) { speakR(S.R, S.vi, text, mood, true); return; }
+  const S = SPK[k]; if (k !== "A") arKnow(k); if (S.R) { speakR(S.R, S.vi, text, mood, true); return; }
   if (!ac) return; const v = Object.assign({}, VOICES[S.vi]); v.vol *= opt.voice; speakVowels(T(text), v);
 }
 function dlgBuild(lines, t0, out) {            // lines: [Sprecher, Text, Stimmung, Pause danach]; out: {ev, subs}

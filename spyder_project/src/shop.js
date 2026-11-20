@@ -304,47 +304,28 @@ function upgBuild() {
 }
 function upgTick(t) { const g = JSON.stringify(gear.upg); if (g !== upgSig) { upgSig = g; upgBuild(); } for (let i = 0; i < upgPods.length; i++) upgPods[i].scale.setScalar(1 + .25*Math.sin(t*3 + i)); }
 
-/* ===== AR-Hilfen: Markierungen an Zielen + Oberflächen-Ring mit Laufrichtung ===== */
-let _ar = null;
-function arBuild() {
-  const lay = document.createElement("div"); lay.id = "arLayer"; document.body.appendChild(lay);
-  const mat = (o) => new THREE.MeshBasicMaterial({color:0x4fa9a3, transparent:true, opacity:o, depthWrite:false, side:THREE.DoubleSide}), grp = new THREE.Group(); grp.renderOrder = 50;
-  const ring = new THREE.Mesh(new THREE.RingGeometry(.5, .525, 64), mat(.3)), tick = new THREE.Mesh(new THREE.RingGeometry(.58, .6, 64, 1, 0, Math.PI*2), mat(.18)), sh = new THREE.Shape(); sh.moveTo(0, .0); sh.lineTo(.09, -.08); sh.lineTo(.09, -.12); sh.lineTo(0, -.04); sh.lineTo(-.09, -.12); sh.lineTo(-.09, -.08); sh.closePath();
-  const chev = new THREE.Mesh(new THREE.ShapeGeometry(sh), mat(.5)), ch2 = chev.clone(); chev.position.set(0, .78, 0); ch2.position.set(0, .94, 0); ch2.material = mat(.28);
-  [ring, tick, chev, ch2].forEach(o => { o.renderOrder = 50; grp.add(o); }); grp.visible = false; scene.add(grp);
-  _ar = {lay, grp, ring, tick, chev, ch2, mk:new Map(), v:new THREE.Vector3(), a:new THREE.Vector3(), b:new THREE.Vector3(), q:new THREE.Matrix4()};
-}
-function arMarker(id, label) {
-  let e = _ar.mk.get(id); if (e) return e;
-  e = document.createElement("div"); e.className = "arM"; e.innerHTML = "<i></i><i></i><i></i><i></i><b></b><span></span><em></em>"; e.querySelector("span").textContent = T(label); _ar.lay.appendChild(e); _ar.mk.set(id, e); return e;
-}
+/* ===== AR-Namensschilder: Namen bekannter Figuren neben dem Kopf ===== */
+let _ar = null; const _arV = new THREE.Vector3();
+function arKnow(k) { try { gear.known = gear.known || {}; gear.known[k] = 1; } catch (e) {} }
 function arTick(dt) {
-  if (!_ar) arBuild(); const A = _ar, on = opt.ar && mode === "surf" && !paused && !fp && !(cut && cut.def) && !hack.state && !mel.state && gameStarted && story.ph !== "menu";
-  A.grp.visible = on && !document.body.classList.contains("prolog"); A.lay.style.display = on ? "" : "none"; if (!on) return;
-  // Ring unter der Spinne
-  A.a.set(0, 0, 0); let n = 0; for (const l of legs) { A.a.add(l.foot); n++; } if (n) A.a.multiplyScalar(1/n); else A.a.copy(pos);
-  const up = nS, hx = A.b.copy(hd).addScaledVector(up, -hd.dot(up)); if (hx.lengthSq() < 1e-4) hx.set(1, 0, 0); hx.normalize();
-  const rx = new THREE.Vector3().crossVectors(hx, up).normalize(); A.q.makeBasis(rx, hx, up); A.grp.quaternion.setFromRotationMatrix(A.q); A.grp.position.copy(A.a).addScaledVector(up, .02); A.grp.scale.setScalar(S*4.4);
-  const sp = clamp(Math.hypot(vel.x, vel.y, vel.z)/2, 0, 1), t = performance.now()/1000; A.ring.material.opacity = .22 + .12*sp; A.chev.material.opacity = .25 + .4*sp; A.ch2.material.opacity = .1 + .3*sp*(.6 + .4*Math.sin(t*6)); A.tick.rotation.z = t*.2;
-  // Markierungen
-  const w = innerWidth, h = innerHeight, seen = new Set(), near = nearTerminal();
-  const put = (id, label, p, hide) => {
-    const e = arMarker(id, label); seen.add(id); const d = A.v.copy(p).distanceTo(camera.position) / 1, dd = Math.hypot(p.x - pos.x, p.y - pos.y, p.z - pos.z);
-    if (hide || dd > 22) { e.style.display = "none"; return; } e.style.display = ""; const q = A.a.copy(p).project(camera); let x = q.x, y = q.y; const behind = q.z > 1; if (behind) { x = -x; y = -y; }
-    const off = behind || Math.abs(x) > .92 || Math.abs(y) > .86; if (off) { const k = Math.max(Math.abs(x)/.92, Math.abs(y)/.86, 1e-3); x /= k; y /= k; }
-    e.classList.toggle("edge", off); e.style.transform = "translate(" + ((x*.5 + .5)*w).toFixed(1) + "px," + ((-y*.5 + .5)*h).toFixed(1) + "px)"; e.querySelector("em").textContent = dd.toFixed(1) + " m"; e.style.setProperty("--a", Math.atan2(-y*h, x*w) + "rad");
-  };
-  terms.forEach((T, i) => { if (!T.g || !T.active || T.hacked || !T.g.visible) return; A.v.set(0, 1.25, 0).add(T.g.position); put("t" + i, "Konsole · " + T.name, A.v, i === near); });
-  if (typeof vent !== "undefined" && story.lvl === 2 && !vent.broken && ventG.visible) put("vent", "Lüftungsgitter", ventG.position, false);
-  for (const [id, e] of A.mk) if (!seen.has(id)) e.style.display = "none";
+  if (!_ar) { const lay = document.createElement("div"); lay.id = "arLayer"; document.body.appendChild(lay); _ar = {lay, tags:{}}; }
+  const A = _ar, on = opt.ar && mode === "surf" && !paused && !fp && !(cut && cut.def) && gameStarted && story.ph !== "menu" && !document.body.classList.contains("prolog");
+  A.lay.style.display = on ? "" : "none"; if (!on) return; const w = innerWidth, h = innerHeight, kn = gear.known || {};
+  for (const k in SPK) {
+    const S = SPK[k], R = S.R; let e = A.tags[k]; let show = !!(kn[k] && R && R.g && R.head);
+    if (show) { let o = R.g; while (o && o !== scene) { if (!o.visible) { show = false; break; } o = o.parent; } if (o !== scene) show = false; }
+    if (show) { R.head.getWorldPosition(_arV); const sc = R.g.getWorldScale(new THREE.Vector3()).y || 1; _arV.y += .42*sc; const dd = Math.hypot(_arV.x - pos.x, _arV.y - pos.y, _arV.z - pos.z); const q = _arV.project(camera); if (q.z < 1 && q.y > .88 && q.y < 8) q.y = .88;
+      if (dd > 15 || q.z > 1 || Math.abs(q.x) > 1.05 || Math.abs(q.y) > 1.05) show = false; else {
+        if (!e) { e = document.createElement("div"); e.className = "arN"; const p = S.name.split(" · "); e.innerHTML = (p.length > 1 ? "<small></small>" : "") + "<b></b><i></i>"; if (p.length > 1) e.querySelector("small").textContent = T(p[0]); e.querySelector("b").textContent = T(p[p.length - 1]); A.lay.appendChild(e); A.tags[k] = e; }
+        e.style.display = ""; e.style.opacity = clamp((15 - dd)/5, 0, 1).toFixed(2); e.style.transform = "translate(" + ((q.x*.5 + .5)*w).toFixed(1) + "px," + ((-q.y*.5 + .5)*h).toFixed(1) + "px)"; } }
+    if (!show && e) e.style.display = "none";
+  }
 }
 { const st = document.createElement("style"); st.textContent = `
 #arLayer{position:fixed;inset:0;z-index:4;pointer-events:none;overflow:hidden}
-#arLayer .arM{position:absolute;left:0;top:0;width:0;height:0;color:#E2E8F0;font-size:11px;letter-spacing:.14em;text-transform:uppercase;will-change:transform}
-#arLayer .arM i{position:absolute;width:9px;height:9px;border:0 solid #4FA9A3;opacity:.9}
-#arLayer .arM i:nth-child(1){left:-22px;top:-22px;border-width:2px 0 0 2px}#arLayer .arM i:nth-child(2){left:13px;top:-22px;border-width:2px 2px 0 0}#arLayer .arM i:nth-child(3){left:-22px;top:13px;border-width:0 0 2px 2px}#arLayer .arM i:nth-child(4){left:13px;top:13px;border-width:0 2px 2px 0}
-#arLayer .arM b{position:absolute;left:-3px;top:-3px;width:6px;height:6px;background:#4FA9A3;transform:rotate(45deg);animation:arP 2.2s ease-in-out infinite}@keyframes arP{50%{opacity:.35}}
-#arLayer .arM span{position:absolute;left:30px;top:-17px;white-space:nowrap;padding:2px 8px;background:rgba(11,14,20,.6);border-left:2px solid #4FA9A3}
-#arLayer .arM em{text-transform:none;position:absolute;left:30px;top:2px;font-style:normal;font-size:10px;color:rgba(226,232,240,.6);padding-left:10px}
-#arLayer .arM.edge i,#arLayer .arM.edge span{display:none}#arLayer .arM.edge b{width:0;height:0;background:none;border:7px solid transparent;border-left:12px solid #4FA9A3;transform:rotate(var(--a)) translateX(-6px);animation:none}#arLayer .arM.edge em{left:-24px;top:12px;padding:0}
+#arLayer .arN{position:absolute;left:0;top:0;width:0;height:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;color:#E2E8F0;text-transform:uppercase;will-change:transform}
+#arLayer .arN small{font-size:9px;letter-spacing:.26em;color:#4FA9A3;margin-bottom:2px;white-space:nowrap;transform:translateY(-100%);position:absolute;bottom:34px}
+#arLayer .arN b{font-weight:500;font-size:13px;letter-spacing:.2em;white-space:nowrap;padding:3px 10px;background:rgba(11,14,20,.62);border-bottom:2px solid #4FA9A3;position:absolute;bottom:18px;transform:translateY(0)}
+#arLayer .arN i{position:absolute;bottom:0;width:1px;height:18px;background:linear-gradient(rgba(79,169,163,.0),rgba(79,169,163,.8))}
+#arLayer .arN i::after{content:"";position:absolute;left:-2px;bottom:-3px;width:5px;height:5px;background:#4FA9A3;transform:rotate(45deg)}
 body.menu #arLayer,body.ivOpen #arLayer{display:none !important}`; document.head.appendChild(st); }
