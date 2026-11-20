@@ -190,7 +190,7 @@ function ivCam(dt) {
   camera.up.set(0, 1, 0).applyQuaternion(spider.quaternion); camera.position.copy(wp); camera.lookAt(wt);
   if (ivKey) { const dv = new THREE.Vector3().subVectors(wp, wt).normalize(), rt = new THREE.Vector3().crossVectors(camera.up, dv).normalize(); ivKey.target.position.copy(wt); ivRim.target.position.copy(wt); ivKey.position.copy(wt).addScaledVector(dv, 3).addScaledVector(rt, -2).addScaledVector(camera.up, 2.5); ivRim.position.copy(wt).addScaledVector(dv, -3).addScaledVector(rt, 2.5).addScaledVector(camera.up, 1.5); }
   if (Math.abs(camera.fov - 38) > .01) { camera.fov = 38; camera.updateProjectionMatrix(); }
-  if (camera.aspect > 1.15) camera.translateX(-ivD*spider.scale.x*Math.tan(19*Math.PI/180)*camera.aspect*.36); camera.updateMatrixWorld(true); camera.updateProjectionMatrix(); ivMkTick();
+  if (camera.aspect > 1.15) camera.translateX(-ivD*spider.scale.x*Math.tan(19*Math.PI/180)*camera.aspect*(maseShop ? .52 : .36)); camera.updateMatrixWorld(true); camera.updateProjectionMatrix(); ivMkTick();
 }
 invEl.addEventListener("pointerdown", e => { if (e.target === invEl) { ivDrag = {x:e.clientX, y:e.clientY, t:performance.now(), m:0}; try { invEl.setPointerCapture(e.pointerId); } catch (_) {} } });
 invEl.addEventListener("pointermove", e => { if (!ivDrag) return; ivYaw -= (e.clientX - ivDrag.x)*.008; ivPit = clamp(ivPit + (e.clientY - ivDrag.y)*.006, -.2, 1.1); ivDrag.m += Math.abs(e.clientX - ivDrag.x) + Math.abs(e.clientY - ivDrag.y); ivDrag.x = e.clientX; ivDrag.y = e.clientY; });
@@ -245,11 +245,12 @@ function ivSpider(B) {
   const h = document.createElement("div"); h.className = "r"; h.innerHTML = "<span></span><b></b>"; h.children[0].textContent = T("Gesamt-Integrität"); h.children[1].textContent = Math.round(tot*100) + " %"; pl.appendChild(h);
   for (const n of names) { const v = PARTS[n], r = document.createElement("div"); r.style.marginBottom = "7px"; r.className = "pr"; r.dataset.f = ivPartKey(n); r.innerHTML = '<div class="r" style="margin:0"><span></span><b></b></div><div class="pb"><div></div></div>'; r.querySelector("span").textContent = T(n); r.querySelector("b").textContent = Math.round(v*100) + " %"; const f = r.querySelector(".pb div"); f.style.width = (v*100) + "%"; f.style.background = col(v); pl.appendChild(r); }
 }
+function ivFxT(s) { const m = s.match(/^(.*?)\s*([+−]\s*\d.*)$/); return m ? T(m[1]) + " " + m[2] : T(s); }
 function ivUpg(B) { fixUpg();
   const hint = document.createElement("div"); hint.style.cssText = "width:100%;color:#a7adb4;font-size:12px"; hint.textContent = T(maseShop ? "Mase baut die Upgrades ein. Bezahlt wird in SuperEuro (SE)." : "Upgrades gibt es nur bei Mase in der Werkstatt. Hier siehst du deinen Stand."); B.appendChild(hint);
   for (const U of UPG) { const lv = gear.upg[U.k], c = document.createElement("div"); c.className = "card"; c.innerHTML = '<div class="m"><b></b><span></span><div style="margin-top:6px"></div></div><div style="text-align:right"><u></u><br><button class="btn ivBtn"></button></div>';
-    c.querySelector("b").textContent = T(U.n); c.querySelector("span").textContent = T(U.d) + (lv ? " · " + T(U.fx(lv)) : ""); const pp = c.querySelector(".m div"); for (let i = 0; i < 3; i++) { const p = document.createElement("span"); p.className = "pip" + (i < lv ? " on" : ""); pp.appendChild(p); }
-    const b = c.querySelector("button"), cost = U.cost[lv], locked = U.req && !U.req(); if (locked) { c.style.opacity = ".55"; c.querySelector("span").textContent = T(U.need); } c.querySelector("u").textContent = lv >= 3 ? T("MAX") : T("Stufe") + " " + (lv + 1) + " · " + T(U.fx(lv + 1));
+    c.querySelector("b").textContent = T(U.n); c.querySelector("span").textContent = T(U.d) + (lv ? " · " + ivFxT(U.fx(lv)) : ""); const pp = c.querySelector(".m div"); for (let i = 0; i < 3; i++) { const p = document.createElement("span"); p.className = "pip" + (i < lv ? " on" : ""); pp.appendChild(p); }
+    const b = c.querySelector("button"), cost = U.cost[lv], locked = U.req && !U.req(); if (locked) { c.style.opacity = ".55"; c.querySelector("span").textContent = T(U.need); } c.querySelector("u").textContent = lv >= 3 ? T("MAX") : T("Stufe") + " " + (lv + 1) + " · " + ivFxT(U.fx(lv + 1));
     b.textContent = locked ? "🔒" : lv >= 3 ? "✓" : maseShop ? fmtSE(cost) : T("BEI MASE"); b.disabled = !maseShop || locked || lv >= 3 || (gear.se || 0) < cost; b.onclick = () => { if (maseShop && !locked && (gear.se || 0) >= cost && lv < 3) { gear.se -= cost; gear.upg[U.k]++; clang(.3); beep(1200, .1, 0, .05); beep(1800, .12, .1, .05); toast(T(U.n) + ": " + T("Stufe") + " " + (lv + 2)); writeSave(); ivRender(); } };
     B.appendChild(c); }
 }
@@ -319,7 +320,7 @@ const RM_TALK = [["R", "Also, Mase: Ich brauch 'ne neue Pistole. Kompakt, aber m
   ["R", "Du bist ein Schatz, Mase.", "j"], ["M", "Ich summ dabei was Schönes.", "w"]];
 function maseInteract() {
   if (xs.scene !== "street" || !shopM || shopM.g.parent !== exG || !gear.knife || pos.z < SD/2 + .3 || Math.hypot(pos.x - shopM.g.position.x, pos.z - shopM.g.position.z) > 3.4) return null;
-  return {label:"Mase: Upgrades", act:() => { maseLine("Hmm hmm. Was darf's sein, Kleine?"); maseShop = true; invTab = 3; invOpen = true; invEl.classList.add("show"); paused = true; unlockPtr(); invSel = 0; try { ivRender(); } catch (e) { console.error(e); } try { uiSnd(.8, "ok"); } catch (e) {} }};
+  return {label:"Mase: Upgrades", act:() => { maseLine("Hmm hmm. Was darf's sein, Kleine?"); maseShop = true; invTab = 3; invOpen = true; setPanel(invEl, true); paused = true; try { ivEnter(); } catch (e) { console.error(e); } unlockPtr(); invSel = 0; try { ivRender(); } catch (e) { console.error(e); } try { uiSnd(.8, "ok"); } catch (e) {} }};
 }
 function rackInteract() {
   if (xs.scene === "street" && gear.job >= 2 && gear.gold > 0 && payRack && payRack.g.parent === exG && Math.hypot(pos.x - payRack.g.position.x, pos.z - payRack.g.position.z) < 3.2) return {label:"Gold an Rackson übergeben", act:sellGold};
