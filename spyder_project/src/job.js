@@ -306,7 +306,7 @@ function rackSpot() { const M = shopM, mx = M ? M.g.position.x : GARX, mz = M ? 
 function rackShopTick(dt) {
   if (xs.scene !== "street" || !shopM || gear.job !== 0 || !gear.rackMet || ch2.stage !== 8) return;
   if (mode !== "cut" && (!shopRack || shopRack.g.parent !== exG)) { const R = makeRobot({body:0x3a4a5a, acc:0x3c8680, glow:0x8ad0a0, tape:true, apron:0x2a2c30, cool:true}), s = rackSpot(); R.glass.visible = false; exG.add(R.g); exAct.push(R); R.g.position.set(s[0], 0, s[1]); R.g.rotation.y = s[2]; shopRack = R; }
-  if (mode === "surf" && !gear.rackReady && pos.z > SD/2 + .3 && shopRack && shopM) {
+  if ((mode === "surf" || mode === "air") && !gear.rackReady && shopRack && shopM) {
     ch2.rw = (ch2.rw || 0) - dt; if (ch2.rw > 0) return;
     const i = ch2.rwI || 0;
     if (i >= RM_TALK.length) { gear.rackReady = true; setObj(jobObj()); toast("Rackson ist fertig"); beep(900, .1, 0, .04); beep(1300, .1, .12, .04); return; }
