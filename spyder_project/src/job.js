@@ -87,6 +87,7 @@ body #inv .card{background:rgba(226,232,240,.04);border:0;border-left:2px solid 
 body #inv .pl{flex:1 1 100%;min-width:0}body #inv .det{position:fixed;right:4vw;bottom:8vh;width:min(480px,36vw);box-sizing:border-box;background:rgba(8,11,17,.8);border:1px solid rgba(79,169,163,.45);border-radius:0;padding:18px 22px;z-index:3;pointer-events:none}body #inv .det .btn{pointer-events:auto;margin-top:6px}body #inv .det h3{font-family:'Bruno Ace SC','Bruno Ace',sans-serif;font-weight:400;font-size:17px;letter-spacing:.14em;margin-bottom:10px}body #inv .det p{font-size:14px}
 body.ivOpen #bars,body.ivOpen #setBtn,body.ivOpen #camBtn,body.ivOpen #mapBtn,body.ivOpen #interact,body.ivOpen #prompt,body.ivOpen #obj,body.ivOpen #seBox,body.ivOpen #hud{display:none !important}
 @keyframes ivI{from{transform:translateX(-100%)}to{transform:none}}@keyframes ivO{from{transform:none}to{transform:translateX(-100%)}}body #inv.show .ivP{animation:ivI .6s cubic-bezier(.16,1,.3,1) backwards !important}body #inv.out .ivP{animation:ivO .4s cubic-bezier(.5,0,.75,0) both !important}
+#ivX{position:fixed;top:22px;right:22px;z-index:6;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:rgba(11,14,20,.55);border:0;border-bottom:2px solid rgba(226,232,240,.22);color:#e2e8f0;cursor:pointer;pointer-events:auto}#ivX:hover{border-bottom-color:#4fa9a3;background:rgba(79,169,163,.16)}body.padUsed #ivX{display:none}body #inv .bigIc{width:96px;height:96px;float:right;margin:-6px 0 4px 10px}
 #ivBg{position:fixed;inset:-30px;z-index:0;display:none;background:center/cover no-repeat;filter:blur(18px) brightness(.45) saturate(.85)}
 #ivMk{position:absolute;inset:0;pointer-events:none;overflow:hidden}#ivMk .mk{position:absolute;left:0;top:0;display:flex;align-items:center;gap:8px;white-space:nowrap;font-size:11px;letter-spacing:.14em;color:#e2e8f0}
 #ivMk .mk i{width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:rgba(226,232,240,.8);flex:none;box-shadow:0 0 0 3px rgba(226,232,240,.15)}
@@ -95,21 +96,35 @@ body.ivOpen #bars,body.ivOpen #setBtn,body.ivOpen #camBtn,body.ivOpen #mapBtn,bo
 #ivMk .mk.gd{color:#4fa9a3}#ivMk .mk.gd i{border-radius:0;transform:rotate(45deg);background:#4fa9a3;box-shadow:0 0 0 3px rgba(79,169,163,.25)}@keyframes mkp{50%{box-shadow:0 0 0 7px rgba(224,103,93,0)}}
 @media(max-width:800px){body #inv .ivP{width:100vw !important}}`; document.head.appendChild(st); }
 const invEl = document.createElement("div"); invEl.id = "inv";
-invEl.innerHTML = '<div class="ivP"><div class="ivH"><b id="ivT1"></b><span id="ivT2"></span><em id="ivGold"></em></div><div class="ivT" id="ivTabs"></div><div class="ivB" id="ivBody"></div><div class="ivF" id="ivF"></div></div>';
+invEl.innerHTML = '<button id="ivX" aria-label="Schließen"><svg width="16" height="16" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 2L12 12M12 2L2 12"/></svg></button><div class="ivP"><div class="ivH"><b id="ivT1"></b><span id="ivT2"></span><em id="ivGold"></em></div><div class="ivT" id="ivTabs"></div><div class="ivB" id="ivBody"></div><div class="ivF" id="ivF"></div></div>';
 document.body.appendChild(invEl);
-invEl.addEventListener("click", e => { if (e.target === invEl && !(ivDrag && ivDrag.m > 6)) { /* Hintergrund: Spinne ansehen, nicht schließen */ } });
+invEl.addEventListener("click", e => { if (e.target.closest && e.target.closest("#ivX")) { toggleInv(); return; } if (e.target === invEl && !(ivDrag && ivDrag.m > 6)) { /* Hintergrund: Spinne ansehen, nicht schließen */ } });
 function invList() {
   const L = []; let g = gear.gold; while (g > 0) { L.push({id:"gold", n:Math.min(10, g)}); g -= 10; }
   if (gear.items.kit > 0) L.push({id:"kit", n:gear.items.kit}); if (gear.items.cell > 0) L.push({id:"cell", n:gear.items.cell});
   L.push({id:"card", n:1}); if (gear.map) L.push({id:"map", n:1}); return L;
 }
+const _ic3 = {}; let _icS3 = null, _icR3 = null;
+function itemMesh(id) {
+  const g = new THREE.Group(), M = (c, m, r) => new THREE.MeshStandardMaterial({color:c, metalness:m, roughness:r, envMap:envTex, envMapIntensity:1.1}), A = (geo, mt, x, y, z) => { const o = new THREE.Mesh(geo, mt); o.position.set(x, y, z); g.add(o); return o; };
+  if (id === "gold") { const gm = M(0xdcaa2e, .95, .28), bar = (x, y, z) => { const o = A(new THREE.CylinderGeometry(.34, .5, .3, 4), gm, x, y, z); o.rotation.y = Math.PI/4; o.scale.set(1.7, 1, .8); return o; }; bar(-.42, -.25, .12); bar(.42, -.25, .12); bar(0, .06, -.05); }
+  else if (id === "kit") { A(new THREE.BoxGeometry(1.3, .95, .5), M(0xe8eefc, .1, .5), 0, 0, 0); const t = M(0x4fa9a3, .2, .5); A(new THREE.BoxGeometry(.2, .6, .54), t, 0, 0, 0); A(new THREE.BoxGeometry(.6, .2, .54), t, 0, 0, 0); A(new THREE.BoxGeometry(.5, .12, .3), M(0x5a6070, .5, .4), 0, .54, 0); }
+  else if (id === "cell") { A(new THREE.CylinderGeometry(.34, .34, 1.1, 20), M(0x3a3f48, .6, .4), 0, 0, 0); A(new THREE.CylinderGeometry(.355, .355, .3, 20), M(0x4fa9a3, .3, .45), 0, .08, 0); A(new THREE.CylinderGeometry(.14, .14, .16, 14), M(0xc7cdd4, .9, .3), 0, .63, 0); A(new THREE.CylinderGeometry(.35, .35, .08, 20), M(0x1d2026, .4, .5), 0, -.58, 0); }
+  else if (id === "card") { A(new THREE.BoxGeometry(1.5, .95, .04), M(0xe8eefc, .05, .6), 0, 0, 0); A(new THREE.BoxGeometry(1.5, .2, .05), M(0x4fa9a3, .2, .5), 0, .38, 0); const d = M(0x1d2026, .2, .7); A(new THREE.BoxGeometry(.9, .06, .05), d, -.2, -.05, 0); A(new THREE.BoxGeometry(.6, .06, .05), d, -.35, -.22, 0); }
+  else { const cv = document.createElement("canvas"); cv.width = cv.height = 128; const x = cv.getContext("2d"); x.fillStyle = "#c9ccd0"; x.fillRect(0, 0, 128, 128); x.strokeStyle = "#555b63"; x.lineWidth = 3; x.strokeRect(6, 6, 116, 116); x.beginPath(); x.moveTo(6, 44); x.lineTo(122, 70); x.moveTo(52, 6); x.lineTo(78, 122); x.stroke(); x.fillStyle = "#4fa9a3"; x.beginPath(); x.arc(68, 58, 9, 0, 7); x.fill();
+    const t = new THREE.CanvasTexture(cv), m = new THREE.MeshStandardMaterial({map:t, metalness:.05, roughness:.8}); A(new THREE.BoxGeometry(1.4, 1.1, .05), m, 0, 0, 0); A(new THREE.BoxGeometry(.04, 1.1, .06), M(0x7a8088, .4, .5), 0, 0, 0); }
+  return g;
+}
 function itemIcon(id, sz) {
-  const cv = document.createElement("canvas"); cv.width = cv.height = sz; const x = cv.getContext("2d"), c = ITEMS[id].c, u = sz/58; x.translate(sz/2, sz/2); x.scale(u, u);
-  if (id === "gold") { for (const [dx, dy, s] of [[-9, 8, 1], [9, 8, 1], [0, -4, 1]]) { x.fillStyle = "#b88a20"; x.beginPath(); x.moveTo(dx - 13, dy + 6); x.lineTo(dx + 13, dy + 6); x.lineTo(dx + 9, dy - 6); x.lineTo(dx - 9, dy - 6); x.fill(); x.fillStyle = c; x.fillRect(dx - 9, dy - 6, 18, 4); } }
-  else if (id === "kit") { x.fillStyle = c; x.fillRect(-16, -12, 32, 24); x.fillStyle = "#4fa9a3"; x.fillRect(-3, -9, 6, 18); x.fillRect(-9, -3, 18, 6); }
-  else if (id === "cell") { x.fillStyle = "#3f4249"; x.fillRect(-10, -16, 20, 32); x.fillStyle = c; x.fillRect(-7, -9, 14, 7); x.fillRect(-7, 1, 14, 7); x.fillRect(-4, -19, 8, 3); }
-  else if (id === "card") { x.fillStyle = "#e8eefc"; x.fillRect(-17, -11, 34, 22); x.fillStyle = "#4fa9a3"; x.fillRect(-17, -11, 34, 5); x.fillStyle = "#1d2026"; x.fillRect(-12, -1, 20, 2); x.fillRect(-12, 4, 14, 2); }
-  else { x.strokeStyle = c; x.lineWidth = 2; x.strokeRect(-16, -14, 32, 28); x.beginPath(); x.moveTo(-16, -4); x.lineTo(16, 4); x.moveTo(-3, -14); x.lineTo(5, 14); x.stroke(); x.fillStyle = "#4fa9a3"; x.beginPath(); x.arc(2, 0, 3, 0, 7); x.fill(); }
+  const key = id + sz, cv = document.createElement("canvas"); cv.width = cv.height = sz;
+  if (_ic3[key]) { cv.getContext("2d").drawImage(_ic3[key], 0, 0, sz, sz); return cv; }
+  try {
+    if (!_icS3) { _icS3 = new THREE.Scene(); _icS3.add(new THREE.HemisphereLight(0xdfe8ff, 0x20242c, .9)); const k = new THREE.DirectionalLight(0xfff0dc, 2.2); k.position.set(2, 3, 3); _icS3.add(k); const r = new THREE.DirectionalLight(0x8fd0ca, 1.2); r.position.set(-3, 1, -2); _icS3.add(r); _icR3 = new THREE.PerspectiveCamera(28, 1, .1, 20); _icR3.position.set(1.9, 1.5, 3.4); _icR3.lookAt(0, -.02, 0); }
+    const px = sz*2, rt = new THREE.WebGLRenderTarget(px, px), m = itemMesh(id); m.rotation.y = -.45; m.rotation.x = .1; _icS3.add(m); m.updateMatrixWorld(true); { const bb = new THREE.Box3().setFromObject(m), c = bb.getCenter(new THREE.Vector3()), r = bb.getSize(new THREE.Vector3()).length()/2; m.position.sub(c); _icR3.position.set(.5, .38, .8).normalize().multiplyScalar(r/Math.sin(14*Math.PI/180)*1.02); _icR3.lookAt(0, 0, 0); _icR3.updateMatrixWorld(true); }
+    const oa = renderer.getClearAlpha(), oc = renderer.getClearColor(new THREE.Color()).getHex(), ob = _icS3.background; renderer.setClearColor(0x000000, 0); renderer.setRenderTarget(rt); renderer.clear(); renderer.render(_icS3, _icR3); const buf = new Uint8Array(px*px*4); renderer.readRenderTargetPixels(rt, 0, 0, px, px, buf); renderer.setRenderTarget(null); renderer.setClearColor(oc, oa);
+    _icS3.remove(m); rt.dispose(); const c2 = document.createElement("canvas"); c2.width = c2.height = px; const x = c2.getContext("2d"), im = x.createImageData(px, px);
+    for (let y = 0; y < px; y++) im.data.set(buf.subarray((px - 1 - y)*px*4, (px - y)*px*4), y*px*4); x.putImageData(im, 0, 0); _ic3[key] = c2; cv.getContext("2d").drawImage(c2, 0, 0, sz, sz);
+  } catch (e) { console.error("icon3d", e.message); const x = cv.getContext("2d"); x.fillStyle = ITEMS[id].c; x.fillRect(sz*.25, sz*.25, sz*.5, sz*.5); }
   return cv;
 }
 function toggleInv() {
@@ -159,11 +174,11 @@ function ivCam(dt) {
   if (f === "knife" || f === "dock") { const L = ivLeg(0, f === "knife" ? 1 : -1); tg = L.P3.clone().lerp(L.P2, .35); d = 3.4; }
   else if (f.startsWith("leg:")) { const p = f.split(":"), L = ivLeg(+p[1], +p[2]); tg = L ? L.P3.clone().lerp(L.P2, .5) : new THREE.Vector3(); d = 4.2; }
   else { const e = (IVF[f] || IVF.all)(); tg = new THREE.Vector3(e[0][0], e[0][1], e[0][2]); d = e[1]; }
-  const k = Math.min(1, dt*5); ivT.lerp(tg, k); ivD += (d*ivK*(f === "all" ? 1 : 1.35) - ivD)*k; if (!ivDrag) ivYaw += dt*.22;
+  const k = Math.min(1, dt*5); ivT.lerp(tg, k); ivD += (d*ivK*(f === "all" ? 1 : 1.35) - ivD)*k; 
   try { const gp = (navigator.getGamepads && navigator.getGamepads()[pad.idxPad || 0]) || null; if (gp) { const x = gp.axes[2] || 0, y = gp.axes[3] || 0; if (Math.abs(x) > .25) ivYaw -= x*dt*2.2; if (Math.abs(y) > .25) ivPit = clamp(ivPit + y*dt*1.4, -.2, 1.1); } } catch (e) {}
   const cp = Math.cos(ivPit), sp = Math.sin(ivPit), lv = new THREE.Vector3(Math.sin(ivYaw)*cp*ivD, sp*ivD, Math.cos(ivYaw)*cp*ivD).add(ivT);
   spider.updateMatrixWorld(true); const wp = spider.localToWorld(lv), wt = spider.localToWorld(ivT.clone());
-  let my = 9; for (const l of legs) { const q = spider.worldToLocal(l.foot.clone()); if (q.y < my) my = q.y; } if (ivRing) ivRing.position.y = my - .02, ivRing.rotation.y += dt*.1;
+  let my = 9; for (const l of legs) { const q = spider.worldToLocal(l.foot.clone()); if (q.y < my) my = q.y; } if (ivRing) ivRing.position.y = my - .02;
   camera.up.set(0, 1, 0).applyQuaternion(spider.quaternion); camera.position.copy(wp); camera.lookAt(wt);
   if (ivKey) { const dv = new THREE.Vector3().subVectors(wp, wt).normalize(), rt = new THREE.Vector3().crossVectors(camera.up, dv).normalize(); ivKey.target.position.copy(wt); ivRim.target.position.copy(wt); ivKey.position.copy(wt).addScaledVector(dv, 3).addScaledVector(rt, -2).addScaledVector(camera.up, 2.5); ivRim.position.copy(wt).addScaledVector(dv, -3).addScaledVector(rt, 2.5).addScaledVector(camera.up, 1.5); }
   if (Math.abs(camera.fov - 38) > .01) { camera.fov = 38; camera.updateProjectionMatrix(); }
@@ -196,7 +211,7 @@ function ivInv(B) {
   for (let i = 0; i < 24; i++) { const s = document.createElement("div"), it = L[i]; s.className = "slot ivSlot" + (it ? "" : " empty") + (i === invSel && it ? " on" : "");
     if (it) { s.appendChild(itemIcon(it.id, 58)); if (it.n > 1) { const c = document.createElement("i"); c.textContent = it.n; s.appendChild(c); } s.onclick = () => { invSel = i; ivRender(); }; } grid.appendChild(s); }
   const det = document.createElement("div"); det.className = "det"; B.appendChild(det); const it = L[invSel];
-  if (it) { const D = ITEMS[it.id]; det.innerHTML = "<h3></h3><p></p>"; det.firstChild.textContent = T(D.n); det.children[1].textContent = T(D.d);
+  if (it) { const D = ITEMS[it.id]; det.innerHTML = "<h3></h3><p></p>"; const big = itemIcon(it.id, 120); big.className = "bigIc"; det.prepend(big); det.children[1].textContent = T(D.n); det.children[2].textContent = T(D.d);
     if (D.use) { const b = document.createElement("button"); b.className = "btn ivBtn"; b.textContent = T("BENUTZEN"); b.onclick = () => ivUse(it.id); det.appendChild(b); } }
   else det.innerHTML = "<p>" + T("Leer.") + "</p>";
 }
@@ -216,6 +231,7 @@ function ivEquip(B) {
   for (const [n, s, d] of rows) { const c = document.createElement("div"); c.className = "card eq"; c.dataset.f = {"Laserklinge":"knife", "Holo-Schild":"shield", "Dock-Bein":"dock", "Karte von CJ-City":"map", "Virtual Backpack":"pack"}[n] || "all"; c.innerHTML = '<div class="m"><b></b><span></span></div><u></u>'; c.querySelector("b").textContent = T(n); c.querySelector("span").textContent = T(d); c.querySelector("u").textContent = T(s); B.appendChild(c); }
 }
 function ivSpider(B) {
+  const col = v => v > .75 ? "#e8eefc" : v > .45 ? "#e0a24a" : "#e0675d";
   const pl = document.createElement("div"); pl.className = "pl"; B.appendChild(pl);
   const names = BODYP.concat(legs.map(legName)); const tot = dmgAvg();
   const h = document.createElement("div"); h.className = "r"; h.innerHTML = "<span></span><b></b>"; h.children[0].textContent = T("Gesamt-Integrität"); h.children[1].textContent = Math.round(tot*100) + " %"; pl.appendChild(h);
