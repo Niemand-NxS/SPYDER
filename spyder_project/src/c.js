@@ -49,6 +49,24 @@ for (const s of [-1,1]) {
   const ant = addH(new THREE.CylinderGeometry(.008,.014,.55,6), matLight, s*.12,.34,.78); ant.rotation.x = -.5;
 }
 
+// Kopf-Details: Stirnschale, Wangenplatten, Linsenkranz, Sensorpods, Mandibeln, Lüftung
+{ const brow = addH(new THREE.SphereGeometry(.318,28,12,0,Math.PI*2,0,Math.PI*.36), matLight, 0,.075,.86); brow.scale.set(1.02,.74,1.07);
+  addH(new THREE.BoxGeometry(.4,.008,.012), matLens, 0,.118,1.095);
+  addH(new THREE.TorusGeometry(.135,.012,8,32,Math.PI), matBrass, 0,.06,1.075).rotation.z = Math.PI;
+  for (const s of [-1,1]) {
+    const ch = addH(new THREE.BoxGeometry(.045,.15,.26), matLight, s*.265,-.0,.95); ch.rotation.y = s*.35;
+    addH(new THREE.BoxGeometry(.05,.03,.24), matBrass, s*.268,-.085,.95).rotation.y = s*.35;
+    const pod = addH(new THREE.CylinderGeometry(.045,.05,.09,14), matDark, s*.31,.07,.82); pod.rotation.z = Math.PI/2;
+    addH(new THREE.CylinderGeometry(.03,.03,.02,12), matLens, s*.362,.07,.82).rotation.z = Math.PI/2;
+    for (const [dx,dy] of [[.19,.0],[.165,-.055],[.165,.055]]) addH(new THREE.SphereGeometry(.018,10,8), matLens, s*dx,.06+dy,1.06);
+    const fang = addH(new THREE.ConeGeometry(.02,.15,8), matDark, s*.075,-.13,1.12); fang.rotation.x = Math.PI - .5;
+    addH(new THREE.BoxGeometry(.012,.02,.1), matBrass, s*.12,.2,.72);
+  }
+  const dome = addH(new THREE.SphereGeometry(.055,14,10), matLens, 0,.265,.84); dome.scale.y = .6;
+  addH(new THREE.TorusGeometry(.06,.01,6,18), matBrass, 0,.255,.84).rotation.x = Math.PI/2;
+  for (let i = 0; i < 4; i++) addH(new THREE.BoxGeometry(.2 - i*.025,.01,.014), matDark, 0,.2 - i*.006,.62 + i*.02);
+}
+
 // Hinterleib: dunkler Kern, Keramikschale, Rippen, Auslass
 const abd = add(new THREE.SphereGeometry(.55,30,20), matBody, 0,.1,-1.0); abd.scale.set(1,.8,1.4);
 const shell = add(new THREE.SphereGeometry(.56,30,14,0,Math.PI*2,0,Math.PI*.4), matLight, 0,.1,-1.0); shell.scale.set(1.02,.82,1.43);

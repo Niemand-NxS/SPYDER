@@ -373,7 +373,7 @@
     <span class="k">X</span> Nahkampf · <span class="k">Y</span> Interagieren<br>
     <span class="k">LT</span> Schild halten · <span class="k">LB</span> Kamera wechseln · <span class="k">RB</span> Taschenlampe<br>
     <span class="k">RT</span> / <span class="k">R3</span> Foto (First Person)<br>
-    <span class="k">Pfeil ↑</span> Backpack · <span class="k">Pfeil ←</span> Funk · <span class="k">Back</span> Karte · <span class="k">Start</span> Pause<br>
+    <span class="k">Pfeil ↑</span> Backpack · <span class="k">Back</span> Karte · <span class="k">Start</span> Pause<br>
     Menüs: Stick/Kreuz wählen · <span class="k">A</span> bestätigen · <span class="k">B</span> zurück · <span class="k">LB</span>/<span class="k">RB</span> Reiter wechseln
   </div>
   <div class="help touchh">Links: Joystick (FP: ←/→ drehen) · Rechts: Blick ziehen · Pinch: Zoom<br>Knöpfe unten rechts: Nahkampf, Schild (halten, nach dem Umbau), Sprung, ↓<br>Kamera-Knopf oben rechts · Foto-Auslöser nur in der First Person<br>Aktionen erscheinen unten als Button</div>
@@ -1455,7 +1455,7 @@ function groundPoint(p, n, out) {
 }
 
 /* ---------------- Renderer / Szene ---------------- */
-const renderer = new THREE.WebGLRenderer({antialias:true});
+const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -1683,6 +1683,24 @@ for (const s of [-1,1]) {
   const pp = addH(new THREE.CylinderGeometry(.028,.045,.36,12), matBody, s*.15,-.1,1.0); pp.rotation.x = Math.PI/2 + .4;
   addH(new THREE.SphereGeometry(.036,10,8), matBrass, s*.15,-.2,1.16);
   const ant = addH(new THREE.CylinderGeometry(.008,.014,.55,6), matLight, s*.12,.34,.78); ant.rotation.x = -.5;
+}
+
+// Kopf-Details: Stirnschale, Wangenplatten, Linsenkranz, Sensorpods, Mandibeln, Lüftung
+{ const brow = addH(new THREE.SphereGeometry(.318,28,12,0,Math.PI*2,0,Math.PI*.36), matLight, 0,.075,.86); brow.scale.set(1.02,.74,1.07);
+  addH(new THREE.BoxGeometry(.4,.008,.012), matLens, 0,.118,1.095);
+  addH(new THREE.TorusGeometry(.135,.012,8,32,Math.PI), matBrass, 0,.06,1.075).rotation.z = Math.PI;
+  for (const s of [-1,1]) {
+    const ch = addH(new THREE.BoxGeometry(.045,.15,.26), matLight, s*.265,-.0,.95); ch.rotation.y = s*.35;
+    addH(new THREE.BoxGeometry(.05,.03,.24), matBrass, s*.268,-.085,.95).rotation.y = s*.35;
+    const pod = addH(new THREE.CylinderGeometry(.045,.05,.09,14), matDark, s*.31,.07,.82); pod.rotation.z = Math.PI/2;
+    addH(new THREE.CylinderGeometry(.03,.03,.02,12), matLens, s*.362,.07,.82).rotation.z = Math.PI/2;
+    for (const [dx,dy] of [[.19,.0],[.165,-.055],[.165,.055]]) addH(new THREE.SphereGeometry(.018,10,8), matLens, s*dx,.06+dy,1.06);
+    const fang = addH(new THREE.ConeGeometry(.02,.15,8), matDark, s*.075,-.13,1.12); fang.rotation.x = Math.PI - .5;
+    addH(new THREE.BoxGeometry(.012,.02,.1), matBrass, s*.12,.2,.72);
+  }
+  const dome = addH(new THREE.SphereGeometry(.055,14,10), matLens, 0,.265,.84); dome.scale.y = .6;
+  addH(new THREE.TorusGeometry(.06,.01,6,18), matBrass, 0,.255,.84).rotation.x = Math.PI/2;
+  for (let i = 0; i < 4; i++) addH(new THREE.BoxGeometry(.2 - i*.025,.01,.014), matDark, 0,.2 - i*.006,.62 + i*.02);
 }
 
 // Hinterleib: dunkler Kern, Keramikschale, Rippen, Auslass
@@ -2799,7 +2817,7 @@ function applyReal() {
   scene.traverse(o => { if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => { if (!m.envMap && m.isMeshStandardMaterial && m !== matLight) m.envMapIntensity = on ? .3 : 1; m.needsUpdate = true; }); });
 }
 const DEVO = {joyF:"touch", joyS:"touch", joyO:"touch", joyDz:"touch", tbS:"touch", vib:"touch", lockP:"keyboard", padS:"pad", padDz:"pad", padVib:"pad", padInvY:"pad", padRamp:"pad", padHelp:"pad"};
-const CHANGELOG = [["1.48",["Einstellungen komplett neu: Vollbild mit Reitern links, Optionen in der Mitte und der Erklärung rechts (beim Überfahren oder Auswählen); Optionen in neue, übersichtliche Reiter mit Abschnitten sortiert; Titelzusatz „Roboterspinne · Infiltration“ entfernt","Settings rebuilt: fullscreen with tabs on the left, options in the middle and the explanation on the right (on hover or selection); options sorted into new tabs with sections; removed the subtitle under the title"]],["1.47",["Neuer Auswahl-Klick: spielt beim Wechsel zwischen Buttons/Slidern mit dem Controller und wenn die Maus einen Button oder Slider berührt","New selection click: plays when moving between buttons/sliders with the controller and when the mouse touches a button or slider"]],["1.46",["Energie (gelber Blitz) und Integrität (rotes Herz) als Symbole ohne Beschriftung, Buttons im neuen flachen Design; Controller: Inventar und Funk mit Auswahl (Steuerkreuz/Stick, A, LB/RB Reiter), weichere Bewegung; Fehler behoben: Spinne lief nach dem Funk/Backpack dauerhaft vorwärts","Energy (yellow bolt) and integrity (red heart) as symbols without labels, buttons in the new flat design; controller: inventory and radio with selection (d-pad/stick, A, LB/RB tabs), smoother movement; fixed: the spider kept walking forward after the radio/backpack"]],["1.45",["Hände biegen die Finger nach innen (zum Körper) statt nach außen; Handrücken zeigt nach außen, Daumen nach vorn","Hands now curl their fingers inward (toward the body) instead of outward; back of the hand faces out, thumb points forward"]],["1.44",["Glas-Griff: Hand dreht sich um 90° und umfasst das Glas von der Seite statt durch es hindurch","Glass grip: the hand turns 90° and holds the glass from the side instead of through it"]],["1.43",["Roboter-Kopf deutlich kürzer und runder (kein Alien-Kopf mehr); Hand liegt jetzt um das Glas statt durch es hindurch","Robot head much shorter and rounder (no more alien head); hand now wraps around the glass instead of through it"]],["1.42",["Roboter: Kopf komplett neu als Helm mit Glasvisier, durch das man die Augen sieht; Hände mit Animationen (Faust, Glas halten, zeigen, gestikulieren); A/B/X/Y-Symbole wirklich rund","Robots: head rebuilt as a helmet with a glass visor you can see the eyes through; hands with animations (fist, holding a glass, pointing, gesturing); A/B/X/Y glyphs truly round"]],["1.41",["Tastensymbole der Controller-Hinweise einfarbig (keine Farben mehr)","Controller button hint glyphs are single-colored (no more colors)"]],["1.40",["Controller: die Buttons oben rechts bleiben ausgeblendet, solange der Controller benutzt wird (auch wenn die Maus zuckt)","Controller: the buttons at the top right stay hidden while the controller is in use (even if the mouse jitters)"]],["1.39",["Controller-Symbole in Button-Leiste, Hinweisen und Foto-Leiste behalten ihre Farben","Controller glyphs in the button bar, hints and photo bar keep their colors"]],["1.38",["Foto-Modus mit Controller: Hinweisleiste zeigt Controller-Tasten, Zoom per Steuerkreuz hoch/runter, Blick mit rechtem Stick","Photo mode with controller: hint bar shows controller buttons, zoom with d-pad up/down, look with the right stick"]],["1.37",["Alle Menüs (Inventar, Funk, Karte) als Slide-over; Einstellungen/Menüs schieben vollständig von rechts rein, Start-/Pausenmenü schiebt links aus dem Bild; eckige Schalter; Y-Symbol nicht mehr gelb; Controller: obere Buttons ausgeblendet, nur schon nutzbare Tastenhinweise","All menus (inventory, radio, map) as slide-overs; settings/menus slide fully in from the right, start/pause menu slides out to the left edge; squared switches; Y glyph no longer yellow; controller: top buttons hidden, only currently usable button hints"]],["1.36",["Einstellungen als durchsichtiges Vollbild, Spinne wandert dabei in die Mitte; Controller: Navigation zwischen Schaltern und Reglern zuverlässig, Interaktions-Symbol flackert nicht mehr, Tastenhinweise in Cutscenes ausgeblendet","Settings as a transparent fullscreen view, the spider moves to the center; controller: reliable navigation between switches and sliders, interact glyph no longer flickers, button hints hidden in cutscenes"]],["1.35",["Menüs als Slide-over im Stil des Startbildschirms (Einstellungen, Speicherstände): schieben von rechts rein, Startmenü schiebt nach links raus; Controller: Auswahl als Zeilen-Hervorhebung, Reiter nur mit Bumpern, rechter Stick scrollt, Tastenhinweise verteilt am Bildschirmrand; Updates-Tab repariert","Menus as slide-overs in the start screen style (settings, save slots): slide in from the right while the start menu slides out left; controller: row highlight selection, tabs only via bumpers, right stick scrolls, button hints spread around the screen edges; Updates tab fixed"]]];
+const CHANGELOG = [["1.49",["Backpack neu im Einstellungs-Design: links Inventar/Ausrüstung/Spinne, rechts die 3D-Spinne mit Markern für Add-ons und beschädigte Teile (beschädigte Beine leuchten orange/rot), das Spiel bleibt unscharf im Hintergrund, Beschreibung unten rechts; Funk aus dem Backpack entfernt (bleibt auf J); Spinne mit detaillierterem Kopf und sichtbaren Gadgets (Laserklinge, Dock-Bein, Schild, Backpack, Karten-Antenne)","Backpack rebuilt in the settings design: item panel on the left, 3D spider on the right with markers for add-ons and damaged parts (damaged legs glow orange/red), the game stays blurred behind, description at the bottom right; radio removed from the backpack (still on J); spider with a more detailed head and visible gadgets (laser blade, docking leg, shield, backpack, map antenna)"]],["1.48",["Einstellungen komplett neu: Vollbild mit Reitern links, Optionen in der Mitte und der Erklärung rechts (beim Überfahren oder Auswählen); Optionen in neue, übersichtliche Reiter mit Abschnitten sortiert; Titelzusatz „Roboterspinne · Infiltration“ entfernt","Settings rebuilt: fullscreen with tabs on the left, options in the middle and the explanation on the right (on hover or selection); options sorted into new tabs with sections; removed the subtitle under the title"]],["1.47",["Neuer Auswahl-Klick: spielt beim Wechsel zwischen Buttons/Slidern mit dem Controller und wenn die Maus einen Button oder Slider berührt","New selection click: plays when moving between buttons/sliders with the controller and when the mouse touches a button or slider"]],["1.46",["Energie (gelber Blitz) und Integrität (rotes Herz) als Symbole ohne Beschriftung, Buttons im neuen flachen Design; Controller: Inventar und Funk mit Auswahl (Steuerkreuz/Stick, A, LB/RB Reiter), weichere Bewegung; Fehler behoben: Spinne lief nach dem Funk/Backpack dauerhaft vorwärts","Energy (yellow bolt) and integrity (red heart) as symbols without labels, buttons in the new flat design; controller: inventory and radio with selection (d-pad/stick, A, LB/RB tabs), smoother movement; fixed: the spider kept walking forward after the radio/backpack"]],["1.45",["Hände biegen die Finger nach innen (zum Körper) statt nach außen; Handrücken zeigt nach außen, Daumen nach vorn","Hands now curl their fingers inward (toward the body) instead of outward; back of the hand faces out, thumb points forward"]],["1.44",["Glas-Griff: Hand dreht sich um 90° und umfasst das Glas von der Seite statt durch es hindurch","Glass grip: the hand turns 90° and holds the glass from the side instead of through it"]],["1.43",["Roboter-Kopf deutlich kürzer und runder (kein Alien-Kopf mehr); Hand liegt jetzt um das Glas statt durch es hindurch","Robot head much shorter and rounder (no more alien head); hand now wraps around the glass instead of through it"]],["1.42",["Roboter: Kopf komplett neu als Helm mit Glasvisier, durch das man die Augen sieht; Hände mit Animationen (Faust, Glas halten, zeigen, gestikulieren); A/B/X/Y-Symbole wirklich rund","Robots: head rebuilt as a helmet with a glass visor you can see the eyes through; hands with animations (fist, holding a glass, pointing, gesturing); A/B/X/Y glyphs truly round"]],["1.41",["Tastensymbole der Controller-Hinweise einfarbig (keine Farben mehr)","Controller button hint glyphs are single-colored (no more colors)"]],["1.40",["Controller: die Buttons oben rechts bleiben ausgeblendet, solange der Controller benutzt wird (auch wenn die Maus zuckt)","Controller: the buttons at the top right stay hidden while the controller is in use (even if the mouse jitters)"]],["1.39",["Controller-Symbole in Button-Leiste, Hinweisen und Foto-Leiste behalten ihre Farben","Controller glyphs in the button bar, hints and photo bar keep their colors"]],["1.38",["Foto-Modus mit Controller: Hinweisleiste zeigt Controller-Tasten, Zoom per Steuerkreuz hoch/runter, Blick mit rechtem Stick","Photo mode with controller: hint bar shows controller buttons, zoom with d-pad up/down, look with the right stick"]],["1.37",["Alle Menüs (Inventar, Funk, Karte) als Slide-over; Einstellungen/Menüs schieben vollständig von rechts rein, Start-/Pausenmenü schiebt links aus dem Bild; eckige Schalter; Y-Symbol nicht mehr gelb; Controller: obere Buttons ausgeblendet, nur schon nutzbare Tastenhinweise","All menus (inventory, radio, map) as slide-overs; settings/menus slide fully in from the right, start/pause menu slides out to the left edge; squared switches; Y glyph no longer yellow; controller: top buttons hidden, only currently usable button hints"]],["1.36",["Einstellungen als durchsichtiges Vollbild, Spinne wandert dabei in die Mitte; Controller: Navigation zwischen Schaltern und Reglern zuverlässig, Interaktions-Symbol flackert nicht mehr, Tastenhinweise in Cutscenes ausgeblendet","Settings as a transparent fullscreen view, the spider moves to the center; controller: reliable navigation between switches and sliders, interact glyph no longer flickers, button hints hidden in cutscenes"]]];
 const KT = {dash:"SPIEL|Spielablauf", ibuf:"SPIEL|Spielablauf", tut:"SPIEL|Hinweise", objv:"SPIEL|Hinweise", subs:"SPIEL|Hinweise", subsz:"SPIEL|Hinweise",
   sens:"STEUERUNG|Maus & Tastatur", sprint:"STEUERUNG|Maus & Tastatur", lockP:"STEUERUNG|Maus & Tastatur", inv:"STEUERUNG|Maus & Tastatur",
   padS:"STEUERUNG|Controller", padDz:"STEUERUNG|Controller", padRamp:"STEUERUNG|Controller", padInvY:"STEUERUNG|Controller", padVib:"STEUERUNG|Controller", padHelp:"STEUERUNG|Controller",
@@ -3103,14 +3121,14 @@ addEventListener("pointerdown", e => { document.body.classList.remove("padUsed")
 function padKey(code) { const e = new KeyboardEvent("keydown", {code, key:code, bubbles:true}); e.__pad = true; dispatchEvent(e); const u = new KeyboardEvent("keyup", {code, key:code, bubbles:true}); u.__pad = true; dispatchEvent(u); }       // keyup direkt hinterher, sonst bleibt z. B. Pfeil-hoch = Vorwärts hängen
 function padRumble(ms) { if (!opt.padVib || window.inputMode !== "pad") return; try { const g = padGet(); const a = g && (g.vibrationActuator || (g.hapticActuators && g.hapticActuators[0])); if (a && a.playEffect) a.playEffect("dual-rumble", {duration:ms, strongMagnitude:.6, weakMagnitude:.8}); else if (a && a.pulse) a.pulse(.7, ms); } catch (e) {} }
 function padGet() { try { for (const g of (navigator.getGamepads ? navigator.getGamepads() : [])) if (g && g.connected) return g; } catch (e) {} return null; }
-function padUiList(root) { const ic = root.id === "inv" || root.id === "com"; return [...root.querySelectorAll(ic ? "button:not(.ivTab),.slot:not(.empty)" : "button,input[type=range],#slotX")].filter(b => b.offsetParent !== null && !b.disabled && b.getBoundingClientRect().width > 0 && !(settingsOpen && b.closest("#sTabs"))); }
+function padUiList(root) { const ic = root.id === "inv" || root.id === "com"; return [...root.querySelectorAll(ic ? "button:not(.ivTab),.slot:not(.empty),.card.eq,.pr" : "button,input[type=range],#slotX")].filter(b => b.offsetParent !== null && !b.disabled && b.getBoundingClientRect().width > 0 && !(settingsOpen && b.closest("#sTabs"))); }
 function padUi(g, dir, a, b, lb, rb, now) {
   const slotsUp = $("slots").classList.contains("show"), root = slotsUp ? $("slots") : settingsOpen ? $("settings") : invOpen ? $("inv") : comOpen ? $("com") : pauseOpen ? $("pause") : (mode === "menu" && document.body.classList.contains("menu")) ? $("start") : null;
   if (!root) return false;
   { const ry = g.axes[3] || 0; if (Math.abs(ry) > .25) { const sc = slotsUp ? root.querySelector(".sp") : settingsOpen ? $("optRows") : (invOpen || comOpen) ? root.querySelector(".ivB") : null; if (sc) sc.scrollTop += ry*16; } }       // rechter Stick scrollt
   const fresh = pad.root !== root; if (fresh) { pad.root = root; pad.idx = 0; }
   const L = padUiList(root); if (!L.length) return true; if (fresh && slotsUp) pad.idx = Math.max(0, L.findIndex(x => x.id !== "slotX")); pad.idx = Math.max(0, Math.min(L.length - 1, pad.idx));
-  const mark = () => { const was = root.querySelector(".padf"); for (const x of root.querySelectorAll(".padf")) x.classList.remove("padf"); L[pad.idx].classList.add("padf"); try { const sr = L[pad.idx].closest(".srow"); if (sr) sInfoSet(sr); } catch (e) {} if (was !== L[pad.idx]) try { uiHover(); } catch (e) {} try { L[pad.idx].scrollIntoView({block:"nearest", behavior:"smooth"}); } catch (e) {} };
+  const mark = () => { const was = root.querySelector(".padf"); for (const x of root.querySelectorAll(".padf")) x.classList.remove("padf"); L[pad.idx].classList.add("padf"); try { const fk = L[pad.idx].closest("[data-f]"); if (fk && typeof ivFocusKey === "function") ivFocusKey(fk.dataset.f); } catch (e) {} try { const sr = L[pad.idx].closest(".srow"); if (sr) sInfoSet(sr); } catch (e) {} if (was !== L[pad.idx]) try { uiHover(); } catch (e) {} try { L[pad.idx].scrollIntoView({block:"nearest", behavior:"smooth"}); } catch (e) {} };
   if ((dir.x || dir.y) && now > pad.navT) { const cur = L[pad.idx], isR = cur.type === "range";
     if (isR && dir.x) { cur.value = +cur.value + dir.x*Math.max(1, (cur.max - cur.min)/20); cur.dispatchEvent(new Event("input", {bubbles:true})); pad.navT = now + 80; }
     else { const r0 = cur.getBoundingClientRect(), cx = r0.left + r0.width/2, cy = r0.top + r0.height/2; let best = -1, bs = 1e9;      // räumliche Navigation: nächstes Element in Stick-Richtung
@@ -5457,6 +5475,31 @@ function gearBuild() {
   const sg = new THREE.IcosahedronGeometry(.5, 2); _shield = new THREE.Mesh(sg, new THREE.MeshBasicMaterial({color:0x7fa6ee, transparent:true, opacity:.14, side:THREE.DoubleSide, depthWrite:false}));
   _shieldW = new THREE.Mesh(new THREE.IcosahedronGeometry(.505, 1), new THREE.MeshBasicMaterial({color:0xcfe0ff, transparent:true, opacity:.3, wireframe:true, depthWrite:false})); _shield.add(_shieldW); _shield.visible = false; scene.add(_shield);
 }
+/* ---------- Gadgets am Körper der Spinne (sichtbar, wenn freigeschaltet) ---------- */
+let _gad = null; const _gu = new THREE.Vector3(0,1,0), _gd = new THREE.Vector3();
+function gadBuild() {
+  const G = _gad = {pack:new THREE.Group(), shield:new THREE.Group(), blade:new THREE.Group(), dock:new THREE.Group(), map:new THREE.Group()};
+  const A = (geo, m, x, y, z, p) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.castShadow = true; p.add(o); return o; };
+  { const p = G.pack; p.position.set(0,.56,-1.0);                                              // Virtual Backpack auf dem Hinterleib
+    A(new THREE.BoxGeometry(.5,.16,.62), matDark, 0,.03,0, p); A(new THREE.BoxGeometry(.44,.03,.56), matLight, 0,.12,0, p);
+    for (const z of [-.2,.2]) A(new THREE.BoxGeometry(.54,.035,.05), matBrass, 0,.04,z, p);
+    A(new THREE.BoxGeometry(.28,.012,.025), matLens, 0,.14,-.22, p);
+    for (const s of [-1,1]) { const k = A(new THREE.CylinderGeometry(.06,.06,.4,14), matBody, s*.31,.04,0, p); k.rotation.x = Math.PI/2; A(new THREE.CylinderGeometry(.045,.045,.02,12), matLens, s*.31,.04,.21, p).rotation.x = Math.PI/2;
+      const an = A(new THREE.CylinderGeometry(.006,.01,.4,6), matLight, s*.2,.3,-.22, p); an.rotation.z = -s*.18; an.rotation.x = .25; }
+    A(new THREE.SphereGeometry(.025,10,8), matLens, 0,.31,-.3, p); }
+  { const p = G.shield; for (const [x,z] of [[.38,.12],[-.38,.12],[.32,-.3],[-.32,-.3]]) { const y = .14 + .26*Math.sqrt(Math.max(0,1 - (Math.hypot(x,z/1.1)/.57)**2)) + .01;
+      const o = A(new THREE.CylinderGeometry(.05,.06,.035,14), matBrass, x,y,z, p); o.lookAt(x*2,y+.4,z*2); o.rotateX(Math.PI/2); A(new THREE.SphereGeometry(.032,12,8), matLens, x,y+.02,z, p).scale.y = .6; }
+    const r = A(new THREE.TorusGeometry(.34,.01,6,32), matLens, 0,.43,0, p); r.rotation.x = Math.PI/2; }
+  { const p = G.blade; A(new THREE.CylinderGeometry(.075,.075,.05,16), matBrass, 0,0,0, p); A(new THREE.CylinderGeometry(.062,.062,.1,16), matDark, 0,0,0, p); A(new THREE.BoxGeometry(.06,.05,.14), matLight, 0,.0,.0, p).position.set(.0,.0,.07); A(new THREE.CylinderGeometry(.012,.012,.08,8), matLens, 0,.0,.14, p).rotation.x = Math.PI/2; }
+  { const p = G.dock; A(new THREE.CylinderGeometry(.065,.065,.04,16), matBrass, 0,0,0, p); A(new THREE.CylinderGeometry(.052,.052,.06,16), matLens, 0,0,0, p); A(new THREE.CylinderGeometry(.02,.03,.1,10), matDark, 0,.09,0, p); }
+  { const p = G.map; A(new THREE.CylinderGeometry(.01,.014,.26,6), matLight, 0,.13,0, p); const d = A(new THREE.SphereGeometry(.085,16,8,0,Math.PI*2,0,Math.PI*.5), matLight, 0,.26,0, p); d.rotation.x = -.5; A(new THREE.SphereGeometry(.022,10,8), matLens, 0,.285,.03, p); p.position.set(.27,.2,.8); headG.add(p); }
+  for (const k of ["pack","shield","blade","dock"]) { G[k].visible = false; spider.add(G[k]); } G.map.visible = false;
+}
+function gadTick() {
+  if (!_gad) gadBuild(); const G = _gad;
+  G.pack.visible = !!gear.pack; G.shield.visible = !!gear.shield; G.map.visible = !!gear.map; G.blade.visible = !!gear.knife; G.dock.visible = !!gear.knife;
+  for (const [g, s, f] of [[G.blade, 1, .72], [G.dock, -1, .8]]) { const L = legs.find(l => l.row === 0 && l.side === s); if (!L || !g.visible) continue; g.position.lerpVectors(L.P2, L.P3, f); _gd.subVectors(L.P3, L.P2).normalize(); g.quaternion.setFromUnitVectors(_gu, _gd); }
+}
 function gearTick(dt, wantS) {
   upgTick(performance.now()/1000);
   if (!_gearBuilt) gearBuild(); const sb = $("btnShield"); if (sb) sb.style.display = gear.shield ? "" : "none"; if (ch2.stage >= 8) { gear.map = true; givePack(); } const mb = $("mapBtn"); if (mb) mb.style.display = gear.map ? "flex" : "none"; if (xs.on && xs.scene === "street" && xs.gar && gear.knife && ch2.stage >= 8) xs.gar.tgt = 1; const ib = $("btnInv"); if (ib) ib.style.display = gear.pack ? "" : "none";
@@ -5725,10 +5768,28 @@ let maseShop = false, invOpen = false, invTab = 0, invSel = 0;
   document.head.appendChild(st);
   const s2 = document.createElement("style"); s2.textContent = st.textContent.replace(/#inv/g, "#com") + `@keyframes cmb{50%{opacity:.25}}#com .live{animation:cmb 1.2s infinite}#com .cid{font-family:ui-monospace,monospace;letter-spacing:.14em;color:#4fa9a3;font-size:11px}#com .call{width:100%;border:1px solid rgba(79,169,163,.4);background:rgba(79,169,163,.08);border-radius:16px;padding:14px 18px}#com .call small{display:block;letter-spacing:.2em;font-size:10px;color:#4fa9a3;margin-bottom:6px}#com .call p{margin:0;font-size:14px;line-height:1.5;color:#fff}#com .card .m{flex:1}#com .card span{display:block;color:rgba(255,255,255,.62);font-size:12px;margin-top:3px;line-height:1.45}`; document.head.appendChild(s2);
 }
+{ const st = document.createElement("style"); st.textContent = `
+body #inv{background:none !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;touch-action:none;cursor:grab}body #inv:active{cursor:grabbing}
+body #inv{justify-content:flex-start !important}body #inv .ivP{width:min(660px,54vw) !important;cursor:default;background:linear-gradient(90deg,rgba(8,11,17,.78),rgba(8,11,17,.45)) !important;border-left:0 !important;border-right:1px solid rgba(79,169,163,.3) !important}
+body #inv .ivH{padding:40px 36px 10px !important}body #inv .ivT{padding:0 36px !important}body #inv .ivB{padding:18px 36px !important;align-content:flex-start}body #inv .ivF{padding:12px 36px !important;text-align:left}
+body #inv .ivT button{letter-spacing:.2em;border-bottom:2px solid transparent !important}body #inv .ivT button.on{border-bottom-color:#4fa9a3 !important;color:#fff}
+body #inv .grid{grid-template-columns:repeat(6,56px);gap:6px}body #inv .slot{width:56px;height:56px;background:rgba(226,232,240,.05);border:1px solid rgba(226,232,240,.14)}
+body #inv .card,body #inv .pr{transition:background .15s,box-shadow .15s}body #inv .card.eq:hover,body #inv .pr:hover{background:rgba(79,169,163,.1)}
+body #inv .card{background:rgba(226,232,240,.04);border:0;border-left:2px solid rgba(79,169,163,.5)}body #inv .pr{padding:5px 8px;margin:0 -8px 3px !important;border-left:2px solid transparent}body #inv .pr:hover{border-left-color:#4fa9a3}
+body #inv .pl{flex:1 1 100%;min-width:0}body #inv .det{position:fixed;right:4vw;bottom:8vh;width:min(480px,36vw);box-sizing:border-box;background:rgba(8,11,17,.8);border:1px solid rgba(79,169,163,.45);border-radius:0;padding:18px 22px;z-index:3;pointer-events:none}body #inv .det .btn{pointer-events:auto;margin-top:6px}body #inv .det h3{font-family:'Bruno Ace SC','Bruno Ace',sans-serif;font-weight:400;font-size:17px;letter-spacing:.14em;margin-bottom:10px}body #inv .det p{font-size:14px}
+body.ivOpen #bars,body.ivOpen #setBtn,body.ivOpen #camBtn,body.ivOpen #mapBtn,body.ivOpen #interact,body.ivOpen #prompt,body.ivOpen #obj,body.ivOpen #seBox,body.ivOpen #hud{display:none !important}
+@keyframes ivI{from{transform:translateX(-100%)}to{transform:none}}@keyframes ivO{from{transform:none}to{transform:translateX(-100%)}}body #inv.show .ivP{animation:ivI .6s cubic-bezier(.16,1,.3,1) backwards !important}body #inv.out .ivP{animation:ivO .4s cubic-bezier(.5,0,.75,0) both !important}
+#ivBg{position:fixed;inset:-30px;z-index:0;display:none;background:center/cover no-repeat;filter:blur(18px) brightness(.45) saturate(.85)}
+#ivMk{position:absolute;inset:0;pointer-events:none;overflow:hidden}#ivMk .mk{position:absolute;left:0;top:0;display:flex;align-items:center;gap:8px;white-space:nowrap;font-size:11px;letter-spacing:.14em;color:#e2e8f0}
+#ivMk .mk i{width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:rgba(226,232,240,.8);flex:none;box-shadow:0 0 0 3px rgba(226,232,240,.15)}
+#ivMk .mk span{display:none;padding:3px 8px;background:rgba(11,14,20,.72);border-left:2px solid currentColor}#ivMk .mk.big span{display:block}#ivMk .mk.l{flex-direction:row-reverse;margin-left:-100%}#ivMk .mk.l span{border-left:0;border-right:2px solid currentColor}
+#ivMk .mk.wr{color:#e0a24a}#ivMk .mk.wr i{background:#e0a24a;box-shadow:0 0 0 3px rgba(224,162,74,.25)}#ivMk .mk.cr{color:#e0675d}#ivMk .mk.cr i{background:#e0675d;box-shadow:0 0 0 3px rgba(224,103,93,.3);animation:mkp 1.4s infinite}
+#ivMk .mk.gd{color:#4fa9a3}#ivMk .mk.gd i{border-radius:0;transform:rotate(45deg);background:#4fa9a3;box-shadow:0 0 0 3px rgba(79,169,163,.25)}@keyframes mkp{50%{box-shadow:0 0 0 7px rgba(224,103,93,0)}}
+@media(max-width:800px){body #inv .ivP{width:100vw !important}}`; document.head.appendChild(st); }
 const invEl = document.createElement("div"); invEl.id = "inv";
 invEl.innerHTML = '<div class="ivP"><div class="ivH"><b id="ivT1"></b><span id="ivT2"></span><em id="ivGold"></em></div><div class="ivT" id="ivTabs"></div><div class="ivB" id="ivBody"></div><div class="ivF" id="ivF"></div></div>';
 document.body.appendChild(invEl);
-invEl.addEventListener("click", e => { if (e.target === invEl) toggleInv(); });
+invEl.addEventListener("click", e => { if (e.target === invEl && !(ivDrag && ivDrag.m > 6)) { /* Hintergrund: Spinne ansehen, nicht schließen */ } });
 function invList() {
   const L = []; let g = gear.gold; while (g > 0) { L.push({id:"gold", n:Math.min(10, g)}); g -= 10; }
   if (gear.items.kit > 0) L.push({id:"kit", n:gear.items.kit}); if (gear.items.cell > 0) L.push({id:"cell", n:gear.items.cell});
@@ -5745,8 +5806,66 @@ function itemIcon(id, sz) {
 }
 function toggleInv() {
   if (!invOpen && (!gear.pack || mode === "cut" || mode === "menu" || pauseOpen || settingsOpen)) return;
-  invOpen = !invOpen; setPanel(invEl, invOpen); paused = invOpen; if (invOpen) { unlockPtr(); invSel = 0; try { ivRender(); } catch (e) { console.error(e); } try { uiSnd(.8, "ok"); } catch (e) {} } else { maseShop = false; if (invTab > 2) invTab = 0; uiSnd(.6, "tab"); lock(); }
+  invOpen = !invOpen; setPanel(invEl, invOpen); paused = invOpen; if (invOpen) { ivEnter(); unlockPtr(); invSel = 0; try { ivRender(); } catch (e) { console.error(e); } try { uiSnd(.8, "ok"); } catch (e) {} } else { ivLeave(); maseShop = false; if (invTab > 2) invTab = 0; uiSnd(.6, "tab"); lock(); }
 }
+let ivYaw = .7, ivPit = .32, ivDrag = null, ivFk = "all", ivD = 8.6, ivT = new THREE.Vector3(0, .2, -.1), ivSave = null, ivK = 1, ivBg = null, ivMk = [], ivTint = [], ivHid = [], ivRing = null, ivKey = null, ivRim = null;
+const ivLeg = (r, s) => legs.find(l => l.row === r && l.side === s);
+function ivPartKey(n) { if (n === "Sensorkopf") return "head"; if (n === "Hauptakku") return "body"; if (n === "Rückenpanzer") return "shield"; for (let r = 0; r < 4; r++) if (n.startsWith(LEGN[r])) return "leg:" + r + ":" + (n.endsWith("links") ? 1 : -1); return "all"; }
+function ivFocusKey(k) { ivFk = k || "all"; }
+function ivEnter() {
+  try { renderFinal(.016); const url = cvs.toDataURL("image/jpeg", .7); if (!ivBg) { ivBg = document.createElement("div"); ivBg.id = "ivBg"; document.body.appendChild(ivBg); } ivBg.style.backgroundImage = "url(" + url + ")"; ivBg.style.display = "block"; } catch (e) {}
+  cvs.style.position = "fixed"; cvs.style.inset = "0"; cvs.style.zIndex = "1";
+  ivFk = "all"; ivT.set(0, -.2, -.1); loop.ic = 0; ivYaw = .7;
+  try { if (ivRing) ivRing.visible = false; spider.updateMatrixWorld(true); const bx = new THREE.Box3().setFromObject(spider), sz = bx.getSize(new THREE.Vector3()), asp = camera.aspect, fill = asp > 1.15 ? .4 : .8; ivK = clamp((Math.max(sz.x, sz.z, sz.y*1.3)/spider.scale.x)/(fill*2*Math.tan(19*Math.PI/180)*Math.max(asp, 1))/8.6, .6, 4); } catch (e) { ivK = 1.4; } ivD = 8.6*ivK;
+  ivHid = scene.children.filter(c => c.visible && !c.isLight && c !== spider); ivHid.forEach(c => c.visible = false);
+  ivSave = {bg:scene.background, fog:scene.fog, hi:hemi.intensity, hc:hemi.color.getHex(), li:lamp.intensity, fov:camera.fov}; scene.background = null; renderer.setClearAlpha(0); scene.fog = null; hemi.intensity = .55; hemi.color.setHex(0xaab8d8); lamp.intensity = Math.max(lamp.intensity, 1.1);
+  if (!ivRing) { ivRing = new THREE.Group(); for (const r of [.9, 1.5, 2.2]) { const t = new THREE.Mesh(new THREE.TorusGeometry(r, .006, 6, 72), new THREE.MeshBasicMaterial({color:0x4fa9a3, transparent:true, opacity:.5 - r*.12})); t.rotation.x = Math.PI/2; ivRing.add(t); } spider.add(ivRing); }
+  if (!ivKey) { ivKey = new THREE.DirectionalLight(0xfff0dc, 2.6); ivRim = new THREE.DirectionalLight(0x8fd0ca, 2.2); scene.add(ivKey, ivRim, ivKey.target, ivRim.target); } ivKey.visible = ivRim.visible = true;
+  ivRing.visible = true; document.body.classList.add("ivOpen"); spider.visible = true; ivBuildMk(); ivTintParts();
+}
+function ivTintParts() {
+  ivTint = []; for (const l of legs) { const v = PARTS[legName(l)]; if (v === undefined || v >= .75) continue; const crit = v < .45, em = crit ? 0xb3241c : 0xb86a12;
+    for (const k of ["mFemur", "mTibia", "jKnee"]) { const m = l[k], mt = m.material.clone(); mt.emissive = new THREE.Color(em); mt.emissiveIntensity = crit ? .75 : .45; ivTint.push([m, m.material]); m.material = mt; } }
+}
+function ivUntint() { for (const [m, o] of ivTint) { m.material.dispose(); m.material = o; } ivTint = []; }
+function ivBuildMk() {
+  let root = $("ivMk"); if (!root) { root = document.createElement("div"); root.id = "ivMk"; invEl.appendChild(root); } root.innerHTML = ""; ivMk = [];
+  const add = (name, v, p, gad) => { const e = document.createElement("div"); e.className = "mk" + (gad ? " gd" : v < .45 ? " cr" : v < .75 ? " wr" : " ok"); e.innerHTML = "<i></i><span></span>"; e.querySelector("span").textContent = T(name) + (gad ? "" : " " + Math.round(v*100) + " %"); e.dataset.f = ""; root.appendChild(e); ivMk.push({e, p, v, gad}); };
+  add("Sensorkopf", PARTS["Sensorkopf"] ?? 1, () => V3(0, .2, .95)); add("Hauptakku", PARTS["Hauptakku"] ?? 1, () => V3(0, 0, -.2)); add("Rückenpanzer", PARTS["Rückenpanzer"] ?? 1, () => V3(0, .4, .1));
+  for (const l of legs) { const n = legName(l); add(n, PARTS[n] ?? 1, () => l.P2.clone().lerp(l.P3, .5)); }
+  if (gear.knife) { add("Laserklinge", 1, () => _gad ? _gad.blade.position.clone() : V3(), true); add("Dock-Bein", 1, () => _gad ? _gad.dock.position.clone() : V3(), true); }
+  if (gear.shield) add("Holo-Schild", 1, () => V3(0, .55, .1), true);
+  if (gear.pack) add("Virtual Backpack", 1, () => V3(0, .85, -1), true);
+  if (gear.map) add("Karte von CJ-City", 1, () => _gad ? _gad.map.getWorldPosition(new THREE.Vector3()).applyMatrix4(new THREE.Matrix4().copy(spider.matrixWorld).invert()) : V3(), true);
+}
+function ivMkTick() {
+  const w = innerWidth, h = innerHeight; for (const m of ivMk) { const wp = spider.localToWorld(m.p()).project(camera), vis = wp.z < 1 && Math.abs(wp.x) < 1.05; m.e.style.display = vis ? "" : "none"; if (vis) m.e.style.transform = "translate(" + ((wp.x*.5 + .5)*w).toFixed(1) + "px," + ((-wp.y*.5 + .5)*h).toFixed(1) + "px)"; m.e.classList.toggle("big", m.gad || m.v < .9); m.e.classList.toggle("l", wp.x > .42); }
+}
+function ivLeave() {
+  ivHid.forEach(c => c.visible = true); ivHid = []; ivUntint(); renderer.setClearAlpha(1); cvs.style.position = cvs.style.inset = cvs.style.zIndex = ""; if (ivBg) ivBg.style.display = "none"; const mk = $("ivMk"); if (mk) mk.innerHTML = ""; if (ivSave) { scene.background = ivSave.bg; scene.fog = ivSave.fog; hemi.intensity = ivSave.hi; hemi.color.setHex(ivSave.hc); lamp.intensity = ivSave.li; camera.fov = ivSave.fov; camera.updateProjectionMatrix(); ivSave = null; }
+  if (ivRing) ivRing.visible = false; if (ivKey) ivKey.visible = ivRim.visible = false; document.body.classList.remove("ivOpen");
+}
+const IVF = {all:() => [[0, -.2, -.1], 8.6], pack:() => [[0, .55, -1], 4.6], shield:() => [[0, .3, 0], 5.2], map:() => [[.28, .32, .82], 3.0], head:() => [[0, .1, .95], 3.4], body:() => [[0, .1, -.2], 5.8]};
+function ivCam(dt) {
+  if (!ivSave) return; let tg, d; const f = ivFk;
+  if (f === "knife" || f === "dock") { const L = ivLeg(0, f === "knife" ? 1 : -1); tg = L.P3.clone().lerp(L.P2, .35); d = 3.4; }
+  else if (f.startsWith("leg:")) { const p = f.split(":"), L = ivLeg(+p[1], +p[2]); tg = L ? L.P3.clone().lerp(L.P2, .5) : new THREE.Vector3(); d = 4.2; }
+  else { const e = (IVF[f] || IVF.all)(); tg = new THREE.Vector3(e[0][0], e[0][1], e[0][2]); d = e[1]; }
+  const k = Math.min(1, dt*5); ivT.lerp(tg, k); ivD += (d*ivK*(f === "all" ? 1 : 1.35) - ivD)*k; if (!ivDrag) ivYaw += dt*.22;
+  try { const gp = (navigator.getGamepads && navigator.getGamepads()[pad.idxPad || 0]) || null; if (gp) { const x = gp.axes[2] || 0, y = gp.axes[3] || 0; if (Math.abs(x) > .25) ivYaw -= x*dt*2.2; if (Math.abs(y) > .25) ivPit = clamp(ivPit + y*dt*1.4, -.2, 1.1); } } catch (e) {}
+  const cp = Math.cos(ivPit), sp = Math.sin(ivPit), lv = new THREE.Vector3(Math.sin(ivYaw)*cp*ivD, sp*ivD, Math.cos(ivYaw)*cp*ivD).add(ivT);
+  spider.updateMatrixWorld(true); const wp = spider.localToWorld(lv), wt = spider.localToWorld(ivT.clone());
+  let my = 9; for (const l of legs) { const q = spider.worldToLocal(l.foot.clone()); if (q.y < my) my = q.y; } if (ivRing) ivRing.position.y = my - .02, ivRing.rotation.y += dt*.1;
+  camera.up.set(0, 1, 0).applyQuaternion(spider.quaternion); camera.position.copy(wp); camera.lookAt(wt);
+  if (ivKey) { const dv = new THREE.Vector3().subVectors(wp, wt).normalize(), rt = new THREE.Vector3().crossVectors(camera.up, dv).normalize(); ivKey.target.position.copy(wt); ivRim.target.position.copy(wt); ivKey.position.copy(wt).addScaledVector(dv, 3).addScaledVector(rt, -2).addScaledVector(camera.up, 2.5); ivRim.position.copy(wt).addScaledVector(dv, -3).addScaledVector(rt, 2.5).addScaledVector(camera.up, 1.5); }
+  if (Math.abs(camera.fov - 38) > .01) { camera.fov = 38; camera.updateProjectionMatrix(); }
+  if (camera.aspect > 1.15) camera.translateX(-ivD*spider.scale.x*Math.tan(19*Math.PI/180)*camera.aspect*.36); camera.updateMatrixWorld(true); camera.updateProjectionMatrix(); ivMkTick();
+}
+invEl.addEventListener("pointerdown", e => { if (e.target === invEl) { ivDrag = {x:e.clientX, y:e.clientY, t:performance.now(), m:0}; try { invEl.setPointerCapture(e.pointerId); } catch (_) {} } });
+invEl.addEventListener("pointermove", e => { if (!ivDrag) return; ivYaw -= (e.clientX - ivDrag.x)*.008; ivPit = clamp(ivPit + (e.clientY - ivDrag.y)*.006, -.2, 1.1); ivDrag.m += Math.abs(e.clientX - ivDrag.x) + Math.abs(e.clientY - ivDrag.y); ivDrag.x = e.clientX; ivDrag.y = e.clientY; });
+invEl.addEventListener("pointerup", () => { ivDrag = null; });
+invEl.addEventListener("mouseover", e => { const c = e.target.closest && e.target.closest("[data-f]"); if (c) ivFocusKey(c.dataset.f); });
+invEl.addEventListener("mouseleave", () => ivFocusKey("all"));
 function invKey(code) {
   if (maseShop && (code === "KeyE" || code === "KeyI" || code === "Escape")) { toggleInv(); return; } if (maseShop) return;
   if (code === "KeyI" || code === "Escape" || code === "Tab") { toggleInv(); return; }
@@ -5754,13 +5873,13 @@ function invKey(code) {
   else if (code === "ArrowLeft" || code === "KeyA") { const n = invN(), t = (invTab + n - 1)%n; if (t === 3) { goCom(); return; } invTab = t; invSel = 0; ivRender(); uiSnd(.5, "tab"); }
   else if (code.startsWith("Digit") && +code[5] >= 1 && +code[5] <= invN()) { if (+code[5] === 4) { goCom(); return; } invTab = +code[5] - 1; invSel = 0; ivRender(); uiSnd(.5, "tab"); }
 }
-const invN = () => comAvail() ? 4 : 3;
+const invN = () => 3;
 function goCom() { if (!invOpen) return; toggleInv(); toggleCom(); }
 function goInv() { if (!comOpen || !gear.pack) return; toggleCom(); toggleInv(); }
 function ivRender() {
   if (!maseShop && invTab > 2) invTab = 0;
-  $("ivT1").textContent = T(maseShop ? "MASES WERKSTATT" : "VIRTUAL BACKPACK"); $("ivT2").textContent = maseShop ? T("UPGRADE-BERATUNG") : "ARACHNE-8 · CJ-CITY"; $("ivGold").textContent = fmtSE(gear.se || 0); $("ivF").textContent = T("I / Esc: Schließen  ·  ← → oder 1–4: Reiter");
-  const tb = $("ivTabs"); tb.innerHTML = ""; ["INVENTAR", "AUSRÜSTUNG", "SPINNE"].concat(comAvail() ? ["FUNK"] : []).forEach((n, i) => { const b = document.createElement("button"); b.className = "ivTab" + (i === invTab ? " on" : ""); b.textContent = (i + 1) + " · " + T(n); b.onclick = () => { if (i === 3) { goCom(); return; } invTab = i; invSel = 0; ivRender(); }; tb.appendChild(b); });
+  $("ivT1").textContent = T(maseShop ? "MASES WERKSTATT" : "VIRTUAL BACKPACK"); $("ivT2").textContent = maseShop ? T("UPGRADE-BERATUNG") : "ARACHNE-8 · CJ-CITY"; $("ivGold").textContent = fmtSE(gear.se || 0); $("ivF").textContent = T("I / Esc: Schließen  ·  ← → oder 1–3: Reiter  ·  Ziehen: Spinne drehen");
+  const tb = $("ivTabs"); tb.innerHTML = ""; ["INVENTAR", "AUSRÜSTUNG", "SPINNE"].forEach((n, i) => { const b = document.createElement("button"); b.className = "ivTab" + (i === invTab ? " on" : ""); b.textContent = (i + 1) + " · " + T(n); b.onclick = () => { if (i === 3) { goCom(); return; } invTab = i; invSel = 0; ivRender(); }; tb.appendChild(b); });
   tb.style.display = maseShop ? "none" : ""; if (maseShop) $("ivF").textContent = T("E / Esc: Schließen");
   const B = $("ivBody"); B.innerHTML = ""; [ivInv, ivEquip, ivSpider, ivUpg][maseShop ? 3 : invTab](B);
 }
@@ -5786,21 +5905,13 @@ function ivEquip(B) {
     ["Karte von CJ-City", gear.map ? "AKTIV" : "–", "M: Karte öffnen."],
     ["Virtual Backpack", "AKTIV", "I: Inventar, Bauteile, Upgrades."]
   ];
-  for (const [n, s, d] of rows) { const c = document.createElement("div"); c.className = "card"; c.innerHTML = '<div class="m"><b></b><span></span></div><u></u>'; c.querySelector("b").textContent = T(n); c.querySelector("span").textContent = T(d); c.querySelector("u").textContent = T(s); B.appendChild(c); }
+  for (const [n, s, d] of rows) { const c = document.createElement("div"); c.className = "card eq"; c.dataset.f = {"Laserklinge":"knife", "Holo-Schild":"shield", "Dock-Bein":"dock", "Karte von CJ-City":"map", "Virtual Backpack":"pack"}[n] || "all"; c.innerHTML = '<div class="m"><b></b><span></span></div><u></u>'; c.querySelector("b").textContent = T(n); c.querySelector("span").textContent = T(d); c.querySelector("u").textContent = T(s); B.appendChild(c); }
 }
 function ivSpider(B) {
-  const cv = document.createElement("canvas"); cv.width = 300; cv.height = 280; cv.style.cssText = "background:#282b32;border:1px solid rgba(210,224,250,.2);border-radius:8px;max-width:100%"; B.appendChild(cv);
-  const x = cv.getContext("2d"), col = v => v > .75 ? "#e8eefc" : v > .45 ? "#4fa9a3" : "#c0392b", cx = 150, cy = 140;
-  const ang = [-.95, -.35, .3, .9];
-  for (const side of [-1, 1]) for (let r = 0; r < 4; r++) { const nm = LEGN[r] + (side > 0 ? " links" : " rechts"), a = ang[r], hx = cx + side*18, hy = cy + r*9 - 14, kx = hx + side*58, ky = hy + a*52 - 18, fx = kx + side*28, fy = ky + a*36 + 30;
-    x.strokeStyle = col(PARTS[nm]); x.lineWidth = 6; x.lineCap = "round"; x.beginPath(); x.moveTo(hx, hy); x.lineTo(kx, ky); x.lineTo(fx, fy); x.stroke(); x.fillStyle = "#1d2026"; x.beginPath(); x.arc(kx, ky, 4, 0, 7); x.fill(); }
-  x.fillStyle = col(PARTS["Hauptakku"]); x.beginPath(); x.ellipse(cx, cy + 6, 26, 36, 0, 0, 7); x.fill(); x.fillStyle = col(PARTS["Rückenpanzer"]); x.beginPath(); x.ellipse(cx, cy + 12, 17, 22, 0, 0, 7); x.fill();
-  x.fillStyle = col(PARTS["Sensorkopf"]); x.beginPath(); x.ellipse(cx, cy - 34, 13, 15, 0, 0, 7); x.fill(); x.fillStyle = "#4fa9a3"; x.fillRect(cx - 8, cy - 38, 16, 4);
-  x.fillStyle = "#a7adb4"; x.font = "11px system-ui,sans-serif"; x.textAlign = "center"; x.fillText(T("Weiß: Gehäuse  ·  Orange: Verschleiß  ·  Rot: kritisch"), cx, 268);
   const pl = document.createElement("div"); pl.className = "pl"; B.appendChild(pl);
   const names = BODYP.concat(legs.map(legName)); const tot = dmgAvg();
   const h = document.createElement("div"); h.className = "r"; h.innerHTML = "<span></span><b></b>"; h.children[0].textContent = T("Gesamt-Integrität"); h.children[1].textContent = Math.round(tot*100) + " %"; pl.appendChild(h);
-  for (const n of names) { const v = PARTS[n], r = document.createElement("div"); r.style.marginBottom = "7px"; r.innerHTML = '<div class="r" style="margin:0"><span></span><b></b></div><div class="pb"><div></div></div>'; r.querySelector("span").textContent = T(n); r.querySelector("b").textContent = Math.round(v*100) + " %"; const f = r.querySelector(".pb div"); f.style.width = (v*100) + "%"; f.style.background = col(v); pl.appendChild(r); }
+  for (const n of names) { const v = PARTS[n], r = document.createElement("div"); r.style.marginBottom = "7px"; r.className = "pr"; r.dataset.f = ivPartKey(n); r.innerHTML = '<div class="r" style="margin:0"><span></span><b></b></div><div class="pb"><div></div></div>'; r.querySelector("span").textContent = T(n); r.querySelector("b").textContent = Math.round(v*100) + " %"; const f = r.querySelector(".pb div"); f.style.width = (v*100) + "%"; f.style.background = col(v); pl.appendChild(r); }
 }
 function ivUpg(B) { fixUpg();
   const hint = document.createElement("div"); hint.style.cssText = "width:100%;color:#a7adb4;font-size:12px"; hint.textContent = T(maseShop ? "Mase baut die Upgrades ein. Bezahlt wird in SuperEuro (SE)." : "Upgrades gibt es nur bei Mase in der Werkstatt. Hier siehst du deinen Stand."); B.appendChild(hint);
@@ -6155,7 +6266,7 @@ function comKey(code) {
 }
 function comRender() {
   $("cmF").textContent = T("J / Esc: Schließen  ·  ← → oder 1–2: Reiter");
-  const tb = $("cmTabs"); tb.innerHTML = ""; ["AUFTRÄGE", "KONTAKTE"].concat(gear.pack ? ["BACKPACK"] : []).forEach((n, i) => { const b = document.createElement("button"); b.className = "ivTab" + (i === comTab ? " on" : ""); b.textContent = (i + 1) + " · " + T(n); b.onclick = () => { if (i === 2) { goInv(); return; } comTab = i; comRender(); }; tb.appendChild(b); });
+  const tb = $("cmTabs"); tb.innerHTML = ""; ["AUFTRÄGE", "KONTAKTE"].forEach((n, i) => { const b = document.createElement("button"); b.className = "ivTab" + (i === comTab ? " on" : ""); b.textContent = (i + 1) + " · " + T(n); b.onclick = () => { if (i === 2) { goInv(); return; } comTab = i; comRender(); }; tb.appendChild(b); });
   const B = $("cmBody"); B.innerHTML = ""; const card = (t, d, u, extra) => { const c = document.createElement("div"); c.className = "card"; c.innerHTML = '<div class="m"><b></b><span></span></div><u></u>'; c.querySelector("b").textContent = T(t); c.querySelector("span").textContent = T(d); c.querySelector("u").textContent = T(u); if (extra) extra(c); B.appendChild(c); return c; };
   if (comTab === 0) {
     const f = comFeed(); if (!f.length) card("Keine Übertragung", "Noch kein Auftrag. Rackson meldet sich, sobald etwas reinkommt.", "WARTE …");
@@ -6724,7 +6835,7 @@ function loop() {
   lookTick(Math.min(.05, (performance.now() - (loop.lt || performance.now()))/1000)); loop.lt = performance.now();
   if (gameStarted && !paused && !settingsOpen && !pauseOpen) playT += Math.min(.1, (performance.now() - (loop.ps || performance.now()))/1000); loop.ps = performance.now();
   padTick(Math.min(.05, (performance.now() - (loop.pt || performance.now()))/1000)); loop.pt = performance.now();
-  if (paused) { clock.getDelta(); renderFinal(.016); return; }
+  if (paused) { clock.getDelta(); if (invOpen) { try { ivCam(Math.min(.1, (performance.now() - (loop.ic || performance.now()))/1000)); loop.ic = performance.now(); } catch (e) {} renderer.render(scene, camera); return; } renderFinal(.016); return; }
   const raw = Math.min(clock.getDelta(), .25), nSub = Math.max(1, Math.ceil(raw/(1/30) - 1e-6)), dt = raw/nSub*(nSub > 1 ? 1 : 1); clockT += raw;
   const ix = clamp((keys.KeyD?1:0) - (keys.KeyA?1:0) + joy.x + padv.x, -1, 1);
   const iz = clamp(((keys.KeyW||keys.ArrowUp)?1:0) - (keys.KeyS?1:0) + joy.y + padv.y, -1, 1);
@@ -6735,6 +6846,7 @@ function loop() {
   doorT += (doorOpen - doorT)*(1 - Math.exp(-dt*3)); doorG.position.z = 1.6 + 1.05*doorT;
   for (const l of legs) { _a.copy(l.foot); spider.worldToLocal(_a); solveLeg(l, _a); }
   legCheck();
+  try { gadTick(); } catch (e) {}
   if (mode === "menu") menuCamera(); else if (mode === "cut") cutCamera(dt); else updateCamera();
   torchTick(dt); shadowTick(dt); fxTick(dt); sndTick(dt); applyShake();
   camera.updateMatrixWorld(true); updateAttack(dt); updateMann(dt);

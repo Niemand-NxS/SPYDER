@@ -76,10 +76,28 @@ let maseShop = false, invOpen = false, invTab = 0, invSel = 0;
   document.head.appendChild(st);
   const s2 = document.createElement("style"); s2.textContent = st.textContent.replace(/#inv/g, "#com") + `@keyframes cmb{50%{opacity:.25}}#com .live{animation:cmb 1.2s infinite}#com .cid{font-family:ui-monospace,monospace;letter-spacing:.14em;color:#4fa9a3;font-size:11px}#com .call{width:100%;border:1px solid rgba(79,169,163,.4);background:rgba(79,169,163,.08);border-radius:16px;padding:14px 18px}#com .call small{display:block;letter-spacing:.2em;font-size:10px;color:#4fa9a3;margin-bottom:6px}#com .call p{margin:0;font-size:14px;line-height:1.5;color:#fff}#com .card .m{flex:1}#com .card span{display:block;color:rgba(255,255,255,.62);font-size:12px;margin-top:3px;line-height:1.45}`; document.head.appendChild(s2);
 }
+{ const st = document.createElement("style"); st.textContent = `
+body #inv{background:none !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;touch-action:none;cursor:grab}body #inv:active{cursor:grabbing}
+body #inv{justify-content:flex-start !important}body #inv .ivP{width:min(660px,54vw) !important;cursor:default;background:linear-gradient(90deg,rgba(8,11,17,.78),rgba(8,11,17,.45)) !important;border-left:0 !important;border-right:1px solid rgba(79,169,163,.3) !important}
+body #inv .ivH{padding:40px 36px 10px !important}body #inv .ivT{padding:0 36px !important}body #inv .ivB{padding:18px 36px !important;align-content:flex-start}body #inv .ivF{padding:12px 36px !important;text-align:left}
+body #inv .ivT button{letter-spacing:.2em;border-bottom:2px solid transparent !important}body #inv .ivT button.on{border-bottom-color:#4fa9a3 !important;color:#fff}
+body #inv .grid{grid-template-columns:repeat(6,56px);gap:6px}body #inv .slot{width:56px;height:56px;background:rgba(226,232,240,.05);border:1px solid rgba(226,232,240,.14)}
+body #inv .card,body #inv .pr{transition:background .15s,box-shadow .15s}body #inv .card.eq:hover,body #inv .pr:hover{background:rgba(79,169,163,.1)}
+body #inv .card{background:rgba(226,232,240,.04);border:0;border-left:2px solid rgba(79,169,163,.5)}body #inv .pr{padding:5px 8px;margin:0 -8px 3px !important;border-left:2px solid transparent}body #inv .pr:hover{border-left-color:#4fa9a3}
+body #inv .pl{flex:1 1 100%;min-width:0}body #inv .det{position:fixed;right:4vw;bottom:8vh;width:min(480px,36vw);box-sizing:border-box;background:rgba(8,11,17,.8);border:1px solid rgba(79,169,163,.45);border-radius:0;padding:18px 22px;z-index:3;pointer-events:none}body #inv .det .btn{pointer-events:auto;margin-top:6px}body #inv .det h3{font-family:'Bruno Ace SC','Bruno Ace',sans-serif;font-weight:400;font-size:17px;letter-spacing:.14em;margin-bottom:10px}body #inv .det p{font-size:14px}
+body.ivOpen #bars,body.ivOpen #setBtn,body.ivOpen #camBtn,body.ivOpen #mapBtn,body.ivOpen #interact,body.ivOpen #prompt,body.ivOpen #obj,body.ivOpen #seBox,body.ivOpen #hud{display:none !important}
+@keyframes ivI{from{transform:translateX(-100%)}to{transform:none}}@keyframes ivO{from{transform:none}to{transform:translateX(-100%)}}body #inv.show .ivP{animation:ivI .6s cubic-bezier(.16,1,.3,1) backwards !important}body #inv.out .ivP{animation:ivO .4s cubic-bezier(.5,0,.75,0) both !important}
+#ivBg{position:fixed;inset:-30px;z-index:0;display:none;background:center/cover no-repeat;filter:blur(18px) brightness(.45) saturate(.85)}
+#ivMk{position:absolute;inset:0;pointer-events:none;overflow:hidden}#ivMk .mk{position:absolute;left:0;top:0;display:flex;align-items:center;gap:8px;white-space:nowrap;font-size:11px;letter-spacing:.14em;color:#e2e8f0}
+#ivMk .mk i{width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:rgba(226,232,240,.8);flex:none;box-shadow:0 0 0 3px rgba(226,232,240,.15)}
+#ivMk .mk span{display:none;padding:3px 8px;background:rgba(11,14,20,.72);border-left:2px solid currentColor}#ivMk .mk.big span{display:block}#ivMk .mk.l{flex-direction:row-reverse;margin-left:-100%}#ivMk .mk.l span{border-left:0;border-right:2px solid currentColor}
+#ivMk .mk.wr{color:#e0a24a}#ivMk .mk.wr i{background:#e0a24a;box-shadow:0 0 0 3px rgba(224,162,74,.25)}#ivMk .mk.cr{color:#e0675d}#ivMk .mk.cr i{background:#e0675d;box-shadow:0 0 0 3px rgba(224,103,93,.3);animation:mkp 1.4s infinite}
+#ivMk .mk.gd{color:#4fa9a3}#ivMk .mk.gd i{border-radius:0;transform:rotate(45deg);background:#4fa9a3;box-shadow:0 0 0 3px rgba(79,169,163,.25)}@keyframes mkp{50%{box-shadow:0 0 0 7px rgba(224,103,93,0)}}
+@media(max-width:800px){body #inv .ivP{width:100vw !important}}`; document.head.appendChild(st); }
 const invEl = document.createElement("div"); invEl.id = "inv";
 invEl.innerHTML = '<div class="ivP"><div class="ivH"><b id="ivT1"></b><span id="ivT2"></span><em id="ivGold"></em></div><div class="ivT" id="ivTabs"></div><div class="ivB" id="ivBody"></div><div class="ivF" id="ivF"></div></div>';
 document.body.appendChild(invEl);
-invEl.addEventListener("click", e => { if (e.target === invEl) toggleInv(); });
+invEl.addEventListener("click", e => { if (e.target === invEl && !(ivDrag && ivDrag.m > 6)) { /* Hintergrund: Spinne ansehen, nicht schließen */ } });
 function invList() {
   const L = []; let g = gear.gold; while (g > 0) { L.push({id:"gold", n:Math.min(10, g)}); g -= 10; }
   if (gear.items.kit > 0) L.push({id:"kit", n:gear.items.kit}); if (gear.items.cell > 0) L.push({id:"cell", n:gear.items.cell});
@@ -96,8 +114,66 @@ function itemIcon(id, sz) {
 }
 function toggleInv() {
   if (!invOpen && (!gear.pack || mode === "cut" || mode === "menu" || pauseOpen || settingsOpen)) return;
-  invOpen = !invOpen; setPanel(invEl, invOpen); paused = invOpen; if (invOpen) { unlockPtr(); invSel = 0; try { ivRender(); } catch (e) { console.error(e); } try { uiSnd(.8, "ok"); } catch (e) {} } else { maseShop = false; if (invTab > 2) invTab = 0; uiSnd(.6, "tab"); lock(); }
+  invOpen = !invOpen; setPanel(invEl, invOpen); paused = invOpen; if (invOpen) { ivEnter(); unlockPtr(); invSel = 0; try { ivRender(); } catch (e) { console.error(e); } try { uiSnd(.8, "ok"); } catch (e) {} } else { ivLeave(); maseShop = false; if (invTab > 2) invTab = 0; uiSnd(.6, "tab"); lock(); }
 }
+let ivYaw = .7, ivPit = .32, ivDrag = null, ivFk = "all", ivD = 8.6, ivT = new THREE.Vector3(0, .2, -.1), ivSave = null, ivK = 1, ivBg = null, ivMk = [], ivTint = [], ivHid = [], ivRing = null, ivKey = null, ivRim = null;
+const ivLeg = (r, s) => legs.find(l => l.row === r && l.side === s);
+function ivPartKey(n) { if (n === "Sensorkopf") return "head"; if (n === "Hauptakku") return "body"; if (n === "Rückenpanzer") return "shield"; for (let r = 0; r < 4; r++) if (n.startsWith(LEGN[r])) return "leg:" + r + ":" + (n.endsWith("links") ? 1 : -1); return "all"; }
+function ivFocusKey(k) { ivFk = k || "all"; }
+function ivEnter() {
+  try { renderFinal(.016); const url = cvs.toDataURL("image/jpeg", .7); if (!ivBg) { ivBg = document.createElement("div"); ivBg.id = "ivBg"; document.body.appendChild(ivBg); } ivBg.style.backgroundImage = "url(" + url + ")"; ivBg.style.display = "block"; } catch (e) {}
+  cvs.style.position = "fixed"; cvs.style.inset = "0"; cvs.style.zIndex = "1";
+  ivFk = "all"; ivT.set(0, -.2, -.1); loop.ic = 0; ivYaw = .7;
+  try { if (ivRing) ivRing.visible = false; spider.updateMatrixWorld(true); const bx = new THREE.Box3().setFromObject(spider), sz = bx.getSize(new THREE.Vector3()), asp = camera.aspect, fill = asp > 1.15 ? .4 : .8; ivK = clamp((Math.max(sz.x, sz.z, sz.y*1.3)/spider.scale.x)/(fill*2*Math.tan(19*Math.PI/180)*Math.max(asp, 1))/8.6, .6, 4); } catch (e) { ivK = 1.4; } ivD = 8.6*ivK;
+  ivHid = scene.children.filter(c => c.visible && !c.isLight && c !== spider); ivHid.forEach(c => c.visible = false);
+  ivSave = {bg:scene.background, fog:scene.fog, hi:hemi.intensity, hc:hemi.color.getHex(), li:lamp.intensity, fov:camera.fov}; scene.background = null; renderer.setClearAlpha(0); scene.fog = null; hemi.intensity = .55; hemi.color.setHex(0xaab8d8); lamp.intensity = Math.max(lamp.intensity, 1.1);
+  if (!ivRing) { ivRing = new THREE.Group(); for (const r of [.9, 1.5, 2.2]) { const t = new THREE.Mesh(new THREE.TorusGeometry(r, .006, 6, 72), new THREE.MeshBasicMaterial({color:0x4fa9a3, transparent:true, opacity:.5 - r*.12})); t.rotation.x = Math.PI/2; ivRing.add(t); } spider.add(ivRing); }
+  if (!ivKey) { ivKey = new THREE.DirectionalLight(0xfff0dc, 2.6); ivRim = new THREE.DirectionalLight(0x8fd0ca, 2.2); scene.add(ivKey, ivRim, ivKey.target, ivRim.target); } ivKey.visible = ivRim.visible = true;
+  ivRing.visible = true; document.body.classList.add("ivOpen"); spider.visible = true; ivBuildMk(); ivTintParts();
+}
+function ivTintParts() {
+  ivTint = []; for (const l of legs) { const v = PARTS[legName(l)]; if (v === undefined || v >= .75) continue; const crit = v < .45, em = crit ? 0xb3241c : 0xb86a12;
+    for (const k of ["mFemur", "mTibia", "jKnee"]) { const m = l[k], mt = m.material.clone(); mt.emissive = new THREE.Color(em); mt.emissiveIntensity = crit ? .75 : .45; ivTint.push([m, m.material]); m.material = mt; } }
+}
+function ivUntint() { for (const [m, o] of ivTint) { m.material.dispose(); m.material = o; } ivTint = []; }
+function ivBuildMk() {
+  let root = $("ivMk"); if (!root) { root = document.createElement("div"); root.id = "ivMk"; invEl.appendChild(root); } root.innerHTML = ""; ivMk = [];
+  const add = (name, v, p, gad) => { const e = document.createElement("div"); e.className = "mk" + (gad ? " gd" : v < .45 ? " cr" : v < .75 ? " wr" : " ok"); e.innerHTML = "<i></i><span></span>"; e.querySelector("span").textContent = T(name) + (gad ? "" : " " + Math.round(v*100) + " %"); e.dataset.f = ""; root.appendChild(e); ivMk.push({e, p, v, gad}); };
+  add("Sensorkopf", PARTS["Sensorkopf"] ?? 1, () => V3(0, .2, .95)); add("Hauptakku", PARTS["Hauptakku"] ?? 1, () => V3(0, 0, -.2)); add("Rückenpanzer", PARTS["Rückenpanzer"] ?? 1, () => V3(0, .4, .1));
+  for (const l of legs) { const n = legName(l); add(n, PARTS[n] ?? 1, () => l.P2.clone().lerp(l.P3, .5)); }
+  if (gear.knife) { add("Laserklinge", 1, () => _gad ? _gad.blade.position.clone() : V3(), true); add("Dock-Bein", 1, () => _gad ? _gad.dock.position.clone() : V3(), true); }
+  if (gear.shield) add("Holo-Schild", 1, () => V3(0, .55, .1), true);
+  if (gear.pack) add("Virtual Backpack", 1, () => V3(0, .85, -1), true);
+  if (gear.map) add("Karte von CJ-City", 1, () => _gad ? _gad.map.getWorldPosition(new THREE.Vector3()).applyMatrix4(new THREE.Matrix4().copy(spider.matrixWorld).invert()) : V3(), true);
+}
+function ivMkTick() {
+  const w = innerWidth, h = innerHeight; for (const m of ivMk) { const wp = spider.localToWorld(m.p()).project(camera), vis = wp.z < 1 && Math.abs(wp.x) < 1.05; m.e.style.display = vis ? "" : "none"; if (vis) m.e.style.transform = "translate(" + ((wp.x*.5 + .5)*w).toFixed(1) + "px," + ((-wp.y*.5 + .5)*h).toFixed(1) + "px)"; m.e.classList.toggle("big", m.gad || m.v < .9); m.e.classList.toggle("l", wp.x > .42); }
+}
+function ivLeave() {
+  ivHid.forEach(c => c.visible = true); ivHid = []; ivUntint(); renderer.setClearAlpha(1); cvs.style.position = cvs.style.inset = cvs.style.zIndex = ""; if (ivBg) ivBg.style.display = "none"; const mk = $("ivMk"); if (mk) mk.innerHTML = ""; if (ivSave) { scene.background = ivSave.bg; scene.fog = ivSave.fog; hemi.intensity = ivSave.hi; hemi.color.setHex(ivSave.hc); lamp.intensity = ivSave.li; camera.fov = ivSave.fov; camera.updateProjectionMatrix(); ivSave = null; }
+  if (ivRing) ivRing.visible = false; if (ivKey) ivKey.visible = ivRim.visible = false; document.body.classList.remove("ivOpen");
+}
+const IVF = {all:() => [[0, -.2, -.1], 8.6], pack:() => [[0, .55, -1], 4.6], shield:() => [[0, .3, 0], 5.2], map:() => [[.28, .32, .82], 3.0], head:() => [[0, .1, .95], 3.4], body:() => [[0, .1, -.2], 5.8]};
+function ivCam(dt) {
+  if (!ivSave) return; let tg, d; const f = ivFk;
+  if (f === "knife" || f === "dock") { const L = ivLeg(0, f === "knife" ? 1 : -1); tg = L.P3.clone().lerp(L.P2, .35); d = 3.4; }
+  else if (f.startsWith("leg:")) { const p = f.split(":"), L = ivLeg(+p[1], +p[2]); tg = L ? L.P3.clone().lerp(L.P2, .5) : new THREE.Vector3(); d = 4.2; }
+  else { const e = (IVF[f] || IVF.all)(); tg = new THREE.Vector3(e[0][0], e[0][1], e[0][2]); d = e[1]; }
+  const k = Math.min(1, dt*5); ivT.lerp(tg, k); ivD += (d*ivK*(f === "all" ? 1 : 1.35) - ivD)*k; if (!ivDrag) ivYaw += dt*.22;
+  try { const gp = (navigator.getGamepads && navigator.getGamepads()[pad.idxPad || 0]) || null; if (gp) { const x = gp.axes[2] || 0, y = gp.axes[3] || 0; if (Math.abs(x) > .25) ivYaw -= x*dt*2.2; if (Math.abs(y) > .25) ivPit = clamp(ivPit + y*dt*1.4, -.2, 1.1); } } catch (e) {}
+  const cp = Math.cos(ivPit), sp = Math.sin(ivPit), lv = new THREE.Vector3(Math.sin(ivYaw)*cp*ivD, sp*ivD, Math.cos(ivYaw)*cp*ivD).add(ivT);
+  spider.updateMatrixWorld(true); const wp = spider.localToWorld(lv), wt = spider.localToWorld(ivT.clone());
+  let my = 9; for (const l of legs) { const q = spider.worldToLocal(l.foot.clone()); if (q.y < my) my = q.y; } if (ivRing) ivRing.position.y = my - .02, ivRing.rotation.y += dt*.1;
+  camera.up.set(0, 1, 0).applyQuaternion(spider.quaternion); camera.position.copy(wp); camera.lookAt(wt);
+  if (ivKey) { const dv = new THREE.Vector3().subVectors(wp, wt).normalize(), rt = new THREE.Vector3().crossVectors(camera.up, dv).normalize(); ivKey.target.position.copy(wt); ivRim.target.position.copy(wt); ivKey.position.copy(wt).addScaledVector(dv, 3).addScaledVector(rt, -2).addScaledVector(camera.up, 2.5); ivRim.position.copy(wt).addScaledVector(dv, -3).addScaledVector(rt, 2.5).addScaledVector(camera.up, 1.5); }
+  if (Math.abs(camera.fov - 38) > .01) { camera.fov = 38; camera.updateProjectionMatrix(); }
+  if (camera.aspect > 1.15) camera.translateX(-ivD*spider.scale.x*Math.tan(19*Math.PI/180)*camera.aspect*.36); camera.updateMatrixWorld(true); camera.updateProjectionMatrix(); ivMkTick();
+}
+invEl.addEventListener("pointerdown", e => { if (e.target === invEl) { ivDrag = {x:e.clientX, y:e.clientY, t:performance.now(), m:0}; try { invEl.setPointerCapture(e.pointerId); } catch (_) {} } });
+invEl.addEventListener("pointermove", e => { if (!ivDrag) return; ivYaw -= (e.clientX - ivDrag.x)*.008; ivPit = clamp(ivPit + (e.clientY - ivDrag.y)*.006, -.2, 1.1); ivDrag.m += Math.abs(e.clientX - ivDrag.x) + Math.abs(e.clientY - ivDrag.y); ivDrag.x = e.clientX; ivDrag.y = e.clientY; });
+invEl.addEventListener("pointerup", () => { ivDrag = null; });
+invEl.addEventListener("mouseover", e => { const c = e.target.closest && e.target.closest("[data-f]"); if (c) ivFocusKey(c.dataset.f); });
+invEl.addEventListener("mouseleave", () => ivFocusKey("all"));
 function invKey(code) {
   if (maseShop && (code === "KeyE" || code === "KeyI" || code === "Escape")) { toggleInv(); return; } if (maseShop) return;
   if (code === "KeyI" || code === "Escape" || code === "Tab") { toggleInv(); return; }
@@ -105,13 +181,13 @@ function invKey(code) {
   else if (code === "ArrowLeft" || code === "KeyA") { const n = invN(), t = (invTab + n - 1)%n; if (t === 3) { goCom(); return; } invTab = t; invSel = 0; ivRender(); uiSnd(.5, "tab"); }
   else if (code.startsWith("Digit") && +code[5] >= 1 && +code[5] <= invN()) { if (+code[5] === 4) { goCom(); return; } invTab = +code[5] - 1; invSel = 0; ivRender(); uiSnd(.5, "tab"); }
 }
-const invN = () => comAvail() ? 4 : 3;
+const invN = () => 3;
 function goCom() { if (!invOpen) return; toggleInv(); toggleCom(); }
 function goInv() { if (!comOpen || !gear.pack) return; toggleCom(); toggleInv(); }
 function ivRender() {
   if (!maseShop && invTab > 2) invTab = 0;
-  $("ivT1").textContent = T(maseShop ? "MASES WERKSTATT" : "VIRTUAL BACKPACK"); $("ivT2").textContent = maseShop ? T("UPGRADE-BERATUNG") : "ARACHNE-8 · CJ-CITY"; $("ivGold").textContent = fmtSE(gear.se || 0); $("ivF").textContent = T("I / Esc: Schließen  ·  ← → oder 1–4: Reiter");
-  const tb = $("ivTabs"); tb.innerHTML = ""; ["INVENTAR", "AUSRÜSTUNG", "SPINNE"].concat(comAvail() ? ["FUNK"] : []).forEach((n, i) => { const b = document.createElement("button"); b.className = "ivTab" + (i === invTab ? " on" : ""); b.textContent = (i + 1) + " · " + T(n); b.onclick = () => { if (i === 3) { goCom(); return; } invTab = i; invSel = 0; ivRender(); }; tb.appendChild(b); });
+  $("ivT1").textContent = T(maseShop ? "MASES WERKSTATT" : "VIRTUAL BACKPACK"); $("ivT2").textContent = maseShop ? T("UPGRADE-BERATUNG") : "ARACHNE-8 · CJ-CITY"; $("ivGold").textContent = fmtSE(gear.se || 0); $("ivF").textContent = T("I / Esc: Schließen  ·  ← → oder 1–3: Reiter  ·  Ziehen: Spinne drehen");
+  const tb = $("ivTabs"); tb.innerHTML = ""; ["INVENTAR", "AUSRÜSTUNG", "SPINNE"].forEach((n, i) => { const b = document.createElement("button"); b.className = "ivTab" + (i === invTab ? " on" : ""); b.textContent = (i + 1) + " · " + T(n); b.onclick = () => { if (i === 3) { goCom(); return; } invTab = i; invSel = 0; ivRender(); }; tb.appendChild(b); });
   tb.style.display = maseShop ? "none" : ""; if (maseShop) $("ivF").textContent = T("E / Esc: Schließen");
   const B = $("ivBody"); B.innerHTML = ""; [ivInv, ivEquip, ivSpider, ivUpg][maseShop ? 3 : invTab](B);
 }
@@ -137,21 +213,13 @@ function ivEquip(B) {
     ["Karte von CJ-City", gear.map ? "AKTIV" : "–", "M: Karte öffnen."],
     ["Virtual Backpack", "AKTIV", "I: Inventar, Bauteile, Upgrades."]
   ];
-  for (const [n, s, d] of rows) { const c = document.createElement("div"); c.className = "card"; c.innerHTML = '<div class="m"><b></b><span></span></div><u></u>'; c.querySelector("b").textContent = T(n); c.querySelector("span").textContent = T(d); c.querySelector("u").textContent = T(s); B.appendChild(c); }
+  for (const [n, s, d] of rows) { const c = document.createElement("div"); c.className = "card eq"; c.dataset.f = {"Laserklinge":"knife", "Holo-Schild":"shield", "Dock-Bein":"dock", "Karte von CJ-City":"map", "Virtual Backpack":"pack"}[n] || "all"; c.innerHTML = '<div class="m"><b></b><span></span></div><u></u>'; c.querySelector("b").textContent = T(n); c.querySelector("span").textContent = T(d); c.querySelector("u").textContent = T(s); B.appendChild(c); }
 }
 function ivSpider(B) {
-  const cv = document.createElement("canvas"); cv.width = 300; cv.height = 280; cv.style.cssText = "background:#282b32;border:1px solid rgba(210,224,250,.2);border-radius:8px;max-width:100%"; B.appendChild(cv);
-  const x = cv.getContext("2d"), col = v => v > .75 ? "#e8eefc" : v > .45 ? "#4fa9a3" : "#c0392b", cx = 150, cy = 140;
-  const ang = [-.95, -.35, .3, .9];
-  for (const side of [-1, 1]) for (let r = 0; r < 4; r++) { const nm = LEGN[r] + (side > 0 ? " links" : " rechts"), a = ang[r], hx = cx + side*18, hy = cy + r*9 - 14, kx = hx + side*58, ky = hy + a*52 - 18, fx = kx + side*28, fy = ky + a*36 + 30;
-    x.strokeStyle = col(PARTS[nm]); x.lineWidth = 6; x.lineCap = "round"; x.beginPath(); x.moveTo(hx, hy); x.lineTo(kx, ky); x.lineTo(fx, fy); x.stroke(); x.fillStyle = "#1d2026"; x.beginPath(); x.arc(kx, ky, 4, 0, 7); x.fill(); }
-  x.fillStyle = col(PARTS["Hauptakku"]); x.beginPath(); x.ellipse(cx, cy + 6, 26, 36, 0, 0, 7); x.fill(); x.fillStyle = col(PARTS["Rückenpanzer"]); x.beginPath(); x.ellipse(cx, cy + 12, 17, 22, 0, 0, 7); x.fill();
-  x.fillStyle = col(PARTS["Sensorkopf"]); x.beginPath(); x.ellipse(cx, cy - 34, 13, 15, 0, 0, 7); x.fill(); x.fillStyle = "#4fa9a3"; x.fillRect(cx - 8, cy - 38, 16, 4);
-  x.fillStyle = "#a7adb4"; x.font = "11px system-ui,sans-serif"; x.textAlign = "center"; x.fillText(T("Weiß: Gehäuse  ·  Orange: Verschleiß  ·  Rot: kritisch"), cx, 268);
   const pl = document.createElement("div"); pl.className = "pl"; B.appendChild(pl);
   const names = BODYP.concat(legs.map(legName)); const tot = dmgAvg();
   const h = document.createElement("div"); h.className = "r"; h.innerHTML = "<span></span><b></b>"; h.children[0].textContent = T("Gesamt-Integrität"); h.children[1].textContent = Math.round(tot*100) + " %"; pl.appendChild(h);
-  for (const n of names) { const v = PARTS[n], r = document.createElement("div"); r.style.marginBottom = "7px"; r.innerHTML = '<div class="r" style="margin:0"><span></span><b></b></div><div class="pb"><div></div></div>'; r.querySelector("span").textContent = T(n); r.querySelector("b").textContent = Math.round(v*100) + " %"; const f = r.querySelector(".pb div"); f.style.width = (v*100) + "%"; f.style.background = col(v); pl.appendChild(r); }
+  for (const n of names) { const v = PARTS[n], r = document.createElement("div"); r.style.marginBottom = "7px"; r.className = "pr"; r.dataset.f = ivPartKey(n); r.innerHTML = '<div class="r" style="margin:0"><span></span><b></b></div><div class="pb"><div></div></div>'; r.querySelector("span").textContent = T(n); r.querySelector("b").textContent = Math.round(v*100) + " %"; const f = r.querySelector(".pb div"); f.style.width = (v*100) + "%"; f.style.background = col(v); pl.appendChild(r); }
 }
 function ivUpg(B) { fixUpg();
   const hint = document.createElement("div"); hint.style.cssText = "width:100%;color:#a7adb4;font-size:12px"; hint.textContent = T(maseShop ? "Mase baut die Upgrades ein. Bezahlt wird in SuperEuro (SE)." : "Upgrades gibt es nur bei Mase in der Werkstatt. Hier siehst du deinen Stand."); B.appendChild(hint);
@@ -506,7 +574,7 @@ function comKey(code) {
 }
 function comRender() {
   $("cmF").textContent = T("J / Esc: Schließen  ·  ← → oder 1–2: Reiter");
-  const tb = $("cmTabs"); tb.innerHTML = ""; ["AUFTRÄGE", "KONTAKTE"].concat(gear.pack ? ["BACKPACK"] : []).forEach((n, i) => { const b = document.createElement("button"); b.className = "ivTab" + (i === comTab ? " on" : ""); b.textContent = (i + 1) + " · " + T(n); b.onclick = () => { if (i === 2) { goInv(); return; } comTab = i; comRender(); }; tb.appendChild(b); });
+  const tb = $("cmTabs"); tb.innerHTML = ""; ["AUFTRÄGE", "KONTAKTE"].forEach((n, i) => { const b = document.createElement("button"); b.className = "ivTab" + (i === comTab ? " on" : ""); b.textContent = (i + 1) + " · " + T(n); b.onclick = () => { if (i === 2) { goInv(); return; } comTab = i; comRender(); }; tb.appendChild(b); });
   const B = $("cmBody"); B.innerHTML = ""; const card = (t, d, u, extra) => { const c = document.createElement("div"); c.className = "card"; c.innerHTML = '<div class="m"><b></b><span></span></div><u></u>'; c.querySelector("b").textContent = T(t); c.querySelector("span").textContent = T(d); c.querySelector("u").textContent = T(u); if (extra) extra(c); B.appendChild(c); return c; };
   if (comTab === 0) {
     const f = comFeed(); if (!f.length) card("Keine Übertragung", "Noch kein Auftrag. Rackson meldet sich, sobald etwas reinkommt.", "WARTE …");

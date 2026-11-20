@@ -88,6 +88,31 @@ function gearBuild() {
   const sg = new THREE.IcosahedronGeometry(.5, 2); _shield = new THREE.Mesh(sg, new THREE.MeshBasicMaterial({color:0x7fa6ee, transparent:true, opacity:.14, side:THREE.DoubleSide, depthWrite:false}));
   _shieldW = new THREE.Mesh(new THREE.IcosahedronGeometry(.505, 1), new THREE.MeshBasicMaterial({color:0xcfe0ff, transparent:true, opacity:.3, wireframe:true, depthWrite:false})); _shield.add(_shieldW); _shield.visible = false; scene.add(_shield);
 }
+/* ---------- Gadgets am Körper der Spinne (sichtbar, wenn freigeschaltet) ---------- */
+let _gad = null; const _gu = new THREE.Vector3(0,1,0), _gd = new THREE.Vector3();
+function gadBuild() {
+  const G = _gad = {pack:new THREE.Group(), shield:new THREE.Group(), blade:new THREE.Group(), dock:new THREE.Group(), map:new THREE.Group()};
+  const A = (geo, m, x, y, z, p) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.castShadow = true; p.add(o); return o; };
+  { const p = G.pack; p.position.set(0,.56,-1.0);                                              // Virtual Backpack auf dem Hinterleib
+    A(new THREE.BoxGeometry(.5,.16,.62), matDark, 0,.03,0, p); A(new THREE.BoxGeometry(.44,.03,.56), matLight, 0,.12,0, p);
+    for (const z of [-.2,.2]) A(new THREE.BoxGeometry(.54,.035,.05), matBrass, 0,.04,z, p);
+    A(new THREE.BoxGeometry(.28,.012,.025), matLens, 0,.14,-.22, p);
+    for (const s of [-1,1]) { const k = A(new THREE.CylinderGeometry(.06,.06,.4,14), matBody, s*.31,.04,0, p); k.rotation.x = Math.PI/2; A(new THREE.CylinderGeometry(.045,.045,.02,12), matLens, s*.31,.04,.21, p).rotation.x = Math.PI/2;
+      const an = A(new THREE.CylinderGeometry(.006,.01,.4,6), matLight, s*.2,.3,-.22, p); an.rotation.z = -s*.18; an.rotation.x = .25; }
+    A(new THREE.SphereGeometry(.025,10,8), matLens, 0,.31,-.3, p); }
+  { const p = G.shield; for (const [x,z] of [[.38,.12],[-.38,.12],[.32,-.3],[-.32,-.3]]) { const y = .14 + .26*Math.sqrt(Math.max(0,1 - (Math.hypot(x,z/1.1)/.57)**2)) + .01;
+      const o = A(new THREE.CylinderGeometry(.05,.06,.035,14), matBrass, x,y,z, p); o.lookAt(x*2,y+.4,z*2); o.rotateX(Math.PI/2); A(new THREE.SphereGeometry(.032,12,8), matLens, x,y+.02,z, p).scale.y = .6; }
+    const r = A(new THREE.TorusGeometry(.34,.01,6,32), matLens, 0,.43,0, p); r.rotation.x = Math.PI/2; }
+  { const p = G.blade; A(new THREE.CylinderGeometry(.075,.075,.05,16), matBrass, 0,0,0, p); A(new THREE.CylinderGeometry(.062,.062,.1,16), matDark, 0,0,0, p); A(new THREE.BoxGeometry(.06,.05,.14), matLight, 0,.0,.0, p).position.set(.0,.0,.07); A(new THREE.CylinderGeometry(.012,.012,.08,8), matLens, 0,.0,.14, p).rotation.x = Math.PI/2; }
+  { const p = G.dock; A(new THREE.CylinderGeometry(.065,.065,.04,16), matBrass, 0,0,0, p); A(new THREE.CylinderGeometry(.052,.052,.06,16), matLens, 0,0,0, p); A(new THREE.CylinderGeometry(.02,.03,.1,10), matDark, 0,.09,0, p); }
+  { const p = G.map; A(new THREE.CylinderGeometry(.01,.014,.26,6), matLight, 0,.13,0, p); const d = A(new THREE.SphereGeometry(.085,16,8,0,Math.PI*2,0,Math.PI*.5), matLight, 0,.26,0, p); d.rotation.x = -.5; A(new THREE.SphereGeometry(.022,10,8), matLens, 0,.285,.03, p); p.position.set(.27,.2,.8); headG.add(p); }
+  for (const k of ["pack","shield","blade","dock"]) { G[k].visible = false; spider.add(G[k]); } G.map.visible = false;
+}
+function gadTick() {
+  if (!_gad) gadBuild(); const G = _gad;
+  G.pack.visible = !!gear.pack; G.shield.visible = !!gear.shield; G.map.visible = !!gear.map; G.blade.visible = !!gear.knife; G.dock.visible = !!gear.knife;
+  for (const [g, s, f] of [[G.blade, 1, .72], [G.dock, -1, .8]]) { const L = legs.find(l => l.row === 0 && l.side === s); if (!L || !g.visible) continue; g.position.lerpVectors(L.P2, L.P3, f); _gd.subVectors(L.P3, L.P2).normalize(); g.quaternion.setFromUnitVectors(_gu, _gd); }
+}
 function gearTick(dt, wantS) {
   upgTick(performance.now()/1000);
   if (!_gearBuilt) gearBuild(); const sb = $("btnShield"); if (sb) sb.style.display = gear.shield ? "" : "none"; if (ch2.stage >= 8) { gear.map = true; givePack(); } const mb = $("mapBtn"); if (mb) mb.style.display = gear.map ? "flex" : "none"; if (xs.on && xs.scene === "street" && xs.gar && gear.knife && ch2.stage >= 8) xs.gar.tgt = 1; const ib = $("btnInv"); if (ib) ib.style.display = gear.pack ? "" : "none";

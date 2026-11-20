@@ -198,7 +198,7 @@ function loop() {
   lookTick(Math.min(.05, (performance.now() - (loop.lt || performance.now()))/1000)); loop.lt = performance.now();
   if (gameStarted && !paused && !settingsOpen && !pauseOpen) playT += Math.min(.1, (performance.now() - (loop.ps || performance.now()))/1000); loop.ps = performance.now();
   padTick(Math.min(.05, (performance.now() - (loop.pt || performance.now()))/1000)); loop.pt = performance.now();
-  if (paused) { clock.getDelta(); renderFinal(.016); return; }
+  if (paused) { clock.getDelta(); if (invOpen) { try { ivCam(Math.min(.1, (performance.now() - (loop.ic || performance.now()))/1000)); loop.ic = performance.now(); } catch (e) {} renderer.render(scene, camera); return; } renderFinal(.016); return; }
   const raw = Math.min(clock.getDelta(), .25), nSub = Math.max(1, Math.ceil(raw/(1/30) - 1e-6)), dt = raw/nSub*(nSub > 1 ? 1 : 1); clockT += raw;
   const ix = clamp((keys.KeyD?1:0) - (keys.KeyA?1:0) + joy.x + padv.x, -1, 1);
   const iz = clamp(((keys.KeyW||keys.ArrowUp)?1:0) - (keys.KeyS?1:0) + joy.y + padv.y, -1, 1);
@@ -209,6 +209,7 @@ function loop() {
   doorT += (doorOpen - doorT)*(1 - Math.exp(-dt*3)); doorG.position.z = 1.6 + 1.05*doorT;
   for (const l of legs) { _a.copy(l.foot); spider.worldToLocal(_a); solveLeg(l, _a); }
   legCheck();
+  try { gadTick(); } catch (e) {}
   if (mode === "menu") menuCamera(); else if (mode === "cut") cutCamera(dt); else updateCamera();
   torchTick(dt); shadowTick(dt); fxTick(dt); sndTick(dt); applyShake();
   camera.updateMatrixWorld(true); updateAttack(dt); updateMann(dt);
