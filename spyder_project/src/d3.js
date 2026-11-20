@@ -236,6 +236,7 @@ function loop() {
     pr.textContent = T(msg); pr.style.display = (msg && !fp) ? "block" : "none";
     if (fp) { const s = Math.floor(clockT); $("fpT").textContent = [s/3600|0, (s/60|0)%60, s%60].map(v => String(v).padStart(2,"0")).join(":"); $("fpZ").textContent = zoom.toFixed(1); }
   }
+  try { arTick(dt); } catch (e) { if (!arTick.er) { arTick.er = 1; console.error("ar", e); } }
   reflTick(dt);
   renderFinal(dt);
   if (shot) savePhoto();
