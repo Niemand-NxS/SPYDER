@@ -305,7 +305,7 @@ function upgBuild() {
 function upgTick(t) { const g = JSON.stringify(gear.upg); if (g !== upgSig) { upgSig = g; upgBuild(); } for (let i = 0; i < upgPods.length; i++) upgPods[i].scale.setScalar(1 + .25*Math.sin(t*3 + i)); }
 
 /* ===== AR-Namensschilder: Namen bekannter Figuren neben dem Kopf ===== */
-let _ar = null; const _arV = new THREE.Vector3();
+let _ar = null; const _arV = new THREE.Vector3(), _arR = new THREE.Vector3();
 function arKnow(k) { try { gear.known = gear.known || {}; gear.known[k] = 1; } catch (e) {} }
 function arTick(dt) {
   if (!_ar) { const lay = document.createElement("div"); lay.id = "arLayer"; document.body.appendChild(lay); _ar = {lay, tags:{}}; }
@@ -314,7 +314,7 @@ function arTick(dt) {
   for (const k in SPK) {
     const S = SPK[k], R = S.R; let e = A.tags[k]; let show = !!(kn[k] && R && R.g && R.head);
     if (show) { let o = R.g; while (o && o !== scene) { if (!o.visible) { show = false; break; } o = o.parent; } if (o !== scene) show = false; }
-    if (show) { R.head.getWorldPosition(_arV); const sc = R.g.getWorldScale(new THREE.Vector3()).y || 1; _arV.y += .42*sc; const dd = Math.hypot(_arV.x - pos.x, _arV.y - pos.y, _arV.z - pos.z); const q = _arV.project(camera); if (q.z < 1 && q.y > .88 && q.y < 8) q.y = .88;
+    if (show) { R.head.getWorldPosition(_arV); const sc = R.g.getWorldScale(new THREE.Vector3()).y || 1; _arV.addScaledVector(_arR.setFromMatrixColumn(camera.matrixWorld, 0), .17*sc); const dd = Math.hypot(_arV.x - pos.x, _arV.y - pos.y, _arV.z - pos.z); const q = _arV.project(camera); if (q.z < 1 && q.y > .88 && q.y < 8) q.y = .88;
       if (dd > 15 || q.z > 1 || Math.abs(q.x) > 1.05 || Math.abs(q.y) > 1.05) show = false; else {
         if (!e) { e = document.createElement("div"); e.className = "arN"; const p = S.name.split(" · "); e.innerHTML = (p.length > 1 ? "<small></small>" : "") + "<b></b><i></i>"; if (p.length > 1) e.querySelector("small").textContent = T(p[0]); e.querySelector("b").textContent = T(p[p.length - 1]); A.lay.appendChild(e); A.tags[k] = e; }
         e.style.display = ""; e.style.opacity = clamp((15 - dd)/5, 0, 1).toFixed(2); e.style.transform = "translate(" + ((q.x*.5 + .5)*w).toFixed(1) + "px," + ((-q.y*.5 + .5)*h).toFixed(1) + "px)"; } }
@@ -323,9 +323,9 @@ function arTick(dt) {
 }
 { const st = document.createElement("style"); st.textContent = `
 #arLayer{position:fixed;inset:0;z-index:4;pointer-events:none;overflow:hidden}
-#arLayer .arN{position:absolute;left:0;top:0;width:0;height:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;color:#E2E8F0;text-transform:uppercase;will-change:transform}
-#arLayer .arN small{font-size:9px;letter-spacing:.26em;color:#4FA9A3;margin-bottom:2px;white-space:nowrap;transform:translateY(-100%);position:absolute;bottom:34px}
-#arLayer .arN b{font-weight:500;font-size:13px;letter-spacing:.2em;white-space:nowrap;padding:3px 10px;background:rgba(11,14,20,.62);border-bottom:2px solid #4FA9A3;position:absolute;bottom:18px;transform:translateY(0)}
-#arLayer .arN i{position:absolute;bottom:0;width:1px;height:18px;background:linear-gradient(rgba(79,169,163,.0),rgba(79,169,163,.8))}
-#arLayer .arN i::after{content:"";position:absolute;left:-2px;bottom:-3px;width:5px;height:5px;background:#4FA9A3;transform:rotate(45deg)}
+#arLayer .arN{position:absolute;left:0;top:0;width:0;height:0;color:#E2E8F0;text-transform:uppercase;will-change:transform}
+#arLayer .arN small{font-size:9px;letter-spacing:.26em;color:#4FA9A3;white-space:nowrap;position:absolute;left:30px;top:-26px}
+#arLayer .arN b{font-weight:500;font-size:13px;letter-spacing:.2em;white-space:nowrap;padding:3px 10px;background:rgba(11,14,20,.62);border-left:2px solid #4FA9A3;position:absolute;left:24px;top:-12px}
+#arLayer .arN i{position:absolute;left:0;top:0;width:24px;height:1px;background:linear-gradient(90deg,rgba(79,169,163,.0),rgba(79,169,163,.85))}
+#arLayer .arN i::after{content:"";position:absolute;left:-2px;top:-2px;width:5px;height:5px;background:#4FA9A3;transform:rotate(45deg)}
 body.menu #arLayer,body.ivOpen #arLayer{display:none !important}`; document.head.appendChild(st); }
