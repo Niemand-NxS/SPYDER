@@ -30,3 +30,50 @@ let _ldBusy = false;
 function ldWrap(f, ms) { return function (...a) { const el = document.getElementById("loadScr"); if (_ldBusy || gameStarted === false || (el && el.classList.contains("on"))) return f.apply(this, a);
   showLoad(ms || 1700, () => { _ldBusy = true; try { f.apply(this, a); } finally { _ldBusy = false; } }, true); }; }
 enterAlley = ldWrap(enterAlley); enterStreet = ldWrap(enterStreet); enterStairs = ldWrap(enterStairs); enterHeist = ldWrap(enterHeist); enterSide = ldWrap(enterSide); enterShaft = ldWrap(enterShaft); enterLab = ldWrap(enterLab); loadCheckpoint = ldWrap(loadCheckpoint, 2000);
+
+/* ===== Konto: lokale Profile, Statistiken, Erfolge ===== */
+const ACK = "spyderAcct";
+let ACC = (() => { try { const o = JSON.parse(localStorage.getItem(ACK)); if (o && o.users) return o; } catch (e) {} return {cur:"", users:{}}; })();
+function acU() { const k = ACC.cur; if (!ACC.users[k]) ACC.users[k] = {since:Date.now(), st:{play:0, dist:0, deaths:0, hits:0, se:0}, ach:{}}; const u = ACC.users[k]; u.st = Object.assign({play:0, dist:0, deaths:0, hits:0, se:0}, u.st); return u; }
+function acSave() { try { localStorage.setItem(ACK, JSON.stringify(ACC)); } catch (e) {} }
+const ACH = [
+  ["start", "Systemstart", "Starte das Spiel.", () => gameStarted],
+  ["walk", "Erste Meter", "Lege 100 m zurück.", u => u.st.dist >= 100], ["walk2", "Weit gereist", "Lege 5 km zurück.", u => u.st.dist >= 5000],
+  ["time", "Eingelebt", "Spiele 30 Minuten.", u => u.st.play >= 1800], ["know", "Bekannte Gesichter", "Lerne 3 Figuren kennen.", () => Object.keys(gear.known || {}).length >= 3],
+  ["knife", "Messerscharf", "Erhalte die Laserklinge.", () => gear.knife], ["shield", "Schutzschild", "Erhalte das Holo-Schild.", () => gear.shield], ["map", "Kartograf", "Lade die Karte von CJ-City herunter.", () => gear.map], ["pack", "Gepackt", "Erhalte das Virtual Backpack.", () => gear.pack],
+  ["rack", "Zwielichtige Bekanntschaft", "Triff Rackson.", () => gear.rackMet], ["job", "Auftrag angenommen", "Nimm Racksons Auftrag an.", () => gear.job >= 1], ["hack", "Tresorknacker", "Hacke den Tresor.", () => gear.hacked],
+  ["upg1", "Aufgerüstet", "Baue ein Upgrade bei Mase ein.", () => UPG.some(U => gear.upg[U.k] > 0)], ["upg3", "Vollausbau", "Bringe alle Upgrades auf Stufe 3.", () => UPG.every(U => gear.upg[U.k] >= 3)],
+  ["rich", "Wohlhabend", "Besitze 10.000 SuperEuro.", u => u.st.se >= 10000], ["dead", "Reparaturbedürftig", "Fall einmal aus.", u => u.st.deaths >= 1], ["hit", "Einstecker", "Erleide 10 Treffer.", u => u.st.hits >= 10]];
+let _acT = 0, _acC = 0, _acP = null;
+function acctTick(dt) {
+  if (!gameStarted) return; const u = acU(), cheat = dev.god || dev.inf || dev.known;
+  u.st.play += dt; if (mode === "surf") { if (_acP) { const d = Math.hypot(pos.x - _acP.x, pos.y - _acP.y, pos.z - _acP.z); if (d < 1.5) u.st.dist += d; } (_acP = _acP || new THREE.Vector3()).copy(pos); } else _acP = null;
+  u.st.se = Math.max(u.st.se, gear.se || 0); _acT += dt; if (_acT > 1.5) { _acT = 0; if (!cheat) for (const [id, n, d, f] of ACH) if (!u.ach[id] && f(u)) { u.ach[id] = Date.now(); toast(T("Erfolg freigeschaltet") + ": " + T(n)); try { uiSnd(.8, "ok"); } catch (e) {} } _acC += 1; if (_acC >= 7) { _acC = 0; acSave(); } }
+}
+{ const _sd = showDeath; showDeath = function (...a) { try { acU().st.deaths++; acSave(); } catch (e) {} return _sd.apply(this, a); };
+  const _th = takeHit; takeHit = function (...a) { const r = _th.apply(this, a); try { if (r) acU().st.hits++; } catch (e) {} return r; }; }
+function acFmt(s) { s = Math.floor(s); const h = Math.floor(s/3600), m = Math.floor(s%3600/60); return h ? h + " h " + m + " min" : m + " min"; }
+function openAcct() {
+  const el = $("slots"); el.querySelector(".sh b").textContent = T("KONTO"); el.classList.add("acct"); setPanel(el, true); acRender(); }
+function acRender() {
+  const box = $("slotList"), u = acU(), g = !ACC.cur, nm = g ? T("Gast") : ACC.cur; box.innerHTML = "";
+  const hd = document.createElement("div"); hd.className = "acP";
+  hd.innerHTML = '<div class="acAv">' + (g ? "?" : nm[0].toUpperCase()) + '</div><div class="acN"><b></b><span></span></div>'; hd.querySelector("b").textContent = nm; hd.querySelector("span").textContent = g ? T("Nicht angemeldet – Fortschritt wird trotzdem lokal gezählt.") : T("Angemeldet (lokales Profil)") + " · " + T("seit") + " " + new Date(u.since).toLocaleDateString(); box.appendChild(hd);
+  const f = document.createElement("div"); f.className = "acF";
+  if (g) { f.innerHTML = '<input type="text" maxlength="16" spellcheck="false" autocomplete="off"><button class="acB">' + T("ANMELDEN") + '</button>'; const inp = f.querySelector("input"); inp.placeholder = T("Profilname (2–16 Zeichen)"); const go = () => { const v = inp.value.trim(); if (v.length < 2) { inp.focus(); toast("Name zu kurz"); return; } ACC.cur = v; acU(); acSave(); acRender(); }; f.querySelector("button").onclick = go; inp.addEventListener("keydown", e => { e.stopPropagation(); if (e.key === "Enter") go(); }); inp.addEventListener("keyup", e => e.stopPropagation()); }
+  else { f.innerHTML = '<button class="acB">' + T("ABMELDEN") + '</button>'; f.querySelector("button").onclick = () => { ACC.cur = ""; acSave(); acRender(); }; }
+  box.appendChild(f);
+  const nt = document.createElement("div"); nt.className = "acNote"; nt.textContent = T("Profile liegen nur auf diesem Gerät im Browser. Ein Online-Konto gibt es noch nicht."); box.appendChild(nt);
+  const h1 = document.createElement("div"); h1.className = "acH"; h1.textContent = T("STATISTIKEN"); box.appendChild(h1);
+  const st = [["Spielzeit", acFmt(u.st.play)], ["Zurückgelegte Strecke", (u.st.dist >= 1000 ? (u.st.dist/1000).toFixed(2) + " km" : Math.round(u.st.dist) + " m")], ["Ausfälle", u.st.deaths], ["Erlittene Treffer", u.st.hits], ["Höchster SuperEuro-Stand", fmtSE(u.st.se)], ["Bekannte Figuren", Object.keys(gear.known || {}).length], ["Eingebaute Upgrade-Stufen", UPG.reduce((a, U) => a + (gear.upg[U.k] | 0), 0) + " / " + UPG.length*3]];
+  const sg = document.createElement("div"); sg.className = "acS"; st.forEach(([l, v]) => { const r = document.createElement("div"); r.innerHTML = '<span></span><b></b>'; r.children[0].textContent = T(l); r.children[1].textContent = v; sg.appendChild(r); }); box.appendChild(sg);
+  const n = ACH.filter(a => u.ach[a[0]]).length, h2 = document.createElement("div"); h2.className = "acH"; h2.textContent = T("ERFOLGE") + " · " + n + " / " + ACH.length; box.appendChild(h2);
+  const bar = document.createElement("div"); bar.className = "acBar"; bar.innerHTML = '<i style="width:' + (n/ACH.length*100) + '%"></i>'; box.appendChild(bar);
+  for (const [id, na, de] of ACH) { const on = !!u.ach[id], r = document.createElement("div"); r.className = "acA" + (on ? " on" : ""); r.innerHTML = '<em>' + (on ? "✓" : "·") + '</em><div><b></b><span></span></div>'; r.querySelector("b").textContent = T(na); r.querySelector("span").textContent = T(de) + (on ? " · " + new Date(u.ach[id]).toLocaleDateString() : ""); box.appendChild(r); }
+}
+$("startAcct").addEventListener("click", () => openAcct());
+setInterval(() => { try { if (gameStarted) acSave(); } catch (e) {} }, 20000);
+{ const st = document.createElement("style"); st.textContent = `#slots.acct #slotList{padding:0 48px 40px}.acP{display:flex;gap:16px;align-items:center;margin:8px 0 14px}.acAv{width:54px;height:54px;border:1px solid #4FA9A3;color:#4FA9A3;display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(79,169,163,.08)}.acN b{display:block;font-size:19px;letter-spacing:.12em;color:#E2E8F0;font-weight:500}.acN span{font-size:12px;color:#8b95a7}
+.acF{display:flex;gap:8px;margin-bottom:8px}.acF input{flex:1;background:rgba(11,14,20,.6);border:1px solid rgba(226,232,240,.2);color:#E2E8F0;padding:10px 12px;font:inherit;letter-spacing:.06em;outline:0}.acF input:focus{border-color:#4FA9A3}.acB{background:none;border:1px solid #4FA9A3;color:#E2E8F0;padding:10px 18px;letter-spacing:.2em;font-size:12px;cursor:pointer}.acB:hover,.acB.padf{background:rgba(79,169,163,.2)}.acNote{font-size:11px;color:#6b7587;margin-bottom:10px}
+.acH{font-size:11px;letter-spacing:.34em;color:#4FA9A3;margin:22px 0 10px}.acS{display:grid;grid-template-columns:1fr 1fr;gap:2px 22px}.acS div{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(226,232,240,.08);font-size:13px;color:#8b95a7}.acS b{color:#E2E8F0;font-weight:500}
+.acBar{height:3px;background:rgba(226,232,240,.1);margin-bottom:10px}.acBar i{display:block;height:100%;background:#4FA9A3}.acA{display:flex;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(226,232,240,.06);opacity:.45}.acA.on{opacity:1}.acA em{width:26px;height:26px;border:1px solid rgba(226,232,240,.25);display:flex;align-items:center;justify-content:center;font-style:normal;color:#8b95a7}.acA.on em{border-color:#4FA9A3;color:#4FA9A3;background:rgba(79,169,163,.12)}.acA b{display:block;font-weight:500;font-size:13px;color:#E2E8F0;letter-spacing:.04em}.acA span{font-size:11.5px;color:#8b95a7}`; document.head.appendChild(st); }
