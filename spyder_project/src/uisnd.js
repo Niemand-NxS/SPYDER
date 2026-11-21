@@ -45,7 +45,17 @@ const ACH = [
   ["knife", "Messerscharf", "Erhalte die Laserklinge.", () => gear.knife], ["shield", "Schutzschild", "Erhalte das Holo-Schild.", () => gear.shield], ["map", "Kartograf", "Lade die Karte von CJ-City herunter.", () => gear.map], ["pack", "Gepackt", "Erhalte das Virtual Backpack.", () => gear.pack],
   ["rack", "Zwielichtige Bekanntschaft", "Triff Rackson.", () => gear.rackMet], ["job", "Auftrag angenommen", "Nimm Racksons Auftrag an.", () => gear.job >= 1], ["hack", "Tresorknacker", "Hacke den Tresor.", () => gear.hacked],
   ["upg1", "Aufgerüstet", "Baue ein Upgrade bei Mase ein.", () => UPG.some(U => gear.upg[U.k] > 0)], ["upg3", "Vollausbau", "Bringe alle Upgrades auf Stufe 3.", () => UPG.every(U => gear.upg[U.k] >= 3)],
-  ["rich", "Wohlhabend", "Besitze 10.000 SuperEuro.", u => u.st.se >= 10000], ["dead", "Reparaturbedürftig", "Fall einmal aus.", u => u.st.deaths >= 1], ["hit", "Einstecker", "Erleide 10 Treffer.", u => u.st.hits >= 10]];
+  ["rich", "Wohlhabend", "Besitze 10.000 SuperEuro.", u => u.st.se >= 10000], ["dead", "Reparaturbedürftig", "Fall einmal aus.", u => u.st.deaths >= 1], ["hit", "Einstecker", "Erleide 10 Treffer.", u => u.st.hits >= 10],
+  ["walk3", "Streuner", "Lege 1 km zurück.", u => u.st.dist >= 1000], ["walk4", "Langstreckenläufer", "Lege 20 km zurück.", u => u.st.dist >= 20000],
+  ["time2", "Stammgast", "Spiele 2 Stunden.", u => u.st.play >= 7200], ["time3", "Dauergast", "Spiele 10 Stunden.", u => u.st.play >= 36000],
+  ["dead2", "Wiederholungstäter", "Falle 5-mal aus.", u => u.st.deaths >= 5], ["dead3", "Ersatzteillager", "Falle 25-mal aus.", u => u.st.deaths >= 25],
+  ["hit2", "Sandsack", "Erleide 50 Treffer.", u => u.st.hits >= 50], ["hit3", "Unverwüstlich", "Erleide 200 Treffer.", u => u.st.hits >= 200],
+  ["se1", "Taschengeld", "Besitze 1.000 SuperEuro.", u => u.st.se >= 1000], ["se2", "Vermögen", "Besitze 50.000 SuperEuro.", u => u.st.se >= 50000],
+  ["know2", "Stadtbekannt", "Lerne 6 Figuren kennen.", () => Object.keys(gear.known || {}).length >= 6],
+  ["upg2", "Halb aufgerüstet", "Baue 15 Upgrade-Stufen ein.", () => UPG.reduce((a, U) => a + (gear.upg[U.k] | 0), 0) >= 15],
+  ["job2", "Kreditkontor geknackt", "Schließe den Auftrag im Kreditkontor ab.", () => gear.job >= 2],
+  ["net", "Vernetzt", "Melde dich mit einem Online-Konto an.", () => !!(fb && fb.user)],
+  ["all", "Perfektionist", "Schalte alle anderen Erfolge frei.", u => ACH.every(a => a[0] === "all" || u.ach[a[0]])]];
 let _acT = 0, _acC = 0, _acP = null;
 function acctTick(dt) {
   if (!gameStarted) return; const u = acU(), cheat = dev.god || dev.inf || dev.known;
@@ -56,24 +66,24 @@ function acctTick(dt) {
   const _th = takeHit; takeHit = function (...a) { const r = _th.apply(this, a); try { if (r) acU().st.hits++; } catch (e) {} return r; }; }
 function acFmt(s) { s = Math.floor(s); const h = Math.floor(s/3600), m = Math.floor(s%3600/60); return h ? h + " h " + m + " min" : m + " min"; }
 function openAcct() {
-  const el = $("slots"); el.querySelector(".sh b").textContent = T("KONTO"); el.classList.add("acct"); setPanel(el, true); acRender(); if (fbCfg() && !fb.auth) fbLoad().catch(e => { fb.msg = fbErr(e); acUi(); }); }
+  const el = $("slots"); el.querySelector(".sh b").textContent = T("KONTO"); el.classList.add("acct"); fb.note = ""; setPanel(el, true); acRender(); if (fbCfg() && !fb.auth) fbLoad().catch(e => { fb.msg = fbErr(e); acUi(); }); }
 let acMode = "in", acNm = "";
-const ACI = {bolt:'<path d="M13 3L5 13h6l-1 8 8-10h-6z"/>', steps:'<path d="M7 20c-2 0-3-1.500-3-3s1-3 3-3 3 1.500 3 3-1 3-3 3zM17 12c-2 0-3-1.500-3-3s1-3 3-3 3 1.500 3 3-1 3-3 3z"/>', clock:'<circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/>', face:'<circle cx="12" cy="9" r="3.500"/><path d="M5 20c0-4 3-6 7-6s7 2 7 6"/>', blade:'<path d="M5 19L19 5M5 19l2-4 2 2z"/>', shield:'<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/>', map:'<path d="M4 6l5-2 6 2 5-2v14l-5 2-6-2-5 2zM9 4v14M15 6v14"/>', box:'<path d="M4 8l8-4 8 4v9l-8 4-8-4zM4 8l8 4 8-4M12 12v9"/>', doc:'<path d="M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h6"/>', lock:'<rect x="5" y="11" width="14" height="9" rx="1"/><path d="M8 11V8a4 4 0 018 0v3"/>', cog:'<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.600 5.600l2.100 2.100M16.300 16.300l2.100 2.100M5.600 18.400l2.100-2.100M16.300 7.700l2.100-2.100"/>', coin:'<circle cx="12" cy="12" r="8"/><path d="M12 8v8M9.500 10c0-1 1-1.500 2.500-1.500s2.500.500 2.500 1.500-1 1.200-2.500 1.500-2.500.600-2.500 1.500 1 1.500 2.500 1.500 2.500-.500 2.500-1.500"/>', wrench:'<path d="M14 6a4 4 0 005 5l-9 9a2 2 0 01-3-3l9-9a4 4 0 01-2-2z"/>', hit:'<path d="M12 3l2 6 6 1-5 4 2 6-5-3-5 3 2-6-5-4 6-1z"/>'};
-const ACM = {start:"bolt", walk:"steps", walk2:"steps", time:"clock", know:"face", knife:"blade", shield:"shield", map:"map", pack:"box", rack:"face", job:"doc", hack:"lock", upg1:"cog", upg3:"cog", rich:"coin", dead:"wrench", hit:"hit"};
+const ACI = {bolt:'<path d="M13 3L5 13h6l-1 8 8-10h-6z"/>', steps:'<path d="M7 20c-2 0-3-1.500-3-3s1-3 3-3 3 1.500 3 3-1 3-3 3zM17 12c-2 0-3-1.500-3-3s1-3 3-3 3 1.500 3 3-1 3-3 3z"/>', clock:'<circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/>', face:'<circle cx="12" cy="9" r="3.500"/><path d="M5 20c0-4 3-6 7-6s7 2 7 6"/>', blade:'<path d="M5 19L19 5M5 19l2-4 2 2z"/>', shield:'<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/>', map:'<path d="M4 6l5-2 6 2 5-2v14l-5 2-6-2-5 2zM9 4v14M15 6v14"/>', box:'<path d="M4 8l8-4 8 4v9l-8 4-8-4zM4 8l8 4 8-4M12 12v9"/>', doc:'<path d="M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h6"/>', lock:'<rect x="5" y="11" width="14" height="9" rx="1"/><path d="M8 11V8a4 4 0 018 0v3"/>', cog:'<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.600 5.600l2.100 2.100M16.300 16.300l2.100 2.100M5.600 18.400l2.100-2.100M16.300 7.700l2.100-2.100"/>', coin:'<circle cx="12" cy="12" r="8"/><path d="M12 8v8M9.500 10c0-1 1-1.500 2.500-1.500s2.500.500 2.500 1.500-1 1.200-2.500 1.500-2.500.600-2.500 1.500 1 1.500 2.500 1.500 2.500-.500 2.500-1.500"/>', wrench:'<path d="M14 6a4 4 0 005 5l-9 9a2 2 0 01-3-3l9-9a4 4 0 01-2-2z"/>', hit:'<path d="M12 3l2 6 6 1-5 4 2 6-5-3-5 3 2-6-5-4 6-1z"/>', cloud:'<path d="M7 18a4 4 0 010-8 5 5 0 019.500-1A3.500 3.500 0 0117 18z"/>', trophy:'<path d="M8 4h8v5a4 4 0 01-8 0zM8 6H5v2a3 3 0 003 3M16 6h3v2a3 3 0 01-3 3M12 13v4M8 20h8"/>'};
+const ACM = {start:"bolt", walk:"steps", walk2:"steps", time:"clock", know:"face", knife:"blade", shield:"shield", map:"map", pack:"box", rack:"face", job:"doc", hack:"lock", upg1:"cog", upg3:"cog", rich:"coin", dead:"wrench", hit:"hit", walk3:"steps", walk4:"steps", time2:"clock", time3:"clock", dead2:"wrench", dead3:"wrench", hit2:"hit", hit3:"shield", se1:"coin", se2:"coin", know2:"face", upg2:"cog", job2:"doc", net:"cloud", all:"trophy"};
 function acRender() {
   const box = $("slotList"), u = acU(), g = !ACC.cur, on = !!fb.user, nm = g ? T("Gast") : ACC.cur, cfg = fbCfg(), n = ACH.filter(a => u.ach[a[0]]).length; box.innerHTML = "";
   const E = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h !== undefined) e.innerHTML = h; return e; }, tx = (t, c, s) => { const e = E(t, c); e.textContent = s; return e; };
   /* Profilkarte */
-  const st0 = on ? (fb.state === "sync" ? "sync" : fb.state === "err" ? "err" : "ok") : "off", stT = on ? (st0 === "sync" ? T("SYNCHRONISIERE …") : st0 === "err" ? T("SYNC-FEHLER") : T("ONLINE · SYNCHRONISIERT")) : g ? T("GAST · NUR LOKAL") : T("LOKALES PROFIL");
+  const off = on && !navigator.onLine, cfl = on && fb.conf.length > 0, st0 = on ? (off || cfl || fb.state === "sync" ? "sync" : fb.state === "err" ? "err" : "ok") : "off", stT = on ? (off ? T("OFFLINE · WIRD NACHGEHOLT") : cfl ? T("KONFLIKT · SPIELSTAND WÄHLEN") : fb.state === "sync" ? T("SYNCHRONISIERE …") : st0 === "err" ? T("SYNC-FEHLER") : T("ONLINE · SYNCHRONISIERT")) : g ? T("GAST · NUR LOKAL") : T("LOKALES PROFIL");
   const pc = E("div", "acCard acProf"); const av = E("div", "acAv", '<i></i><i></i><i></i><i></i><span></span>'); av.querySelector("span").textContent = g ? "?" : nm[0].toUpperCase(); pc.appendChild(av);
   const info = E("div", "acInfo"); info.appendChild(tx("b", "acName", nm)); const chip = E("div", "acChip " + st0, '<s></s><span></span>'); chip.querySelector("span").textContent = stT; info.appendChild(chip);
   info.appendChild(tx("div", "acSum", acFmt(u.st.play) + "  ·  " + n + " / " + ACH.length + " " + T("Erfolge"))); pc.appendChild(info); box.appendChild(pc);
   /* Anmelden / Registrieren */
   const card = E("div", "acCard acLog");
   if (on) { card.appendChild(tx("div", "acT", T("ONLINE-KONTO"))); card.appendChild(tx("p", "acP2", T("Profil, Statistiken, Erfolge und Spielstände werden im Konto gespeichert und zwischen deinen Geräten abgeglichen.")));
-    const r = E("div", "acRow"), b1 = tx("button", "acB pri", T("JETZT SYNCHRONISIEREN")), b2 = tx("button", "acB", T("ABMELDEN")); b1.onclick = () => fbPull().catch(e => { fb.state = "err"; fb.msg = fbErr(e); acUi(); }); b2.onclick = () => fbOut(); r.append(b1, b2); card.appendChild(r); }
+    const r = E("div", "acRow"), b1 = tx("button", "acB pri", T("JETZT SYNCHRONISIEREN")), ls = tx("div", "acLast", acLastTxt()), b2 = tx("button", "acB", T("ABMELDEN")); b1.onclick = () => fbPull().catch(e => { fb.state = "err"; fb.msg = fbErr(e); acUi(); }); b2.onclick = () => fbOut(); ls.id = "acLast"; card.appendChild(ls); r.append(b1, b2); card.appendChild(r); }
   else if (cfg) {
-    const tabs = E("div", "acTabs"); for (const [k, l] of [["in", "ANMELDEN"], ["reg", "REGISTRIEREN"]]) { const t = tx("button", "acTab" + (acMode === k ? " on" : ""), T(l)); t.onclick = () => { acMode = k; fb.msg = ""; acRender(); }; tabs.appendChild(t); } card.appendChild(tabs);
+    const tabs = E("div", "acTabs"); for (const [k, l] of [["in", "ANMELDEN"], ["reg", "REGISTRIEREN"]]) { const t = tx("button", "acTab" + (acMode === k ? " on" : ""), T(l)); t.onclick = () => { acMode = k; fb.msg = ""; fb.note = ""; acRender(); }; tabs.appendChild(t); } card.appendChild(tabs);
     const f1 = E("label", "acFld", '<span></span><input type="text" maxlength="16" autocomplete="username" spellcheck="false">'), f2 = E("label", "acFld", '<span></span><div class="acPw"><input type="password" autocomplete="' + (acMode === "reg" ? "new-password" : "current-password") + '"><button type="button" class="acEye"></button></div>');
     f1.querySelector("span").textContent = T("PROFILNAME"); f2.querySelector("span").textContent = T("PASSWORT"); const i1 = f1.querySelector("input"), i2 = f2.querySelector("input"), eye = f2.querySelector(".acEye"); i1.value = acNm; eye.textContent = T("ANZEIGEN"); eye.onclick = () => { const s = i2.type === "password"; i2.type = s ? "text" : "password"; eye.textContent = T(s ? "VERBERGEN" : "ANZEIGEN"); };
     card.append(f1, f2); card.appendChild(tx("p", "acHint", acMode === "reg" ? T("Name: 2–16 Zeichen (Buchstaben, Zahlen, _ . -) · Passwort: mind. 6 Zeichen. Es wird keine E-Mail benötigt – ein vergessenes Passwort lässt sich nicht zurücksetzen.") : T("Melde dich an, um deinen Fortschritt auf jedem Gerät zu haben.")));
@@ -86,7 +96,7 @@ function acRender() {
       const dt = E("details", "acDet", '<summary></summary>'); dt.querySelector("summary").textContent = T("Online-Speicher einrichten"); dt.appendChild(tx("p", "acHint", T("Füge die Firebase-Konfiguration ein (siehe FIREBASE_SETUP.md).")));
       const ta = E("textarea", "acTa"); ta.rows = 5; ta.placeholder = 'apiKey: "…", authDomain: "…", projectId: "…", appId: "…"'; ta.addEventListener("keydown", e => e.stopPropagation()); ta.addEventListener("keyup", e => e.stopPropagation()); const sv = tx("button", "acB", T("ONLINE-SPEICHER AKTIVIEREN"));
       sv.onclick = () => { const c = {}; for (const k of ["apiKey", "authDomain", "projectId", "appId", "storageBucket", "messagingSenderId"]) { const r = ta.value.match(new RegExp(k + "[\"']?\\s*:\\s*[\"']([^\"']+)[\"']")); if (r) c[k] = r[1]; } if (!c.apiKey || !c.projectId) { toast("Konfiguration unvollständig (apiKey und projectId nötig)"); return; } try { localStorage.setItem("spyderFB", JSON.stringify(c)); } catch (e) {} toast("Gespeichert – Seite lädt neu"); setTimeout(() => location.reload(), 800); }; dt.append(ta, sv); card.appendChild(dt); } }
-  if (fb.msg) card.appendChild(tx("div", "acErrBox", fb.msg)); box.appendChild(card);
+  if (fb.msg) card.appendChild(tx("div", "acErrBox", fb.msg)); if (fb.note) card.appendChild(tx("div", "acOkBox", fb.note)); box.appendChild(card); if (on) acOnline(box, E, tx);
   /* Statistiken */
   box.appendChild(tx("div", "acH", T("STATISTIKEN")));
   const stt = [["Spielzeit", acFmt(u.st.play)], ["Strecke", (u.st.dist >= 1000 ? (u.st.dist/1000).toFixed(2) + " km" : Math.round(u.st.dist) + " m")], ["Ausfälle", u.st.deaths], ["Treffer", u.st.hits], ["Höchster Stand", fmtSE(u.st.se)], ["Figuren", Object.keys(gear.known || {}).length], ["Upgrades", UPG.reduce((a, U) => a + (gear.upg[U.k] | 0), 0) + "/" + UPG.length*3]];
@@ -96,16 +106,46 @@ function acRender() {
   const bar = E("div", "acBar", '<i style="width:' + (n/ACH.length*100) + '%"></i>'); box.appendChild(bar);
   const ag = E("div", "acGrid"); for (const [id, na, de] of ACH) { const o = !!u.ach[id], r = E("div", "acA" + (o ? " on" : ""), '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' + (o ? ACI[ACM[id]] || ACI.bolt : ACI.lock) + '</svg><div><b></b><span></span></div>'); r.querySelector("b").textContent = T(na); r.querySelector("span").textContent = o ? new Date(u.ach[id]).toLocaleDateString() : T(de); ag.appendChild(r); } box.appendChild(ag);
 }
-function acUi() { try { const el = $("slots"); if (el.classList.contains("show") && el.classList.contains("acct")) acRender(); } catch (e) {} }
+function acUi(bg) { try { const el = $("slots"); if (!el.classList.contains("show") || !el.classList.contains("acct")) return; const a = document.activeElement; if (bg && a && /INPUT|TEXTAREA/.test(a.tagName) && el.contains(a)) return; acRender(); } catch (e) {} }
+function acAgo(ts) { const s = Math.max(0, Math.floor((Date.now() - ts) / 1000)); if (s < 10) return T("gerade eben"); const [n, de, en] = s < 60 ? [s, "Sek", "s"] : s < 3600 ? [Math.floor(s/60), "Min", "min"] : s < 86400 ? [Math.floor(s/3600), "Std", "h"] : [Math.floor(s/86400), "Tg", "d"]; return LANG === "en" ? n + " " + en + " ago" : "vor " + n + " " + de; }
+function acLastTxt() { return fb.last ? T("Zuletzt gesichert") + ": " + acAgo(fb.last) : T("Noch nicht gesichert"); }
+setInterval(() => { const e = $("acLast"); if (e) e.textContent = acLastTxt(); }, 15000);
+addEventListener("online", () => { if (fb.user) fbSoon(true); acUi(1); }); addEventListener("offline", () => acUi(1));
+function acSlotInfo(raw) { let o = null; try { o = typeof raw === "string" ? JSON.parse(raw) : raw; } catch (e) {} return o && o.cp ? {t:o.t || 0, pt:o.pt || 0, obj:o.obj || ""} : null; }
+let acOpen = "";
+function mErr(e) { const c = (e && e.code) || ""; if (/wrong-password|invalid-credential/.test(c)) return T("Aktuelles Passwort falsch."); if (/requires-recent-login/.test(c)) return T("Bitte melde dich neu an und versuche es nochmal."); return fbErr(e); }
+function acOnline(box, E, tx) {
+  box.appendChild(tx("div", "acH", T("SPEICHERSTÄNDE")));
+  for (let n = 1; n <= 3; n++) {
+    const cf = fb.conf.find(x => x.n === n), L = acSlotInfo(readSave(n)), C = acSlotInfo(cf ? cf.raw : fb.cloud["s" + n]), row = E("div", "acSlot" + (cf ? " conf" : "")), hd = E("div", "acSlotH");
+    hd.appendChild(tx("b", "", T("Slot") + " " + n)); if (cf) hd.appendChild(tx("em", "", T("KONFLIKT – WÄHLE EINEN STAND"))); row.appendChild(hd);
+    const cols = E("div", "acCols");
+    for (const [lab, I, key] of [["DIESES GERÄT", L, "local"], ["CLOUD", C, "cloud"]]) {
+      const c = E("div", "acCol"); c.appendChild(tx("span", "acColL", T(lab)));
+      if (I) { const b = tx("b", "", new Date(I.t).toLocaleString()); c.appendChild(b); if (cf && L && C && I.t > (key === "local" ? C.t : L.t)) b.appendChild(tx("i", "acNew", T("NEUER"))); c.appendChild(tx("div", "acColS", acFmt(I.pt) + (I.obj ? " · " + T(I.obj) : ""))); } else c.appendChild(tx("b", "acEmpty", T("leer")));
+      if (cf && I) { const bt = tx("button", "acB sm", T("DIESEN BEHALTEN")); bt.onclick = () => fbResolve(n, key); c.appendChild(bt); } cols.appendChild(c); }
+    row.appendChild(cols); box.appendChild(row); }
+  box.appendChild(tx("div", "acH", T("KONTO VERWALTEN")));
+  const mc = E("div", "acCard acMng"), login = (fb.user.email || "").split("@")[0];
+  const fld = (lab, type, auto, val, max) => { const f = E("label", "acFld", "<span></span><input>"), i = f.querySelector("input"); f.querySelector("span").textContent = T(lab); i.type = type; i.autocomplete = auto; i.maxLength = max || 64; if (val) i.value = val; i.addEventListener("keydown", e => e.stopPropagation()); i.addEventListener("keyup", e => e.stopPropagation()); return [f, i]; };
+  const run = (fn, ok) => { fb.msg = ""; fb.note = ""; fb.state = "sync"; acUi(); fn().then(() => { fb.state = fb.user ? "ok" : "off"; fb.note = T(ok); acUi(); }).catch(e => { fb.state = fb.user ? "ok" : "off"; fb.msg = mErr(e); acUi(); }); };
+  const sec = (id, title, build) => { const d = E("details", "acDet", "<summary></summary>"); d.open = acOpen === id; d.querySelector("summary").textContent = T(title); d.addEventListener("toggle", () => { if (d.open) acOpen = id; else if (acOpen === id) acOpen = ""; }); build(d); mc.appendChild(d); };
+  sec("name", "Anzeigename ändern", d => { const [f, i] = fld("NEUER NAME", "text", "off", ACC.cur, 16), b = tx("button", "acB wide", T("NAME SPEICHERN")); d.appendChild(tx("p", "acHint", T("Ändert nur den angezeigten Namen. Zum Anmelden brauchst du weiterhin") + " „" + login + "“.")); b.onclick = () => run(() => fbRename(i.value.trim()), "Name geändert"); d.append(f, b); });
+  sec("pw", "Passwort ändern", d => { const [f1, i1] = fld("AKTUELLES PASSWORT", "password", "current-password"), [f2, i2] = fld("NEUES PASSWORT", "password", "new-password"), b = tx("button", "acB wide", T("PASSWORT SPEICHERN")); b.onclick = () => run(() => fbPass(i1.value, i2.value), "Passwort geändert"); d.append(f1, f2, b); });
+  sec("del", "Konto löschen", d => { const [f, i] = fld("PASSWORT ZUR BESTÄTIGUNG", "password", "current-password"), b = tx("button", "acB danger wide", T("KONTO ENDGÜLTIG LÖSCHEN")); let arm = 0;
+    d.appendChild(tx("p", "acHint", T("Löscht das Online-Konto samt Cloud-Daten sowie Statistiken und Erfolge dieses Profils auf diesem Gerät. Spielstände auf diesem Gerät bleiben erhalten.")));
+    b.onclick = () => { if (!i.value) { i.focus(); return; } if (!arm) { arm = 1; b.textContent = T("SICHER? NOCHMAL DRÜCKEN"); setTimeout(() => { if (b.isConnected) { arm = 0; b.textContent = T("KONTO ENDGÜLTIG LÖSCHEN"); } }, 4000); return; } run(() => fbDelete(i.value), "Konto gelöscht"); }; d.append(f, b); });
+  box.appendChild(mc);
+}
 /* ===== Online-Speicher (Firebase Auth + Firestore) ===== */
 const FB_CONFIG = {apiKey:"AIzaSyBeNOGy5ksL95659qVc32Kvv94m8AnKLzk", authDomain:"spyder-8c6ac.firebaseapp.com", projectId:"spyder-8c6ac", storageBucket:"spyder-8c6ac.firebasestorage.app", messagingSenderId:"747002558815", appId:"1:747002558815:web:0841ae9970b3433fa71eea"};       // hier eintragen ODER im Konto-Fenster einfügen
-const fb = {auth:null, db:null, user:null, state:"off", msg:"", dirty:false, loading:null, tm:0};
+const fb = {auth:null, db:null, user:null, state:"off", msg:"", note:"", dirty:false, loading:null, tm:0, pulled:false, conf:[], cloud:{}, last:0};
 function fbCfg() { if (FB_CONFIG.apiKey && FB_CONFIG.projectId) return FB_CONFIG; try { const o = JSON.parse(localStorage.getItem("spyderFB")); if (o && o.apiKey && o.projectId) return o; } catch (e) {} return null; }
-function fbErr(e) { const c = (e && e.code) || "", m = (e && e.message) || ""; if (/email-already-in-use/.test(c)) return T("Dieser Name ist schon vergeben."); if (/wrong-password|invalid-credential|user-not-found|invalid-login/.test(c)) return T("Name oder Passwort falsch."); if (/weak-password/.test(c)) return T("Passwort zu kurz (mind. 6 Zeichen)."); if (/operation-not-allowed|configuration-not-found/.test(c)) return T("E-Mail/Passwort-Anmeldung ist in Firebase nicht aktiviert."); if (/network/.test(c)) return T("Keine Verbindung zum Server."); if (/permission-denied/.test(c + m)) return T("Zugriff verweigert – Firestore-Regeln prüfen (siehe FIREBASE_SETUP.md)."); return m || T("Unbekannter Fehler"); }
+function fbErr(e) { const c = (e && e.code) || "", m = (e && e.message) || ""; if (/email-already-in-use/.test(c)) return T("Dieser Name ist schon vergeben."); if (/wrong-password|invalid-credential|user-not-found|invalid-login/.test(c)) return T("Name oder Passwort falsch."); if (/weak-password/.test(c)) return T("Passwort zu kurz (mind. 6 Zeichen)."); if (/operation-not-allowed|configuration-not-found/.test(c)) return T("E-Mail/Passwort-Anmeldung ist in Firebase nicht aktiviert."); if (/too-many-requests/.test(c)) return T("Zu viele Versuche – bitte später erneut."); if (/network/.test(c)) return T("Keine Verbindung zum Server."); if (/permission-denied/.test(c + m)) return T("Zugriff verweigert – Firestore-Regeln prüfen (siehe FIREBASE_SETUP.md)."); return m || T("Unbekannter Fehler"); }
 function fbLoad() {
   if (fb.loading) return fb.loading; const cfg = fbCfg(); if (!cfg) return Promise.reject(new Error("nocfg")); const base = "https://www.gstatic.com/firebasejs/10.12.2/", ld = s => new Promise((res, rej) => { const e = document.createElement("script"); e.src = base + s; e.onload = res; e.onerror = () => rej(new Error(T("Online-Bibliothek konnte nicht geladen werden (offline?)"))); document.head.appendChild(e); });
   fb.loading = ld("firebase-app-compat.js").then(() => Promise.all([ld("firebase-auth-compat.js"), ld("firebase-firestore-compat.js")])).then(() => { firebase.initializeApp(cfg); fb.auth = firebase.auth(); fb.db = firebase.firestore();
-    fb.auth.onAuthStateChanged(u => { fb.user = u; if (u) { ACC.cur = u.displayName || (u.email || "").split("@")[0]; acU(); acSave(); fbPull().catch(e => { fb.state = "err"; fb.msg = fbErr(e); acUi(); }); } else { fb.state = "off"; acUi(); } }); }).catch(e => { fb.loading = null; throw e; });
+    fb.auth.onAuthStateChanged(u => { fb.user = u; if (u) { fb.pulled = false; ACC.cur = u.displayName || (u.email || "").split("@")[0]; acU(); acSave(); fbPull().catch(e => { fb.state = "err"; fb.msg = fbErr(e); acUi(); }); } else { fb.state = "off"; acUi(); } }); }).catch(e => { fb.loading = null; throw e; });
   return fb.loading;
 }
 async function fbSign(name, pw, create) {
@@ -114,18 +154,34 @@ async function fbSign(name, pw, create) {
   if (create) { const c = await fb.auth.createUserWithEmailAndPassword(em, pw); await c.user.updateProfile({displayName:name}); } else await fb.auth.signInWithEmailAndPassword(em, pw);
   try { localStorage.setItem("spyderFBOn", "1"); } catch (e) {}
 }
-async function fbOut() { try { await fbPush(); } catch (e) {} try { await fb.auth.signOut(); } catch (e) {} fb.user = null; ACC.cur = ""; fb.state = "off"; fb.msg = ""; try { localStorage.removeItem("spyderFBOn"); } catch (e) {} acSave(); acUi(); }
+async function fbOut() { try { await fbPush(); } catch (e) {} try { await fb.auth.signOut(); } catch (e) {} fb.user = null; ACC.cur = ""; fb.state = "off"; fb.msg = ""; fb.note = ""; fb.pulled = false; fb.conf = []; fb.cloud = {}; fb.last = 0; try { localStorage.removeItem("spyderFBOn"); } catch (e) {} acSave(); acUi(); }
 async function fbPull() {
-  if (!fb.user) return; fb.state = "sync"; acUi(); const snap = await fb.db.collection("users").doc(fb.user.uid).get(), c = snap.exists ? snap.data() : null, u = acU();
+  if (!fb.user) return; fb.state = "sync"; acUi(); const snap = await fb.db.collection("users").doc(fb.user.uid).get(), c = snap.exists ? snap.data() : null, u = acU(); fb.conf = []; fb.cloud = {};
   if (c) { for (const k in u.st) u.st[k] = Math.max(u.st[k] || 0, (c.st && c.st[k]) || 0); for (const k in (c.ach || {})) if (!u.ach[k] || c.ach[k] < u.ach[k]) u.ach[k] = c.ach[k]; if (c.since && c.since < u.since) u.since = c.since;
-    for (let n = 1; n <= 3; n++) { const s = c.saves && c.saves["s" + n]; if (!s) continue; try { const o = JSON.parse(s), l = readSave(n); if (o && o.cp && (!l || (o.t || 0) > (l.t || 0))) localStorage.setItem(slotKey(n), s); } catch (e) {} } }
-  acSave(); await fbPush(); fb.state = "ok"; fb.msg = ""; try { refreshStartBtns(); } catch (e) {} acUi();
+    fb.cloud = Object.assign({}, c.saves || {});
+    /* Nur ein Stand vorhanden: übernehmen. Beide vorhanden und verschieden: Konflikt – der Spieler entscheidet. */
+    for (let n = 1; n <= 3; n++) { const s = c.saves && c.saves["s" + n]; if (!s) continue; try { const o = JSON.parse(s), l = readSave(n); if (!o || !o.cp) continue; if (!l) localStorage.setItem(slotKey(n), s); else if ((o.t || 0) !== (l.t || 0)) fb.conf.push({n, raw:s}); } catch (e) {} } }
+  fb.pulled = true; acSave(); await fbPush(); fb.state = "ok"; fb.msg = ""; if (fb.conf.length) toast(T("Spielstand-Konflikt – im Konto auswählen")); try { refreshStartBtns(); } catch (e) {} acUi();
 }
 async function fbPush() {
-  if (!fb.user || !fb.db) return; const u = acU(), saves = {}; for (let n = 1; n <= 3; n++) saves["s" + n] = localStorage.getItem(slotKey(n)) || null;
-  await fb.db.collection("users").doc(fb.user.uid).set({name:ACC.cur, since:u.since, st:u.st, ach:u.ach, saves, upd:Date.now()}, {merge:true}); fb.dirty = false;
+  if (!fb.user || !fb.db || !fb.pulled) return; const u = acU(), saves = {}; for (let n = 1; n <= 3; n++) if (!fb.conf.some(x => x.n === n)) saves["s" + n] = localStorage.getItem(slotKey(n)) || null;
+  await fb.db.collection("users").doc(fb.user.uid).set({name:ACC.cur, since:u.since, st:u.st, ach:u.ach, saves, upd:Date.now()}, {merge:true}); fb.dirty = false; fb.last = Date.now(); for (const k in saves) fb.cloud[k] = saves[k];
 }
-function fbSoon(now) { if (!fb.user) return; clearTimeout(fb.tm); fb.tm = setTimeout(() => { fbPush().then(() => { fb.state = "ok"; acUi(); }).catch(e => { fb.state = "err"; fb.msg = fbErr(e); acUi(); }); }, now ? 300 : 5000); }
+function fbResolve(n, keep) {
+  const i = fb.conf.findIndex(x => x.n === n); if (i < 0) return; const x = fb.conf.splice(i, 1)[0]; if (keep === "cloud") { try { localStorage.setItem(slotKey(n), x.raw); } catch (e) {} }
+  fb.state = "sync"; fb.msg = ""; acUi(); fbPush().then(() => { fb.state = "ok"; try { refreshStartBtns(); } catch (e) {} acUi(); }).catch(e => { fb.state = "err"; fb.msg = fbErr(e); acUi(); });
+}
+function fbReauth(pw) { return fb.user.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(fb.user.email, pw)); }
+async function fbRename(v) {
+  if (!/^[A-Za-z0-9_.-]{2,16}$/.test(v)) throw new Error(T("Name: 2–16 Zeichen, nur Buchstaben, Zahlen, _ . -")); const old = ACC.cur; if (v !== old && ACC.users[v]) throw new Error(T("Dieser Name ist schon vergeben."));
+  await fb.user.updateProfile({displayName:v}); if (v !== old) { ACC.users[v] = ACC.users[old]; delete ACC.users[old]; ACC.cur = v; } acSave(); await fbPush();
+}
+async function fbPass(oldp, newp) { if (newp.length < 6) throw {code:"auth/weak-password"}; await fbReauth(oldp); await fb.user.updatePassword(newp); }
+async function fbDelete(pw) {
+  await fbReauth(pw); await fb.db.collection("users").doc(fb.user.uid).delete(); await fb.user.delete(); delete ACC.users[ACC.cur]; fb.user = null; ACC.cur = ""; fb.state = "off"; fb.pulled = false; fb.conf = []; fb.cloud = {}; fb.last = 0;
+  try { localStorage.removeItem("spyderFBOn"); } catch (e) {} acSave(); try { refreshStartBtns(); } catch (e) {}
+}
+function fbSoon(now) { if (!fb.user) return; clearTimeout(fb.tm); fb.tm = setTimeout(() => { fbPush().then(() => { fb.state = "ok"; acUi(1); }).catch(e => { fb.state = "err"; fb.msg = fbErr(e); acUi(1); }); }, now ? 300 : 5000); }
 { const _ws = writeSave; writeSave = function (...a) { const r = _ws.apply(this, a); try { fbSoon(); } catch (e) {} return r; }; }
 setInterval(() => { if (fb.user && fb.dirty) fbPush().catch(() => {}); }, 120000);
 addEventListener("visibilitychange", () => { if (document.hidden && fb.user) fbPush().catch(() => {}); });
@@ -147,6 +203,14 @@ setInterval(() => { try { if (gameStarted) acSave(); } catch (e) {} }, 20000);
 .acHint{font-size:11.5px;line-height:1.5;color:#6b7587;margin:0 0 14px}
 .acRow{display:flex;gap:10px}.acB{background:none;border:1px solid rgba(226,232,240,.28);color:#E2E8F0;padding:12px 20px;font:500 11.5px system-ui,sans-serif;letter-spacing:.24em;cursor:pointer;transition:background .15s,border-color .15s}.acB:hover,.acB.padf{background:rgba(79,169,163,.16);border-color:#4FA9A3}
 .acB.pri{background:#4FA9A3;border-color:#4FA9A3;color:#0B0E14;font-weight:700}.acB.pri:hover,.acB.pri.padf{background:#5fbdb6}.acB.wide{width:100%}
+.acOkBox{margin-top:14px;padding:10px 12px;border-left:2px solid #4FA9A3;background:rgba(79,169,163,.08);color:#9fd0cb;font-size:12.5px;line-height:1.4}
+.acLast{font-size:11.5px;letter-spacing:.06em;color:#7b8494;margin:-4px 0 14px}
+.acSlot{background:rgba(226,232,240,.035);border-top:1px solid rgba(79,169,163,.35);padding:12px 14px;margin-bottom:8px}.acSlot.conf{border-top-color:#c9a96a;background:rgba(201,169,106,.06)}
+.acSlotH{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}.acSlotH b{font-weight:500;font-size:13px;letter-spacing:.18em;color:#E2E8F0}.acSlotH em{font-style:normal;font-size:10px;letter-spacing:.2em;color:#c9a96a}
+.acCols{display:grid;grid-template-columns:1fr 1fr;gap:12px}.acCol{min-width:0}.acColL{display:block;font-size:10px;letter-spacing:.24em;color:#7b8494;margin-bottom:4px}.acCol>b{display:block;font-weight:500;font-size:13px;color:#E2E8F0}.acCol>b.acEmpty{color:#5a6272}
+.acColS{font-size:11.5px;color:#8b95a7;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.acNew{font-style:normal;font-size:9px;letter-spacing:.2em;color:#4FA9A3;border:1px solid rgba(79,169,163,.5);padding:1px 5px;margin-left:8px;vertical-align:1px}
+.acB.sm{margin-top:10px;padding:8px 12px;font-size:10.5px;letter-spacing:.18em;width:100%}.acB.danger{border-color:rgba(201,122,106,.55);color:#e0a99c}.acB.danger:hover{background:rgba(201,122,106,.14);border-color:#c97a6a}
+.acMng .acDet:first-child{margin-top:0;border-top:0;padding-top:0}.acMng .acDet{margin-top:12px}
 .acErrBox{margin-top:14px;padding:10px 12px;border-left:2px solid #c97a6a;background:rgba(201,122,106,.08);color:#e0a99c;font-size:12.5px;line-height:1.4}
 .acDet{margin-top:16px;border-top:1px solid rgba(226,232,240,.08);padding-top:12px}.acDet summary{cursor:pointer;font-size:11px;letter-spacing:.2em;color:#7b8494}.acDet summary:hover{color:#E2E8F0}.acDet[open] summary{margin-bottom:10px}
 .acTa{width:100%;box-sizing:border-box;background:rgba(11,14,20,.7);border:1px solid rgba(226,232,240,.16);color:#E2E8F0;padding:10px;font:12px ui-monospace,monospace;margin-bottom:10px;outline:0}
