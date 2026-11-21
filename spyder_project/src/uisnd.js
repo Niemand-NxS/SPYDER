@@ -229,4 +229,8 @@ setInterval(() => { try { if (gameStarted) acSave(); } catch (e) {} }, 20000);
 .acIc{flex:none;width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:rgba(226,232,240,.04)}.acA.on .acIc{background:rgba(79,169,163,.14)}
 .acGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.acA{display:flex;gap:12px;align-items:center;padding:12px;background:rgba(226,232,240,.025);border:1px solid rgba(226,232,240,.06);color:#566072}.acA svg{flex:none}.acA b{display:block;font-weight:500;font-size:13px;color:#6b7587;letter-spacing:.03em}.acA span{display:block;margin-top:2px;font-size:11px;line-height:1.35;color:#566072}
 .acA.on{background:rgba(79,169,163,.07);border-color:rgba(79,169,163,.35);color:#4FA9A3}.acA.on b{color:#E2E8F0}.acA.on span{color:#8b95a7}
+body #slots.acct{background:rgba(8,11,17,.95) !important;justify-content:center}
+body #slots.acct .sp{width:100vw !important;border-left:0 !important;background:none !important}
+body #slots.acct .sh,body #slots.acct #slotList{width:100%;max-width:1080px;margin-left:auto !important;margin-right:auto !important;box-sizing:border-box}
+@media(min-width:1000px){.acGrid{grid-template-columns:repeat(3,1fr)}.acTiles{grid-template-columns:repeat(7,1fr)}.acTile b{font-size:15px}}
 @media(max-width:700px){#slots.acct #slotList{padding:6px 20px 40px}.acTiles{grid-template-columns:repeat(2,1fr)}.acGrid{grid-template-columns:1fr}}`; document.head.appendChild(st); }
