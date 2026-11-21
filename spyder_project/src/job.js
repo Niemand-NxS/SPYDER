@@ -782,7 +782,7 @@ function obsTick(dt) {
 }
 function obsFinish() {
   const O = gear.obs; O.st = 3; obsClear(); $("fade").classList.add("on"); obsClk.querySelector("b").textContent = "21:30"; obsClk.querySelector("span").textContent = T("DER TAG IST VORBEI"); obsClk.classList.add("on");
-  setTimeout(() => { obsTod(0); xs.hI = 1.3; xs.hC = 0x9aa4c8; xs.hG = 0x2a2a34; try { scene.fog.color.setHex(0xb89886); scene.background.setHex(0xb89886); } catch (e) {} try { roomMeshes[1].material.map = gradTex([[0, "#78c4bd"], [.45, "#c98a86"], [1, "#5f636a"]]); } catch (e) {} $("fade").classList.remove("on"); obsClk.classList.remove("on"); sePay(6500, "Beschattung abgeschlossen"); setObj(jobObj()); writeSave();
+  setTimeout(() => { obsTod(0); xs.hI = 1.3; xs.hC = 0x9aa4c8; xs.hG = 0x2a2a34; try { scene.fog.color.setHex(0xb89886); scene.background.setHex(0xb89886); } catch (e) {} try { roomMeshes[1].material.map = gradTex([[0, "#78c4bd"], [.45, "#c98a86"], [1, "#5f636a"]]); } catch (e) {} $("fade").classList.remove("on"); obsClk.classList.remove("on"); sePay(15000, "Beschattung abgeschlossen"); setObj(jobObj()); writeSave();
     setTimeout(() => comIncoming("R", ["Die Bilder sind angekommen, Arach. Der Kunde ist begeistert, dein Anteil liegt auf dem Konto.", "Eins noch: Wer war die Frau an Vargas Seite? Das lass ich mal nachprüfen …"]), 4000); }, 2600);
 }
 function obsInFrame(g, dy) {
