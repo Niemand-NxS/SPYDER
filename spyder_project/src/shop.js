@@ -314,7 +314,9 @@ function upgBuild() {
 function upgTick(t) { const g = JSON.stringify(gear.upg); if (g !== upgSig) { upgSig = g; upgBuild(); } for (let i = 0; i < upgPods.length; i++) upgPods[i].scale.setScalar(1 + .25*Math.sin(t*3 + i)); }
 
 /* ===== AR-Namensschilder: Namen bekannter Figuren neben dem Kopf ===== */
-let _ar = null; const _arV = new THREE.Vector3(), _arR = new THREE.Vector3();
+let _ar = null; const _arV = new THREE.Vector3(), _arR = new THREE.Vector3(), _arW = new THREE.Vector3(), _arP = new THREE.Vector3(), _arN = new THREE.Vector3(), _arL = {};
+/* Namensschild nur, wenn die Figur sichtbar ist: Sichtlinie Kamera → Kopf gegen Wände/Körper prüfen (alle 3 Frames) */
+function arSee(k, w) { const L = _arL[k] || (_arL[k] = {f:0, v:true}); if (L.f++ % 3 === 0) { const a = camera.position, d = a.distanceTo(w), n = Math.min(16, Math.max(4, Math.ceil(d/.7))); let ok = true; for (let i = 1; i < n; i++) { const t = i/n; if (d*(1 - t) < .45) break; _arP.lerpVectors(a, w, t); if (sdf(_arP, _arN) < .03) { ok = false; break; } } L.v = ok; } return L.v; }
 function arKnow(k) { try { gear.known = gear.known || {}; gear.known[k] = 1; } catch (e) {} }
 function arTick(dt) {
   if (!_ar) { const lay = document.createElement("div"); lay.id = "arLayer"; document.body.appendChild(lay); _ar = {lay, tags:{}}; }
@@ -323,8 +325,8 @@ function arTick(dt) {
   for (const k in SPK) {
     const S = SPK[k], R = S.R; let e = A.tags[k]; let show = !!(kn[k] && R && R.g && R.head);
     if (show) { let o = R.g; while (o && o !== scene) { if (!o.visible) { show = false; break; } o = o.parent; } if (o !== scene) show = false; }
-    if (show) { R.head.getWorldPosition(_arV); const sc = R.g.getWorldScale(new THREE.Vector3()).y || 1; _arV.addScaledVector(_arR.setFromMatrixColumn(camera.matrixWorld, 0), .17*sc); const dd = Math.hypot(_arV.x - pos.x, _arV.y - pos.y, _arV.z - pos.z); const q = _arV.project(camera); if (q.z < 1 && q.y > .88 && q.y < 8) q.y = .88;
-      if (dd > 15 || q.z > 1 || Math.abs(q.x) > 1.05 || Math.abs(q.y) > 1.05) show = false; else {
+    if (show) { R.head.getWorldPosition(_arV); _arW.copy(_arV); const sc = R.g.getWorldScale(new THREE.Vector3()).y || 1; _arV.addScaledVector(_arR.setFromMatrixColumn(camera.matrixWorld, 0), .17*sc); const dd = Math.hypot(_arV.x - pos.x, _arV.y - pos.y, _arV.z - pos.z); const q = _arV.project(camera); if (q.z < 1 && q.y > .88 && q.y < 8) q.y = .88;
+      if (dd > 15 || q.z > 1 || Math.abs(q.x) > 1.05 || Math.abs(q.y) > 1.05) show = false; else if (!arSee(k, _arW)) show = false; else {
         if (!e) { e = document.createElement("div"); e.className = "arN"; const p = S.name.split(" · "); e.innerHTML = (p.length > 1 ? "<small></small>" : "") + "<b></b><i></i>"; if (p.length > 1) e.querySelector("small").textContent = T(p[0]); e.querySelector("b").textContent = T(p[p.length - 1]); A.lay.appendChild(e); A.tags[k] = e; }
         e.style.display = ""; e.style.opacity = clamp((15 - dd)/5, 0, 1).toFixed(2); e.style.transform = "translate(" + ((q.x*.5 + .5)*w).toFixed(1) + "px," + ((-q.y*.5 + .5)*h).toFixed(1) + "px)"; } }
     if (!show && e) e.style.display = "none";
