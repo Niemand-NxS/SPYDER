@@ -98,7 +98,7 @@ function acRender() {
 }
 function acUi() { try { const el = $("slots"); if (el.classList.contains("show") && el.classList.contains("acct")) acRender(); } catch (e) {} }
 /* ===== Online-Speicher (Firebase Auth + Firestore) ===== */
-const FB_CONFIG = {apiKey:"", authDomain:"", projectId:"", appId:""};       // hier eintragen ODER im Konto-Fenster einfügen
+const FB_CONFIG = {apiKey:"AIzaSyBeNOGy5ksL95659qVc32Kvv94m8AnKLzk", authDomain:"spyder-8c6ac.firebaseapp.com", projectId:"spyder-8c6ac", storageBucket:"spyder-8c6ac.firebasestorage.app", messagingSenderId:"747002558815", appId:"1:747002558815:web:0841ae9970b3433fa71eea"};       // hier eintragen ODER im Konto-Fenster einfügen
 const fb = {auth:null, db:null, user:null, state:"off", msg:"", dirty:false, loading:null, tm:0};
 function fbCfg() { if (FB_CONFIG.apiKey && FB_CONFIG.projectId) return FB_CONFIG; try { const o = JSON.parse(localStorage.getItem("spyderFB")); if (o && o.apiKey && o.projectId) return o; } catch (e) {} return null; }
 function fbErr(e) { const c = (e && e.code) || "", m = (e && e.message) || ""; if (/email-already-in-use/.test(c)) return T("Dieser Name ist schon vergeben."); if (/wrong-password|invalid-credential|user-not-found|invalid-login/.test(c)) return T("Name oder Passwort falsch."); if (/weak-password/.test(c)) return T("Passwort zu kurz (mind. 6 Zeichen)."); if (/operation-not-allowed|configuration-not-found/.test(c)) return T("E-Mail/Passwort-Anmeldung ist in Firebase nicht aktiviert."); if (/network/.test(c)) return T("Keine Verbindung zum Server."); if (/permission-denied/.test(c + m)) return T("Zugriff verweigert – Firestore-Regeln prüfen (siehe FIREBASE_SETUP.md)."); return m || T("Unbekannter Fehler"); }
