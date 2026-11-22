@@ -227,6 +227,41 @@ function shopTex(kind) {
 }
 
 const carLit = (g, k) => { g.traverse(m => { const a = m.material; if (a && a.isMeshStandardMaterial && !a.userData.lit) { a.userData.lit = 1; a.emissive = a.color.clone().multiplyScalar(k || .35); } }); return g; };
+
+/* ---------- Fassaden: einzelne Häuser mit Versätzen, vertieften Fenstern, Balkonen, Feuertreppen (Instanzen) ---------- */
+function cityFacades() {
+  const HW = CW/2; let sd = 17; const rnd = () => (sd = (sd*9301 + 49297)%233280)/233280, pick = (a) => a[(rnd()*a.length)|0];
+  const pla = canvasTex(128, 128, (x, w, h) => { x.fillStyle = "#b8b2a6"; x.fillRect(0, 0, w, h); speckle(x, w, h, 700, .16); for (let i = 0; i < 9; i++) { const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, "rgba(40,34,30," + (.1 + Math.random()*.15) + ")"); g.addColorStop(1, "rgba(40,34,30,0)"); x.fillStyle = g; x.fillRect(Math.random()*w, 0, 2 + Math.random()*6, h*(.4 + Math.random()*.6)); } }, 1, 1);
+  const S = [], G = [], push = (L, x, y, z, sx, sy, sz, c) => L.push([x, y, z, sx, sy, sz, c]);
+  const lit = [0xd2a25c, 0xdcb272, 0xc4965a, 0xb4c4bc, 0xe0cc9c], dkG = [0x1a222c, 0x202a36, 0x283240, 0x141a24], fr = 0x14161a;
+  for (const s of [-1, 1]) { const n = -s; let z = -CD/2;
+    while (z < CD/2 - 1) {
+      const w = Math.min(7 + rnd()*5, CD/2 - z), zc = z + w/2; z += w; const setb = pick([0, .25, .5, .8]), dep = .2 + setb, face = s*(HW - dep), bh = CH - 3.9;
+      const tint = pick([0x8a6a58, 0x7a6a62, 0x6a6e74, 0x8a8068, 0x74665c, 0x607070, 0x8a7a5c]), brick = rnd() < .55;
+      const mat = brick ? pbrMat("brk", w/2.6, bh/2.6, tint, 0) : new THREE.MeshStandardMaterial({map:pla.clone(), color:tint, roughness:.95});
+      if (!brick) { mat.map.needsUpdate = true; mat.map.wrapS = mat.map.wrapT = THREE.RepeatWrapping; mat.map.repeat.set(w/4, bh/4); }
+      const blk = new THREE.Mesh(new THREE.BoxGeometry(dep, bh, w - .04), mat); blk.position.set(s*(HW - dep/2), 3.9 + bh/2, zc); exG.add(blk);
+      const tc = new THREE.Color(tint).lerp(new THREE.Color(0xd8d0c0), .4).getHex();
+      push(S, face + n*.12, 4.0, zc, .25, .2, w - .05, tc); push(S, face + n*.27, 17.45, zc, .55, .42, w, tc); push(S, face + n*.14, 17.12, zc, .3, .1, w - .1, tc);
+      for (const e of [-1, 1]) push(S, face + n*.1, 3.9 + bh/2, zc + e*(w/2 - .35), .13, bh, .13, 0x3a3c40);
+      const cols = Math.max(2, Math.floor(w/2.5)), ww = .85 + rnd()*.3, wh = 1.3 + rnd()*.35, bal = rnd() < .4, esc = rnd() < .16, ys = [5.3, 8.05, 10.8, 13.55, 16.3];
+      ys.forEach((y, k) => {
+        if (esc) { const zz = zc + w/2 - 1.6; push(S, face + n*.6, y - wh/2 - .08, zz, 1.0, .06, 2.4, 0x23272c); push(S, face + n*1.08, y - wh/2 + .4, zz, .04, .06, 2.4, 0x23272c); for (const e of [-1.15, 1.15]) push(S, face + n*1.08, y - wh/2 + .0, zz + e, .04, .9, .04, 0x23272c);
+          if (k) for (let q = 0; q < 8; q++) push(S, face + n*.6, y - 2.75 - wh/2 - .08 + (q + 1)*2.75/9, zz - .9 + q*.25 - 1.0 + 1.0, .5, .04, .26, 0x23272c); }
+        for (let i = 0; i < cols; i++) { const zw = zc - w/2 + (i + .5)*w/cols; if (rnd() < .05) continue;
+          push(S, face + n*.03, y, zw, .06, wh + .28, ww + .28, fr);
+          const isL = rnd() < .3, gc = isL ? pick(lit) : pick(dkG); push(G, face + n*.075, y, zw, .02, wh, ww, new THREE.Color(gc).multiplyScalar(isL ? .85 : 1).getHex());
+          if (isL && rnd() < .55) push(G, face + n*.085, y + wh*.12, zw + (rnd() < .5 ? -1 : 1)*ww*.25, .02, wh*.72, ww*.5, pick([0x6a4a34, 0x7a5a44, 0x5a4a40]));
+          else if (!isL && rnd() < .15) push(G, face + n*.085, y + wh*.2, zw, .02, wh*.6, ww, 0x56524a);
+          push(S, face + n*.1, y, zw, .06, wh, .05, fr); push(S, face + n*.1, y + wh*.12, zw, .06, .05, ww, fr);
+          push(S, face + n*.16, y - wh/2 - .09, zw, .32, .1, ww + .42, tc); push(S, face + n*.1, y + wh/2 + .13, zw, .16, .1, ww + .32, tc);
+          if (rnd() < .12) push(S, face + n*.42, y - wh/2 - .5, zw, .55, .42, .6, pick([0x6a6e72, 0x5a5e62, 0x7a7a74]));
+          if (bal && k && k%2) { push(S, face + n*.5, y - wh/2 - .16, zw, .85, .1, ww + .6, 0x4a4a4e); push(S, face + n*.92, y - wh/2 + .5, zw, .04, .05, ww + .6, 0x2a2c30);
+            for (const e of [-1, 0, 1]) push(S, face + n*.92, y - wh/2 + .2, zw + e*(ww/2 + .28), .04, .7, .04, 0x2a2c30);
+            if (rnd() < .5) push(S, face + n*.55, y - wh/2 + .1, zw + (rnd() - .5)*.4, .3, .2, .3, pick([0x4a6a44, 0x6a4a34, 0x8a8a7a])); } } }); } }
+  const mk = (L, mat) => { const im = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), mat, L.length), d = new THREE.Object3D(), c = new THREE.Color(); L.forEach(([x, y, zz, sx, sy, sz, col], i) => { d.position.set(x, y, zz); d.scale.set(sx, sy, sz); d.updateMatrix(); im.setMatrixAt(i, d.matrix); im.setColorAt(i, c.setHex(col)); }); im.instanceMatrix.needsUpdate = true; im.instanceColor.needsUpdate = true; im.frustumCulled = false; exG.add(im); };
+  mk(S, new THREE.MeshStandardMaterial({roughness:.85, metalness:.05})); mk(G, new THREE.MeshBasicMaterial({}));
+}
 /* ---------- Szene aufbauen ---------- */
 function buildCity() {
   xs.cast = false; xs.og = 0; CITY.walk.length = 0; CITY.cars.length = 0; CITY.steam.length = 0; CITY.t = 0; CITY.nextCar = 2;
@@ -234,7 +269,7 @@ function buildCity() {
   exRoom(CW, CH, CD, {floor:roadT, ceil:gradTex([[0, "#0e1220"], [1, "#2c303c"]]), ceilBasic:true, wW:gradTex([[0, "#222"], [1, "#222"]]), wE:gradTex([[0, "#222"], [1, "#222"]]), wN:gradTex([[0, "#222"], [1, "#222"]]), wS:gradTex([[0, "#222"], [1, "#222"]])});
   zLim = CZL; skyLim = CH - 1.3; applyAsphalt(roomMeshes[0], CW, CD, 0x8a8c94);
   const rep = (t, rx, ry) => { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rx, ry); return t; };
-  for (const i of [2, 3]) { roomMeshes[i].material.dispose(); roomMeshes[i].material = new THREE.MeshBasicMaterial({map:rep(cityFacTex(i), CD/4.2, CH/4.2), color:0xc8ccd6}); }
+  applyBrick(roomMeshes[2], CD, CH, 0x5a504a); applyBrick(roomMeshes[3], CD, CH, 0x5a504a); cityFacades();
   for (const i of [4, 5]) { roomMeshes[i].material.dispose(); roomMeshes[i].material = new THREE.MeshBasicMaterial({color:FOGC}); }
   scene.fog = new THREE.FogExp2(FOGC, .03); scene.background = new THREE.Color(FOGC);
   const conc = mStd(0x6a6a70, .1, .9), dk = mStd(0x16181d, .5, .6), metal = mStd(0x2a2c32, .6, .5), wood = mStd(0x5a3e2a, .1, .8), HW = CW/2, hw0 = hwS();
