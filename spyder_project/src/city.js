@@ -150,33 +150,41 @@ const CAR_K = {
   van:{L:5.0, W:1.9, wb:3.1, body:[[-2.5,.42],[-2.5,1.18],[-2.4,1.3],[1.5,1.3],[2.1,1.06],[2.45,.9],[2.5,.68],[2.5,.42]], cab:[[-2.38,1.3],[-2.32,2.02],[1.05,2.02],[1.62,1.3]]},
 };
 function carPlateTex(txt) { return canvasTex(128, 32, (x, w, h) => { x.fillStyle = "#d8d4c4"; x.fillRect(0, 0, w, h); x.strokeStyle = "#2a2a2c"; x.lineWidth = 2; x.strokeRect(1, 1, w - 2, h - 2); x.fillStyle = "#1c1c20"; x.font = "bold 22px monospace"; x.textAlign = "center"; x.fillText(txt, w/2, 24); }, 1, 1); }
+function carLoft(keys, p, mat, M) {
+  // Rumpf aus Querschnitten (z, halbe Breite, unten, oben) mit Superellipsen-Profil, kubisch geglättet
+  M = M || 22; const cr = (v, u) => { const n = v.length - 1, i = Math.min(n - 1, Math.floor(u)), f = u - i, g = k => v[Math.max(0, Math.min(n, k))]; return .5*((2*g(i + 1)) + (-g(i) + g(i + 2))*f + (2*g(i) - 5*g(i + 1) + 4*g(i + 2) - g(i + 3))*f*f + (-g(i) + 3*g(i + 1) - 3*g(i + 2) + g(i + 3))*f*f*f); };
+  const col = (k) => keys.map(r => r[k]), Z = col(0), A = col(1), Y0 = col(2), Y1 = col(3), N = 30, pos = [], idx = [], e = 2/p;
+  for (let i = 0; i < N; i++) { const u = i/(N - 1)*(keys.length - 1), z = cr(Z, u), a = Math.max(.001, cr(A, u)), y0 = cr(Y0, u), y1 = Math.max(y0 + .002, cr(Y1, u)), yc = (y0 + y1)/2, hh = (y1 - y0)/2;
+    for (let j = 0; j < M; j++) { const th = j/M*Math.PI*2, c = Math.cos(th), s = Math.sin(th); pos.push(a*Math.sign(c)*Math.pow(Math.abs(c), e), yc + hh*Math.sign(s)*Math.pow(Math.abs(s), e), z); } }
+  for (let i = 0; i < N - 1; i++) for (let j = 0; j < M; j++) { const q = i*M + j, r = i*M + (j + 1)%M, q2 = (i + 1)*M + j, r2 = (i + 1)*M + (j + 1)%M; idx.push(q, q2, r, r, q2, r2); }
+  for (const [ring, flip] of [[0, 1], [N - 1, 0]]) { const ci = pos.length/3; let sy = 0, z = pos[(ring*M)*3 + 2]; for (let j = 0; j < M; j++) sy += pos[(ring*M + j)*3 + 1]; pos.push(0, sy/M, z); for (let j = 0; j < M; j++) { const q = ring*M + j, r = ring*M + (j + 1)%M; idx.push(...(flip ? [ci, r, q] : [ci, q, r])); } }
+  const ge = new THREE.BufferGeometry(); ge.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3)); ge.setIndex(idx); ge.computeVertexNormals(); const m = new THREE.Mesh(ge, mat); m.material.side = THREE.DoubleSide; return m;
+}
 function makeCar(kind, col, o) {
-  // Schwebe-Gleiter: keine Räder, glatter Rumpf, Glaskuppel, Schwebemodule mit dezent hellem Ring, Lichtbänder
-  o = o || {}; const g = new THREE.Group(), HV = .42;
-  const P = {sedan:{L:4.6, W:1.9, hh:.36, ch:.34, cl:.28, cz:-.12, cw:.38}, hatch:{L:3.8, W:1.8, hh:.38, ch:.38, cl:.3, cz:-.2, cw:.4}, van:{L:5.2, W:2.0, hh:.62, ch:.42, cl:.3, cz:.5, cw:.42}}[kind] || {L:4.6, W:1.9, hh:.36, ch:.34, cl:.28, cz:-.12, cw:.38}, L = P.L, W = P.W;
-  const bodyM = new THREE.MeshStandardMaterial({color:col, metalness:.55, roughness:.3}), glassM = new THREE.MeshStandardMaterial({color:0x0e141a, metalness:.9, roughness:.06}),
-    dark = mStd(0x121418, .5, .5), trim = new THREE.MeshStandardMaterial({color:new THREE.Color(col).lerp(new THREE.Color(0xe6e2d8), .55), metalness:.6, roughness:.3}),
-    lamp = new THREE.MeshBasicMaterial({color:0xf0e6cc}), tail = new THREE.MeshBasicMaterial({color:0x8a3c34}), ring = new THREE.MeshBasicMaterial({color:0xa8bcbc});
-  const add = (geo, mat, x, y, z, sx, sy, sz) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); if (sx) m.scale.set(sx, sy, sz); g.add(m); return m; };
-  const sph = new THREE.SphereGeometry(1, 28, 16), cyl = new THREE.CylinderGeometry(1, 1, 1, 18), bx1 = new THREE.BoxGeometry(1, 1, 1);
-  const hy = HV + P.hh + .12;
-  add(sph, bodyM, 0, hy, 0, W/2, P.hh + .1, L/2);                                       // Rumpf (Tropfenform)
-  add(sph, dark, 0, HV + .1, 0, W*.46, .12, L*.46);                                       // Unterboden
-  add(sph, glassM, 0, hy + P.hh*.55, P.cz, W*P.cw, P.ch + .12, L*P.cl + .3);                // Glaskuppel
-  add(sph, bodyM, 0, hy + P.hh*.55 + P.ch*.62, P.cz - .1, W*P.cw*.8, .05, L*P.cl*.95);   // Dach-Schale
-  for (const s of [-1, 1]) {                                                              // seitliche Zierlinie, Heckflossen
-    add(bx1, trim, s*(W/2 - .02), hy - .04, 0, .03, .045, L*.62);
-    const fin = add(bx1, bodyM, s*(W/2 - .22), hy + P.hh*.9, -L/2 + .55, .05, .3, .7); fin.rotation.x = .35;
-    for (const sz of [-1, 1]) {                                                           // Schwebemodule
-      const px = s*(W/2 - .12), pz = sz*L*.32;
-      add(cyl, dark, px, HV + .02, pz, .27, .09, .27); add(cyl, ring, px, HV - .035, pz, .22, .012, .22); add(cyl, trim, px, HV + .09, pz, .3, .03, .3); } }
-  add(bx1, lamp, 0, hy + .02, L/2 - .06, W*.62, .05, .06).rotation.x = -.15;               // Lichtband vorn
-  for (const s of [-1, 1]) add(bx1, lamp, s*(W*.3), hy - .06, L/2 - .09, .2, .06, .06);
-  add(bx1, tail, 0, hy + .1, -L/2 + .05, W*.7, .05, .06);                                  // Lichtband hinten
-  const pl = new THREE.Mesh(new THREE.PlaneGeometry(.5, .13), new THREE.MeshBasicMaterial({map:carPlateTex(o.plate || ("CJ " + (100 + Math.floor(Math.random()*899))))})); pl.position.set(0, hy - .12, -L/2 + .02); pl.rotation.y = Math.PI; g.add(pl);
-  if (o.taxi) { add(bx1, new THREE.MeshBasicMaterial({color:0xd8b060}), 0, hy + P.hh*.55 + P.ch*.62 + .1, P.cz - .1, .5, .13, .24); for (const s of [-1, 1]) for (let k = 0; k < 8; k++) if (k%2 === 0) add(bx1, new THREE.MeshBasicMaterial({color:0xd8b060}), s*(W/2 - .005), hy - .1, -.9 + k*.26, .035, .1, .26); }
-  if (kind === "van") add(bx1, trim, 0, hy + P.hh + .02, -.9, W*.5, .03, 1.6);
-  g.userData.dims = {L, W, H:hy + P.hh + P.ch*.9};
+  // Schwebe-Gleiter ohne Räder: geloftete Karosserie, Glaskuppel, vier Schwebemodule, Lichter
+  o = o || {}; const g = new THREE.Group();
+  const SED = {hull:[[-2.3, .42, .56, .78], [-2.15, .78, .47, .9], [-1.6, .92, .44, .98], [0, .95, .42, 1.0], [1.4, .92, .42, .98], [2.0, .78, .46, .9], [2.3, .38, .56, .76]], cab:[[-1.4, .3, .97, 1.0], [-1.0, .68, .97, 1.4], [-.1, .74, .97, 1.5], [.75, .68, .97, 1.42], [1.3, .36, .97, 1.02]]};
+  const HAT = {hull:SED.hull.map(r => [r[0]*.83, r[1]*.95, r[2], r[3] + .02]), cab:[[-1.2, .3, .99, 1.02], [-.95, .66, .99, 1.5], [-.1, .72, .99, 1.58], [.7, .66, .99, 1.46], [1.15, .34, .99, 1.04]]};
+  const VAN = {hull:[[-2.6, .68, .56, 1.2], [-2.45, .96, .47, 1.5], [-1.8, 1.0, .44, 1.66], [1.2, 1.0, .44, 1.66], [1.9, .92, .46, 1.42], [2.6, .46, .56, .96]], cab:[[.55, .6, 1.5, 1.7], [1.4, .62, 1.42, 1.72], [2.1, .42, 1.3, 1.5]]};
+  const K = kind === "van" ? VAN : kind === "hatch" ? HAT : SED, L = kind === "van" ? 5.2 : kind === "hatch" ? 3.8 : 4.6, W = kind === "van" ? 2.0 : kind === "hatch" ? 1.8 : 1.9;
+  const bodyM = new THREE.MeshStandardMaterial({color:col, metalness:.5, roughness:.32}), glassM = new THREE.MeshStandardMaterial({color:0x10171e, metalness:.9, roughness:.08}),
+    dark = mStd(0x14161a, .5, .5), trim = new THREE.MeshStandardMaterial({color:new THREE.Color(col).lerp(new THREE.Color(0xe6e2d8), .55), metalness:.6, roughness:.3}),
+    lamp = new THREE.MeshBasicMaterial({color:0xefe4c8}), tail = new THREE.MeshBasicMaterial({color:0x9a443a}), ringM = new THREE.MeshBasicMaterial({color:0x9ab0b0});
+  const bx = (w, h, d, mat, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); g.add(m); return m; };
+  g.add(carLoft(K.hull, 3.4, bodyM)); g.add(carLoft(K.cab, 2.6, glassM, 18));
+  const top = kind === "van" ? 1.66 : kind === "hatch" ? 1.58 : 1.5, hz = L/2, hx = K.hull[3][1];
+  for (const s of [-1, 1]) {
+    bx(.03, .045, L*.52, trim, s*(hx + .005), .74, -.05);                                    // Zierlinie
+    for (const sz of [-1, 1]) { const px = s*hx*.72, pz = sz*L*.3; const pod = new THREE.Mesh(new THREE.CylinderGeometry(.2, .24, .16, 16), dark); pod.position.set(px, .4, pz); g.add(pod); const rg = new THREE.Mesh(new THREE.CylinderGeometry(.16, .16, .012, 16), ringM); rg.position.set(px, .31, pz); g.add(rg); }
+    bx(.05, .24, .6, bodyM, s*W*.38, kind === "van" ? 1.8 : 1.1, -hz + .8);                  // Heckflossen (aufrecht)
+    if (kind === "van") bx(.03, .5, 2.0, glassM, s*(hx - .0), 1.32, 0);
+  }
+  bx(W*.84, .035, .5, bodyM, 0, kind === "van" ? 1.74 : 1.0, -hz + .8);                    // Heckleiste
+  for (const s of [-1, 1]) bx(.34, .075, .07, lamp, s*.46, kind === "van" ? .92 : .74, hz - .13);    // Scheinwerfer
+  bx(W*.55, .05, .06, tail, 0, kind === "van" ? .95 : .76, -hz + .09);                       // Rücklichtband
+  const pl = new THREE.Mesh(new THREE.PlaneGeometry(.5, .13), new THREE.MeshBasicMaterial({map:carPlateTex(o.plate || ("CJ " + (100 + Math.floor(Math.random()*899))))})); pl.position.set(0, kind === "van" ? .7 : .62, -hz + .02); pl.rotation.y = Math.PI; g.add(pl);
+  if (o.taxi) { const gold = new THREE.MeshBasicMaterial({color:0xd8b060}); bx(.5, .12, .24, gold, 0, top + .08, -.1); for (const s of [-1, 1]) for (let k = 0; k < 8; k += 2) bx(.035, .09, .24, gold, s*(hx + .01), .66, -1.0 + k*.27); }
+  g.userData.dims = {L, W, H:top + .15};
   return g;
 }
 
