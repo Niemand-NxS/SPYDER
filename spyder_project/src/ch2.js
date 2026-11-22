@@ -127,6 +127,19 @@ function exClear() {
   exAct.length = 0; blocks.length = 0; xs.bell = null; xs.door = null; xs.lights = [];
   for (const m of roomMeshes) if (m) { scene.remove(m); m.geometry.dispose(); }
 }
+/* ---------- Skybox (statt Decke): Kuppel um die Kamera, Verlauf + Sterne/Wolkenschleier ---------- */
+function skySet(stops, parent) {
+  parent = parent || exG; if (xs.sky && xs.sky.parent) xs.sky.parent.remove(xs.sky);
+  const cv = document.createElement("canvas"); cv.width = 1024; cv.height = 512; const x = cv.getContext("2d"), g = x.createLinearGradient(0, 0, 0, 512);
+  for (const [p, col] of stops) g.addColorStop(Math.min(1, (1 - p)*.5), col); g.addColorStop(1, stops[0][1]); x.fillStyle = g; x.fillRect(0, 0, 1024, 512);
+  const z = new THREE.Color(stops[stops.length - 1][1]), lum = z.r*.3 + z.g*.59 + z.b*.11; let s = 91; const rnd = () => (s = (s*9301 + 49297)%233280)/233280;
+  if (lum < .25) for (let i = 0; i < 520; i++) { const a = (.25 + rnd()*.6)*(1 - lum*2); x.fillStyle = "rgba(235,240,255," + a.toFixed(2) + ")"; const r = rnd() < .08 ? 1.6 : .8; x.beginPath(); x.arc(rnd()*1024, rnd()*230, r, 0, 7); x.fill(); }
+  for (let i = 0; i < 16; i++) { const cx = rnd()*1024, cy = 120 + rnd()*110, w = 90 + rnd()*200; for (let k = 0; k < 4; k++) { x.fillStyle = lum < .25 ? "rgba(120,130,160,.035)" : "rgba(255,236,222,.07)"; x.beginPath(); x.ellipse(cx + (rnd() - .5)*w*.5, cy + (rnd() - .5)*8, w*(.5 + rnd()*.5), 7 + rnd()*9, 0, 0, 7); x.fill(); } }
+  const t = new THREE.CanvasTexture(cv); t.anisotropy = 2;
+  const m = new THREE.Mesh(new THREE.SphereGeometry(52, 32, 16), new THREE.MeshBasicMaterial({map:t, side:THREE.BackSide, depthWrite:false, depthTest:false, fog:false}));
+  m.renderOrder = -1000; m.frustumCulled = false; m.userData.noSh = 1; parent.add(m); xs.sky = m; if (roomMeshes[1]) roomMeshes[1].visible = false; return m;
+}
+function skyFollow() { const m = xs.sky; if (m && m.parent) m.position.copy(camera.position); }
 function exLeaveOld() {
   if (alley.on) { alley.on = false; alleyG.visible = false; NEON.length = 0; }
   if (shaft.on) shaft.on = false;
@@ -162,6 +175,7 @@ function buildStreet() {
   xs.cast = true; const T = alleyTexts(), sky = gradTex([[0, "#f2b98a"], [.45, "#c98a86"], [1, "#4c4f78"]]);
   const roadT = T.road.clone(); roadT.needsUpdate = true;
   exRoom(SW, SH, SD, {floor:roadT, ceil:sky, ceilBasic:true, wW:brickT(T, 3, 4), wE:brickT(T, 3, 4), wN:brickT(T, 8, 4), wS:brickT(T, 8, 4)});
+  skySet([[0, "#f2b98a"], [.45, "#c98a86"], [1, "#4c4f78"]]);
   const hd = SD/2;
   applyAsphalt(roomMeshes[0], SW, SD, 0x6c6c78);
   { const wd = [SD, SD, SW, SW]; [2, 3, 4, 5].forEach((i, k) => applyBrick(roomMeshes[i], wd[k]*1.9, SH*1.9, 0x8a7a78)); }

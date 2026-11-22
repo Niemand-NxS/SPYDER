@@ -77,7 +77,7 @@ function buildAlley() {
   roomPlane(0, 2*AW, 2*AD, T.road, V3(0, 0, 0)); applyAsphalt(roomMeshes[0], 2*AW, 2*AD, 0xb4b4bc); roomPlane(1, 2*AW, 2*AD, blk, V3(0, AH, 0));
   roomPlane(2, 2*AD, AH, bt(2*AD/2.4, AH/2.4), V3(-AW, AH/2, 0)); roomPlane(3, 2*AD, AH, bt(2*AD/2.4, AH/2.4), V3(AW, AH/2, 0));
   roomPlane(4, 2*AW, AH, bt(2*AW/2.4, AH/2.4), V3(0, AH/2, -AD)); roomPlane(5, 2*AW, AH, bt(2*AW/2.4, AH/2.4), V3(0, AH/2, AD));
-  roomMeshes[1].material.color.setHex(0x000000); roomMeshes[1].material.roughness = 1;
+  roomMeshes[1].material.color.setHex(0x000000); roomMeshes[1].material.roughness = 1; skySet([[0, "#0d0f16"], [.5, "#06070c"], [1, "#020308"]], alleyG);
   // Nordwand mit Loch für Schaufenster und Tür
   const sh = new THREE.Shape(); sh.moveTo(-AW, -AH/2); sh.lineTo(AW, -AH/2); sh.lineTo(AW, AH/2); sh.lineTo(-AW, AH/2); sh.lineTo(-AW, -AH/2);
   for (const [x0, x1, y0, y1] of [[1.4, 4.1, .85, 2.55], [4.6, 5.6, .01, 2.2]]) { const hp = new THREE.Path(); hp.moveTo(x0, y0 - AH/2); hp.lineTo(x0, y1 - AH/2); hp.lineTo(x1, y1 - AH/2); hp.lineTo(x1, y0 - AH/2); hp.lineTo(x0, y0 - AH/2); sh.holes.push(hp); }

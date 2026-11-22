@@ -275,7 +275,7 @@ function buildCity() {
   xs.cast = false; xs.og = 0; CITY.walk.length = 0; CITY.cars.length = 0; CITY.steam.length = 0; CITY.t = 0; CITY.nextCar = 2;
   const T = alleyTexts(), roadT = T.road.clone(); roadT.needsUpdate = true; const FOGC = 0x1a2030;
   exRoom(CW, CH, CD, {floor:roadT, ceil:gradTex([[0, "#0e1220"], [1, "#2c303c"]]), ceilBasic:true, wW:gradTex([[0, "#222"], [1, "#222"]]), wE:gradTex([[0, "#222"], [1, "#222"]]), wN:gradTex([[0, "#222"], [1, "#222"]]), wS:gradTex([[0, "#222"], [1, "#222"]])});
-  zLim = CZL; skyLim = CH - 1.3; applyAsphalt(roomMeshes[0], CW, CD, 0x8a8c94);
+  skySet([[0, "#1e2434"], [.5, "#12182a"], [1, "#070a15"]]); zLim = CZL; skyLim = CH - 1.3; applyAsphalt(roomMeshes[0], CW, CD, 0x8a8c94);
   const rep = (t, rx, ry) => { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rx, ry); return t; };
   applyBrick(roomMeshes[2], CD, CH, 0x5a504a); applyBrick(roomMeshes[3], CD, CH, 0x5a504a); cityFacades();
   for (const i of [4, 5]) { roomMeshes[i].material.dispose(); roomMeshes[i].material = new THREE.MeshBasicMaterial({color:FOGC}); }

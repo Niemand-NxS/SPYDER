@@ -376,7 +376,7 @@ function buildRoof() {
     const mk = c => { const t = new THREE.CanvasTexture(c); t.anisotropy = 4; return t; }; return [mk(cv[0]), mk(cv[1])]; };
   const fW = facade(11, 6), fE = facade(23, 6), fN = facade(37, 8), fS = facade(53, 8);
   const top = canvasTex(8, 8, (x, w, h) => { x.fillStyle = "#191c22"; x.fillRect(0, 0, w, h); }, 1, 1);
-  exRoom(W, Hh, D, {floor:asph, ceil:top, wW:fW[0], wE:fE[0], wN:fN[0], wS:fS[0]}); roomMeshes[1].visible = false; skyLim = 1e9;
+  exRoom(W, Hh, D, {floor:asph, ceil:top, wW:fW[0], wE:fE[0], wN:fN[0], wS:fS[0]}); roomMeshes[1].visible = false; skyLim = 1e9; skySet([[0, "#141c38"], [.5, "#0c1230"], [1, "#050813"]]);
   [[2, fW], [3, fE], [4, fN], [5, fS]].forEach(([k, f]) => { const m = roomMeshes[k].material; m.emissiveMap = f[1]; m.emissive = new THREE.Color(0xffffff); m.emissiveIntensity = .85; m.roughness = .95; m.needsUpdate = true;
     if (k === 5) return; const t0 = f[0].clone(), t1 = f[1].clone(); t0.needsUpdate = t1.needsUpdate = true; t0.wrapS = t0.wrapT = t1.wrapS = t1.wrapT = THREE.RepeatWrapping; t0.repeat.set(1, 3); t1.repeat.set(1, 3);
     const w = k < 4 ? D : W, n = PLANES[k].m, c0 = roomMeshes[k].position, ex = new THREE.Mesh(new THREE.PlaneGeometry(w, 27), new THREE.MeshStandardMaterial({map:t0, emissiveMap:t1, emissive:0xffffff, emissiveIntensity:.7, roughness:.95})); ex.position.set(c0.x, Hh + 13.5, c0.z); ex.lookAt(ex.position.x + n.x, ex.position.y, ex.position.z + n.z); exG.add(ex); });
@@ -735,7 +735,7 @@ const OBS_ST = [
   () => ({a:[{g:obsFig({skin:0xd0a88c, hair:0x2a2018, coat:0x3a3c48, pants:0x1c1e26, longCoat:1}), x:-10.9, z:.5, yaw:0, steps:[["go", DOORX - 1.1, -1.5], ["wait", 9, "look", Math.PI, 1], ["go", DOORX, -SD/2 + .3]]},
     {g:obsFig({skin:0xb88a70, hair:0x5a2a20, coat:0x7a4a32, pants:0x241c1c, longCoat:1, bun:1}), x:-11.7, z:.9, yaw:0, steps:[["go", DOORX - 1.9, -1.0], ["wait", 9, "idle", Math.PI*.8, 0], ["go", DOORX - .5, -SD/2 + .3]]}], need:[0, 1]})
 ];
-function obsTod(i) { const S = OBS_S[i]; try { roomMeshes[1].material.map = gradTex(S.sky); roomMeshes[1].material.needsUpdate = true; } catch (e) {} xs.hI = S.hI; xs.hC = S.hC; xs.hG = S.hG; try { scene.fog.color.setHex(S.fog); scene.background.setHex(S.fog); } catch (e) {} if (xs.sideL) for (const l of xs.sideL) l.intensity = l.userData.b*(i === 3 ? 1.3 : .12); }
+function obsTod(i) { const S = OBS_S[i]; try { skySet(S.sky); } catch (e) {} xs.hI = S.hI; xs.hC = S.hC; xs.hG = S.hG; try { scene.fog.color.setHex(S.fog); scene.background.setHex(S.fog); } catch (e) {} if (xs.sideL) for (const l of xs.sideL) l.intensity = l.userData.b*(i === 3 ? 1.3 : .12); }
 function obsClear() { const r = obs.run; if (r) { for (const A of r.a) { exG.remove(A.g); } if (r.robot) { exG.remove(r.robot.g); const k = exAct.indexOf(r.robot); if (k >= 0) exAct.splice(k, 1); } } obs.run = null; obsHud.classList.remove("on"); }
 function obsBegin(i) {
   const O = gear.obs, S = OBS_S[i]; obs.busy = true; O.st = 2; O.slot = i; obsClear(); $("fade").classList.add("on"); mode === "surf" && (obs.fadeT = 1);
@@ -783,7 +783,7 @@ function obsTick(dt) {
 }
 function obsFinish() {
   const O = gear.obs; O.st = 3; obsClear(); $("fade").classList.add("on"); obsClk.querySelector("b").textContent = "21:30"; obsClk.querySelector("span").textContent = T("DER TAG IST VORBEI"); obsClk.classList.add("on");
-  setTimeout(() => { obsTod(0); xs.hI = 1.3; xs.hC = 0x9aa4c8; xs.hG = 0x2a2a34; try { scene.fog.color.setHex(0xb89886); scene.background.setHex(0xb89886); } catch (e) {} try { roomMeshes[1].material.map = gradTex([[0, "#78c4bd"], [.45, "#c98a86"], [1, "#5f636a"]]); } catch (e) {} $("fade").classList.remove("on"); obsClk.classList.remove("on"); sePay(15000, "Beschattung abgeschlossen"); setObj(jobObj()); writeSave();
+  setTimeout(() => { obsTod(0); xs.hI = 1.3; xs.hC = 0x9aa4c8; xs.hG = 0x2a2a34; try { scene.fog.color.setHex(0xb89886); scene.background.setHex(0xb89886); } catch (e) {} try { skySet([[0, "#78c4bd"], [.45, "#c98a86"], [1, "#5f636a"]]); } catch (e) {} $("fade").classList.remove("on"); obsClk.classList.remove("on"); sePay(15000, "Beschattung abgeschlossen"); setObj(jobObj()); writeSave();
     setTimeout(() => comIncoming("R", ["Die Bilder sind angekommen, Arach. Der Kunde ist begeistert, dein Anteil liegt auf dem Konto.", "Eins noch: Wer war die Frau an Vargas Seite? Das lass ich mal nachprüfen …"]), 4000); }, 2600);
 }
 function obsInFrame(g, dy) {
@@ -826,7 +826,7 @@ function enterSide() { window.loadShow && (loadShow(), loadHideSoon(2200));
 function buildSide() {
   xs.cast = true; const T = alleyTexts(), roadT = T.road.clone(); roadT.needsUpdate = true; xs.og = 0;
   exRoom(SW, SH, SD, {floor:roadT, ceil:gradTex(OBS_S[0].sky), ceilBasic:true, wW:brickT(T, 3, 4), wE:brickT(T, 3, 4), wN:brickT(T, 8, 4), wS:brickT(T, 8, 4)});
-  const hd = SD/2, hw = SW/2; applyAsphalt(roomMeshes[0], SW, SD, 0x948e82);
+  skySet(OBS_S[0].sky); const hd = SD/2, hw = SW/2; applyAsphalt(roomMeshes[0], SW, SD, 0x948e82);
   [[2, SD, 0x9a8470], [3, SD, 0x9a8470], [4, SW, 0xc6a07c], [5, SW, 0xb89078]].forEach(([i, w, c]) => applyBrick(roomMeshes[i], w*1.9, SH*1.9, c));
   const conc = mStd(0x8a8478, .1, .9), dk = mStd(0x1a1c20, .5, .6), wood = mStd(0x5a3e2a, .1, .8), green = mStd(0x2e4a34, .05, .9), metal = mStd(0x2a2c32, .6, .5);
   for (const s of [-1, 1]) { exBox(SW, .5, .14, conc, 0, .25, s*(hd - .07)); exBox(SW, .3, .3, conc, 0, SH - .15, s*(hd - .15)); }
