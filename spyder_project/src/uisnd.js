@@ -31,7 +31,7 @@ function ldWrap(f, ms) { return function (...a) { const el = document.getElement
   _ldPend = true; showLoad(ms || 1700, () => { _ldBusy = true; try { f.apply(this, a); } finally { _ldBusy = false; _ldPend = false; } const q = _ldQ; _ldQ = []; for (const c of q) try { startCut(...c); } catch (e) { console.error(e); } }, true); }; }
 /* Cutscenes, die während des verzögerten Szenenaufbaus angefordert werden, warten bis die Szene steht */
 { const _sc = startCut; startCut = function (...a) { if (_ldPend && !_ldBusy) { _ldQ.push(a); return; } return _sc.apply(this, a); }; }
-enterAlley = ldWrap(enterAlley); enterStreet = ldWrap(enterStreet); enterStairs = ldWrap(enterStairs); enterHeist = ldWrap(enterHeist); enterSide = ldWrap(enterSide); enterShaft = ldWrap(enterShaft); enterLab = ldWrap(enterLab); loadCheckpoint = ldWrap(loadCheckpoint, 2000);
+enterAlley = ldWrap(enterAlley); enterStreet = ldWrap(enterStreet); enterStairs = ldWrap(enterStairs); enterHeist = ldWrap(enterHeist); enterSide = ldWrap(enterSide); enterCity = ldWrap(enterCity); enterShaft = ldWrap(enterShaft); enterLab = ldWrap(enterLab); loadCheckpoint = ldWrap(loadCheckpoint, 2000);
 
 /* ===== Konto: lokale Profile, Statistiken, Erfolge ===== */
 const ACK = "spyderAcct";

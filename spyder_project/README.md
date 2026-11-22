@@ -4,7 +4,7 @@ Browser-Spiel (Three.js r128, Vanilla JS, Web Audio). Du spielst die Roboterspin
 ## Struktur
 - `src/index.template.html` – HTML/CSS/UI-Gerüst (Menü, HUD, Einstellungen)
 - `src/*.js` – Spielcode in Ladereihenfolge (siehe `ORDER` in `build.py`); `i18n.js` = Übersetzungen, `melee.js` = Kampf, `story.js` = Intro/Story, `job.js`/`ch2.js` = Kapitel 2 …
-- `assets/textures/` – 42 Texturen (JPG), `assets/audio/` – 11 Klänge (MP3), `assets/ui/` – 6 UI-Bilder (Logos, PNG)
+- `assets/textures/` – 42 Texturen (JPG), `assets/audio/` – 12 Klänge (MP3), `assets/ui/` – 6 UI-Bilder (Logos, PNG)
 - `src/three.webgpu.js` – Three.js r170 (WebGPU-Build, nur für die experimentelle WebGPU-Option)
 - `build.py` – baut daraus `dist/spyder.html`
 

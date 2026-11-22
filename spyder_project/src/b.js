@@ -80,8 +80,8 @@ function rayBox(o, dir) {
   rayRes.t = t; rayRes.i = k; return rayRes;
 }
 const UPV = V3(0, 1, 0);
-let skyLim = 1e9;
-function clampIn(p, e = 0.02) { p.x = clamp(p.x, -W + e, W - e); p.y = clamp(p.y, e, Math.min(H, skyLim) - e); p.z = clamp(p.z, -DN + e, D - e); return p; }
+let skyLim = 1e9, zLim = 1e9;                  // zLim: unsichtbare Wände (Stadt) – begrenzen z, ohne dass man an ihnen haftet
+function clampIn(p, e = 0.02) { p.x = clamp(p.x, -W + e, W - e); p.y = clamp(p.y, e, Math.min(H, skyLim) - e); p.z = clamp(p.z, -Math.min(DN, zLim) + e, Math.min(D, zLim) - e); return p; }
 function setPanel(el, on) {   // sanftes Ein-/Ausblenden (.show = sichtbar, .out = Ausblend-Animation)
   clearTimeout(el._pt);
   if (on) { el.classList.remove("out"); el.classList.add("show"); }

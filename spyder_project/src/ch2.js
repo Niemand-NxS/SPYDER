@@ -57,7 +57,7 @@ function ch2Interact() {
   if (xs.scene === "street" && ch2.stage === 5 && !ch2.knock && xs.gar && xs.gar.u < .1 && Math.abs(pos.x - GARX) < 2.6 && pos.z > SD/2 - 1.9 && pos.y < 3.4) return {label:"Anklopfen", act:knockGarage};
   if (xs.scene === "street" && ch2.stage === 6 && shopM && pos.z > SD/2 - .2 && Math.hypot(pos.x - shopM.g.position.x, pos.z - shopM.g.position.z) < 4.2) return {label:"Mit Mase reden", act:() => startCut(maseCut())};
   if (xs.scene === "stairs" && xs.bell && pos.distanceTo(xs.bell) < 2.2) { if (ch2.stage === 4 || (ch2.stage === 8 && gear.job === 0 && !gear.rackMet)) return {label:"Klingeln", act:() => startCut(doorCut(ch2.stage === 8))}; if (ch2.stage >= 8) return {label:"Klingeln", act:rackIntercom}; }
-  { const r = obsGateInt() || rackInteract() || maseInteract(); if (r) return r; }
+  { const r = obsGateInt() || cityGateInt() || rackInteract() || maseInteract(); if (r) return r; }
   { const j = jobInteract(); if (j) return j; }
   return null;
 }
@@ -317,11 +317,12 @@ function buildFlat() {
 /* ---------- Szenen betreten ---------- */
 const mkKlirr = () => makeRobot({body:0x6a7078, acc:0x8a3a2a, glow:0xf2b86a, apron:0x5a4a38, tape:true});
 function enterStreet(kind) { window.loadShow && (loadShow(), loadHideSoon(2200));
-  cpSet(kind === "garage" ? "garage" : kind === "shop" ? "shop" : "street"); exLeaveOld(); buildStreet(); ch2.dark = false; const hw = hwS(), hd = SD/2;
+  cpSet(kind === "city" ? "street" : kind === "garage" ? "garage" : kind === "shop" ? "shop" : "street"); exLeaveOld(); buildStreet(); ch2.dark = false; const hw = hwS(), hd = SD/2;
   if (kind === "arrive") { ch2.stage = 3; placeAt(-10.2, hw, .6, 0, 1, 0, 1, 0, 0); startCut(streetCut()); }
   else if (kind === "door") { ch2.stage = 3; placeAt(5.6, hw, -.6, 0, 1, 0, 1, 0, 0); setObj("Geh zum Treppenhaus (Nr. 14) und klettere ganz nach oben – Wohnung links."); toast("Kapitel 2 · Morgen"); }
   else if (kind === "esc") { ch2.stage = 8 + Math.min(gear.job, 2); placeAt(1.1, hw, -hd + 1.7, 0, 1, 0, 1, 0, 0); setObj(jobObj()); }
   else if (kind === "side") { ch2.stage = 8 + Math.min(gear.job, 2); placeAt(SW/2 - 1.2, hw, 1.6, 0, 1, 0, -1, 0, 0); setObj(jobObj()); }
+  else if (kind === "city") { ch2.stage = 8 + Math.min(gear.job, 2); placeAt(-SW/2 + 1.3, hw, -1.2, 0, 1, 0, 1, 0, 0); setObj(jobObj()); }
   else if (kind === "shop") { ch2.stage = gear.knife ? 8 + Math.min(gear.job, 2) : 6; placeAt(GARX - 1.0, hw, hd - 1.2, 0, 1, 0, 0, 0, 1); if (xs.gar) { xs.gar.u = 1; xs.gar.tgt = 1; } setObj(gear.knife ? jobObj() : "Geh in Mases Werkstatt und sprich mit Mase."); }
   else { ch2.stage = 5; placeAt(DOORX - .6, hw, -hd + 1.0, 0, 1, 0, 1, 0, 0); setObj("Geh zu Mases Garage – schräg gegenüber."); }
   setTimeout(() => { $("fade").classList.remove("on"); }, 350);
@@ -335,7 +336,7 @@ function loadCheckpoint(k) { window.loadShow && (loadShow(), loadHideSoon(2200))
   if (k === "shaft") { labRestore(); for (const o of ceilLights) o.visible = false; enterShaft(); }
   else if (k === "alley") enterAlley();
   else if (k === "heist") enterHeist("roof");
-  else if (k === "street") enterStreet(gear.knife ? "esc" : "door"); else if (k === "stairs") enterStairs(); else if (k === "side") enterSide(); else if (k === "garage") enterStreet("garage"); else if (k === "shop") enterStreet("shop");
+  else if (k === "street") enterStreet(gear.knife ? "esc" : "door"); else if (k === "stairs") enterStairs(); else if (k === "side") enterSide(); else if (k === "city") enterCity(); else if (k === "garage") enterStreet("garage"); else if (k === "shop") enterStreet("shop");
 }
 
 /* ---------- Cutscene: Morgen auf der Straße ---------- */
@@ -442,6 +443,7 @@ function ch2Tick(dt) {
   if (xs.gar) { const G = xs.gar; G.u += (G.tgt - G.u)*(1 - Math.exp(-dt*2.2)); G.g.scale.y = Math.max(.03, 1 - G.u*.97); G.g.visible = G.u < .985; if (G.glow) G.glow.visible = G.u < .05; if (G.u > .5 && !G.gone) { G.gone = true; for (const b of G.bl) { const i = blocks.indexOf(b); if (i >= 0) blocks.splice(i, 1); } } else if (G.u < .4 && G.gone) { G.gone = false; blocks.push(...G.bl); } }
   if (xs.scene === "stairs" && xs.sl) { let f = .94 + .06*Math.sin(clockT*13) + (Math.random() < .02 ? -.4 : 0); if (xs.flick > 0) { xs.flick -= dt; const on = Math.sin(clockT*37) + Math.sin(clockT*23.3) > (xs.flick > 1 ? .5 : -.3) || xs.flick < .25; f = on ? 1 : .03; if (!on !== xs.fOff) { xs.fOff = !on; if (on) beep(1900 + Math.random()*600, .02, 0, .05); } hemi.intensity = xs.hI*(on ? 1 : .08); }  for (const l of xs.bl) l.intensity = 2.0*f; }
   if (xs.scene === "street") cityTick(dt);
+  if (xs.scene === "city") cityLife(dt);
   if (xs.scene === "street" && mode === "surf" && ch2.stage === 8 && gear.job === 0 && !gear.rackMet && xs.gar && xs.gar.u > .5 && pos.z < SD/2 - 1.6 && Math.abs(pos.x - GARX) < 4.5 && pos.y < 3) startCut(rackMeetCut());
   if (xs.scene === "street" && mode === "surf") {
     xs.drunkT -= dt; if (xs.drunkT <= 0 && xs.drunk) { const near = Math.hypot(pos.x + 5, pos.z - 2) < 9, a = xs.drunk[0], b = xs.drunk[1], quiet = mode !== "cut" && !speakBusy() && !subBusy() && !callTok; if (near && quiet && a.talkT <= 0 && b.talkT <= 0) { if (!xs.dq || !xs.dq.length) { let k; do { k = (Math.random()*DRX.length)|0; } while (k === xs.dl && DRX.length > 1); xs.dl = k; xs.dq = DRX[k].slice(); } const l = xs.dq.shift(); speakR(xs.drunk[l[0]], l[0], l[1], l[2]); } xs.drunkT = xs.dq && xs.dq.length ? 2.2 + Math.random()*1.6 : 8 + Math.random()*8; }

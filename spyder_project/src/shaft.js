@@ -35,7 +35,7 @@ const ductBase = canvasTex(256,256,(x,w,h)=>{ x.fillStyle="#4b5d88"; x.fillRect(
   x.fillStyle="#aebbd8"; for (const [a,b] of [[14,14],[w-14,14],[14,h-14],[w-14,h-14],[w/2-12,h/2],[w/2+12,h/2]]) { x.beginPath(); x.arc(a,b,3.5,0,7); x.fill(); }
   x.fillStyle="#3c8680"; x.globalAlpha=.85; x.fillRect(0,h-26,w,8); x.globalAlpha=1; }, 1, 1);
 function ductFor(wm, hm) { const t = ductBase.clone(); t.needsUpdate = true; t.repeat.set(Math.max(1, wm/1.2), Math.max(1, hm/1.2)); return t; }
-function setBox(w, h, d) { TAU = .07; skyLim = 1e9; W = w/2; H = h; D = d/2; DN = D; PLANES[1].c = -H; PLANES[2].c = -W; PLANES[3].c = -W; PLANES[4].c = -D; PLANES[5].c = -D; }
+function setBox(w, h, d) { TAU = .07; skyLim = 1e9; zLim = 1e9; W = w/2; H = h; D = d/2; DN = D; PLANES[1].c = -H; PLANES[2].c = -W; PLANES[3].c = -W; PLANES[4].c = -D; PLANES[5].c = -D; }
 function rebuildRoom() {
   for (const m of roomMeshes) if (m) { scene.remove(m); m.geometry.dispose(); }
   roomPlane(0, 2*W, 2*D, ductFor(2*W, 2*D), V3(0,0,0)); roomPlane(1, 2*W, 2*D, ductFor(2*W, 2*D), V3(0,H,0));

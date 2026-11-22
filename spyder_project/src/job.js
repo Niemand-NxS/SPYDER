@@ -25,6 +25,7 @@ function jobObj() {
   if (gear.job >= 2 && gear.obs && gear.obs.st === 1) return (xs.scene === "side" ? "Beschattung: Herr Varga kommt gleich aus Haus Nr. 31. Such dir einen Beobachtungsplatz – am besten erhöht." : "Auftrag: Beschattung. Nimm den Durchgang am Ostende der Straße in die Parallelstraße – dort wohnt Varga (Nr. 31).");
   if (gear.job >= 2 && gear.obs && gear.obs.st === 2 && xs.scene !== "side") return "Beschattung läuft: Geh zurück durch den Durchgang am Ostende der Straße in die Parallelstraße.";
   if (gear.job >= 2 && gear.obs && gear.obs.st === 2) return "Beschattung: Fotografiere Herr Varga (V = Ich-Perspektive, Enter/RT = Foto). Bleib unentdeckt – Wände und Decken sind dein Freund.";
+  if (gear.job >= 2 && gear.obs && gear.obs.st === 3) return xs.scene === "city" ? "CJ-City: Das Tor ist offen. Sieh dich um – Läden, Gassen, Passanten. Weiter hinten ist noch gesperrt." : "Das Tor am Westende der Straße steht jetzt offen – geh hindurch nach CJ-City.";
   return gear.job === 0 ? (gear.rackMet ? (gear.rackReady ? "Sprich mit Rackson in Mases Werkstatt." : "Warte in Mases Werkstatt, bis Rackson mit Mase fertig ist.") : "Verlasse Mases Werkstatt – Rackson wartet draußen auf dich.")
     : gear.job === 1 ? "Auftrag: Kreditkontor. Klettere in der Gasse die Feuerleiter aufs Dach und dring von oben ein."
     : gear.gold > 0 ? "Bring Rackson die Goldbarren – er wartet in der Gasse." : "Erster Auftrag erledigt. Geh zu Mase in die Werkstatt, um Upgrades zu kaufen.";
